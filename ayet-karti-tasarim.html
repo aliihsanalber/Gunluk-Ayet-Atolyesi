@@ -1,0 +1,365 @@
+<title>Ayet Kartı Tasarımı</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@600;700&family=Noto+Naskh+Arabic:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  /* Yerel Uthman Taha Naskh (referans görseldeki klasik Naskh) */
+  @font-face {
+    font-family: 'UthmanTN';
+    src: url('fonts/UthmanTN1-Regular.otf') format('opentype');
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'UthmanTN';
+    src: url('fonts/UthmanTN1-Bold.otf') format('opentype');
+    font-weight: 700;
+    font-display: swap;
+  }
+
+  /* ---------- Sayfa teması (kart renkleri sabit; sayfa açık/koyu uyumlu) ---------- */
+  :root {
+    --bg: #f6f1e6;
+    --ink: #2c2318;
+    --muted: #7a6f5d;
+    --panel: #fffdf7;
+    --line: rgba(128, 110, 80, 0.28);
+    --chip-bg: rgba(160, 106, 20, 0.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171310;
+      --ink: #efe7d8;
+      --muted: #a3988a;
+      --panel: #201a13;
+      --line: rgba(200, 175, 130, 0.25);
+      --chip-bg: rgba(214, 156, 66, 0.16);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 44px 20px 90px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Lora, Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  .intro { text-align: center; max-width: 720px; margin: 0 auto 54px; }
+  .intro h1 {
+    font-family: Manrope, "Segoe UI", sans-serif;
+    font-weight: 800;
+    font-size: clamp(26px, 4vw, 38px);
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+  }
+  .intro p { font-size: 16.5px; line-height: 1.7; color: var(--muted); margin: 0 0 18px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .tag {
+    font-family: Manrope, sans-serif; font-weight: 700; font-size: 11.5px;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--muted); background: var(--chip-bg);
+    padding: 6px 13px; border-radius: 999px;
+  }
+
+  .flow { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .demo { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .caption {
+    font-family: Manrope, sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--muted); text-align: center; max-width: 520px; line-height: 1.55;
+  }
+  .caption b { color: var(--ink); font-weight: 800; }
+
+  .cont-arrow { color: var(--muted); font-size: 24px; line-height: 1; margin: -6px 0; }
+
+  /* ---------- Kart çerçevesi (görüntüleme ölçeği) ---------- */
+  .frame {
+    position: relative;
+    width: 405px;
+    max-width: 100%;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px -18px rgba(70, 55, 20, 0.35), 0 4px 14px rgba(70, 55, 20, 0.14);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  body.ready .frame { opacity: 1; }
+
+  /* ---------- Kart (doğal çözünürlük 1080 × 1920) ---------- */
+  .card {
+    width: 1080px;
+    height: 1920px;
+    transform-origin: top left;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: radial-gradient(130% 95% at 50% 8%, #faf5e8 0%, #f5eedb 48%, #eee5cd 100%);
+  }
+
+  /* Üst kısım: yıldız + altın başlık */
+  .head {
+    padding: 74px 60px 0;
+    display: flex; flex-direction: column; align-items: center; gap: 22px;
+  }
+  .star { width: 46px; height: 46px; }
+  .title {
+    font-family: Lora, Georgia, serif;
+    font-weight: 700;
+    font-size: 56px;
+    color: #a5821f;
+    letter-spacing: 0.015em;
+    text-align: center;
+  }
+
+  .content {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 44px 92px 100px;
+    gap: 1.05em;
+    font-size: 64px; /* taban punto — JS ile ölçeklenir */
+    overflow: hidden;
+  }
+
+  .arabic {
+    margin: 0;
+    direction: rtl;
+    font-family: 'UthmanTN', 'Noto Naskh Arabic', 'Traditional Arabic', serif;
+    font-size: 0.95em;
+    line-height: 1.85;
+    text-align: center;
+    color: #29573c;
+  }
+  /* Her ayet + madalyonu tek blok: numara asla ayetinden kopmaz */
+  .ayah { display: block; }
+
+  /* Ayet sonu numara madalyonu: ❁ (٥) ❁ */
+  .medal-wrap {
+    display: inline-flex; align-items: center; gap: 0.24em;
+    direction: ltr;
+    vertical-align: middle;
+    margin-inline-start: 0.32em;
+    transform: translateY(-0.12em);
+  }
+  .medal {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 1.9em; height: 1.9em;
+    border: 0.07em solid rgba(41, 87, 60, 0.85);
+    border-radius: 50%;
+    font-size: 0.48em;
+    color: #29573c;
+    line-height: 1;
+  }
+  .orn { font-size: 0.4em; color: #3a7050; line-height: 1; }
+
+  .sep {
+    width: 30%;
+    border-top: 2px solid rgba(150, 118, 52, 0.38);
+  }
+
+  .meal {
+    margin: 0;
+    font-family: Lora, Georgia, serif;
+    font-style: italic;
+    font-size: 0.66em;
+    line-height: 1.66;
+    font-weight: 500;
+    text-align: center;
+    color: #33614a;
+    text-wrap: balance;
+  }
+
+  .part-chip {
+    position: absolute;
+    bottom: 48px; right: 62px;
+    font-family: Manrope, sans-serif;
+    font-weight: 700; font-size: 29px; letter-spacing: 0.12em;
+    color: #8a6d1c;
+    background: rgba(255, 253, 246, 0.6);
+    border: 2px solid rgba(165, 130, 31, 0.5);
+    padding: 10px 30px;
+    border-radius: 999px;
+  }
+
+  /* ---------- Not bölümü ---------- */
+  .notes {
+    margin-top: 60px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px 30px;
+    max-width: 780px;
+    margin-inline: auto;
+  }
+  .notes h2 {
+    font-family: Manrope, sans-serif; font-size: 15px; font-weight: 800;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin: 0 0 14px; color: var(--muted);
+  }
+  .notes ul { margin: 0; padding-left: 20px; font-size: 15.5px; line-height: 1.8; }
+  .notes li { margin-bottom: 6px; }
+</style>
+
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Ayet Kartları — Örnek Tasarım (v2)</h1>
+    <p>Paylaştığınız referans görsel baz alınarak yeniden tasarlandı: soluk bal-krem zemin, altın başlık, koyu yeşil Arapça ve meal, süslemeli madalyon içinde ayet numarası. Arapça fontu Uthman Taha Naskh (KFGQPC) olarak yerel gömüldü.</p>
+    <div class="tags">
+      <span class="tag">Soluk bal zemin</span>
+      <span class="tag">Uthman Taha Naskh</span>
+      <span class="tag">Altın başlık</span>
+      <span class="tag">Koyu yeşil metin</span>
+      <span class="tag">Madalyon ayet no</span>
+    </div>
+  </div>
+
+  <div class="flow">
+
+    <!-- ═══ ÖRNEK 1: Kısa ayet aralığı — puntolar otomatik büyür ═══ -->
+    <div class="demo">
+      <div class="frame">
+        <div class="card">
+          <div class="head">
+            <svg class="star" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.6l2.8 6.05 6.4.58-4.83 4.25 1.43 6.28L12 16.44l-5.8 3.32 1.43-6.28L2.8 9.23l6.4-.58L12 2.6z" stroke="#b4932f" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            <div class="title">94-Şerh Sûresi: 5-6</div>
+          </div>
+          <div class="content">
+            <p class="arabic"><span class="ayah">فَإِنَّ مَعَ ٱلْعُسْرِ يُسْرًا<span class="medal-wrap"><span class="orn">❁</span><span class="medal">٥</span><span class="orn">❁</span></span></span><span class="ayah">إِنَّ مَعَ ٱلْعُسْرِ يُسْرًا<span class="medal-wrap"><span class="orn">❁</span><span class="medal">٦</span><span class="orn">❁</span></span></span></p>
+            <div class="sep"></div>
+            <p class="meal">“Elbette güçlükle beraber şüphesiz bir kolaylık vardır. Gerçekten, güçlükle beraber bir kolaylık vardır.”</p>
+          </div>
+        </div>
+      </div>
+      <div class="caption"><b>Örnek 1 — Kısa ayet:</b> İçerik kısa olduğu için Arapça ve meal puntoları otomatik büyütüldü. Başlık referanstaki düzende: sure no – sure adı – ayet numarası.</div>
+    </div>
+
+    <div class="cont-arrow">▼</div>
+
+    <!-- ═══ ÖRNEK 2: Uzun ayetin ilk yarısı ═══ -->
+    <div class="demo">
+      <div class="frame">
+        <div class="card">
+          <div class="head">
+            <svg class="star" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.6l2.8 6.05 6.4.58-4.83 4.25 1.43 6.28L12 16.44l-5.8 3.32 1.43-6.28L2.8 9.23l6.4-.58L12 2.6z" stroke="#b4932f" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            <div class="title">7-A'râf Sûresi: 158</div>
+          </div>
+          <div class="content">
+            <p class="arabic"><span class="ayah">قُلْ يَٰٓأَيُّهَا ٱلنَّاسُ إِنِّى رَسُولُ ٱللَّهِ إِلَيْكُمْ جَمِيعًا ٱلَّذِى لَهُۥ مُلْكُ ٱلسَّمَٰوَٰتِ وَٱلْأَرْضِ لَآ إِلَٰهَ إِلَّا هُوَ يُحْىِۦ وَيُمِيتُ</span></p>
+            <div class="sep"></div>
+            <p class="meal">“De ki: Ey insanlar! Doğrusu ben, göklerin ve yerin hükümranı, O’ndan başka tanrı bulunmayan, dirilten ve öldüren Allah’ın, hepiniz için gönderdiği peygamberiyim.</p>
+          </div>
+          <div class="part-chip">KART 1/2</div>
+        </div>
+      </div>
+      <div class="caption"><b>Örnek 2 — Uzun ayet, ilk yarım:</b> Anlam bütünlüğü korunarak cümle sınırından ikiye bölündü. Ayet henüz bitmediği için madalyon yok; puntolar okunabilirlik alt sınırının üzerinde küçültüldü.</div>
+    </div>
+
+    <div class="cont-arrow">▼</div>
+
+    <!-- ═══ ÖRNEK 3: Uzun ayetin ikinci yarısı ═══ -->
+    <div class="demo">
+      <div class="frame">
+        <div class="card">
+          <div class="head">
+            <svg class="star" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.6l2.8 6.05 6.4.58-4.83 4.25 1.43 6.28L12 16.44l-5.8 3.32 1.43-6.28L2.8 9.23l6.4-.58L12 2.6z" stroke="#b4932f" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            <div class="title">7-A'râf Sûresi: 158</div>
+          </div>
+          <div class="content">
+            <p class="arabic"><span class="ayah">فَـَٔامِنُوا۟ بِٱللَّهِ وَرَسُولِهِ ٱلنَّبِىِّ ٱلْأُمِّىِّ ٱلَّذِى يُؤْمِنُ بِٱللَّهِ وَكَلِمَٰتِهِۦ وَٱتَّبِعُوهُ لَعَلَّكُمْ تَهْتَدُونَ<span class="medal-wrap"><span class="orn">❁</span><span class="medal">١٥٨</span><span class="orn">❁</span></span></span></p>
+            <div class="sep"></div>
+            <p class="meal">Allah’a ve okuyup yazması olmayan, haber getiren peygamberine — ki o da Allah’a ve sözlerine inanmıştır — inanın; ona uyun ki doğru yolu bulasınız.”</p>
+          </div>
+          <div class="part-chip">KART 2/2</div>
+        </div>
+      </div>
+      <div class="caption"><b>Örnek 3 — Uzun ayet, ikinci yarım:</b> Ayet bu kartta tamamlandığı için ayet numarası (١٥٨) madalyonla buraya kondu. Kart daha kısa olduğu için puntolar bir öncekine göre otomatik büyüdü.</div>
+    </div>
+
+  </div>
+
+  <div class="notes">
+    <h2>Tasarımda uygulanan kurallar (referans görseline göre)</h2>
+    <ul>
+      <li><b>Renkler:</b> Çok açık bal-krem zemin, koyu yeşil Arapça metin ve meal, altın sarısı başlık ve yıldız süsü.</li>
+      <li><b>Arapça font:</b> Uthman Taha Naskh (KFGQPC) — klasik mushaf uygulamalarının fontu, yerel olarak gömüldü (internet gerektirmez).</li>
+      <li><b>Başlık düzeni:</b> “94-Şerh Sûresi: 5-6” biçiminde — sure numarası, sure adı, ayet numarası/aralığı; altın renkte kalın.</li>
+      <li><b>Ayet numarası:</b> Arapça rakamla, ayetin bitiminde süslemeli madalyon içinde; bölünen ayetin numarası yalnızca ayetin bittiği kartta.</li>
+      <li><b>Dinamik punto:</b> İçerik uzunluğuna göre otomatik ölçeklenir — kısa ayette büyür, uzun ayette okunabilirlik alt sınırının üzerinde kalır; kart üstünde/altında boşluk kalmaz.</li>
+      <li><b>Bölme kuralı:</b> Çok uzun ayetler anlam bütünlüğü bozulmadan 2–3 karta bölünür; “KART 1/2” rozeti sıralamayı gösterir.</li>
+      <li><b>Format:</b> 1080×1920 (9:16) dikey, telefon ekranında tam ekran paylaşıma uygun.</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+  var BASE = 64, FLOOR = 0.76, CAP = 2.6;
+
+  function medalOrphan(arabicEl) {
+    var lh = parseFloat(getComputedStyle(arabicEl).lineHeight);
+    var ayahs = arabicEl.querySelectorAll(".ayah");
+    for (var i = 0; i < ayahs.length; i++) {
+      var medal = ayahs[i].querySelector(".medal-wrap");
+      if (!medal || !ayahs[i].childNodes[0]) continue;
+      var range = document.createRange();
+      range.selectNodeContents(ayahs[i].childNodes[0]);
+      var rects = range.getClientRects();
+      if (!rects.length) continue;
+      var lastText = rects[rects.length - 1];
+      var mr = medal.getBoundingClientRect();
+      if (mr.top > lastText.top + lh * 0.6) return true;
+    }
+    return false;
+  }
+
+  function fitCard(card) {
+    var c = card.querySelector(".content");
+    var arabicEl = card.querySelector(".arabic");
+    if (!c) return;
+    /* Büyükten küçüğe tara: kısıtları sağlayan en büyük ölçeği bul */
+    for (var s = CAP; s >= FLOOR; s -= 0.02) {
+      c.style.fontSize = (BASE * s) + "px";
+      if (c.scrollHeight <= c.clientHeight + 2 && !(arabicEl && medalOrphan(arabicEl))) { return; }
+    }
+    c.style.fontSize = (BASE * FLOOR) + "px";
+  }
+
+  function fitAll() {
+    document.querySelectorAll(".card").forEach(fitCard);
+  }
+
+  function scaleAll() {
+    document.querySelectorAll(".demo").forEach(function (demo) {
+      var frame = demo.querySelector(".frame");
+      var card = frame.querySelector(".card");
+      var target = Math.min(demo.clientWidth, 440);
+      var s = target / 1080;
+      frame.style.width = (1080 * s) + "px";
+      frame.style.height = (1920 * s) + "px";
+      card.style.transform = "scale(" + s + ")";
+    });
+  }
+
+  function init() {
+    fitAll();
+    scaleAll();
+    document.body.classList.add("ready");
+  }
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(init);
+  } else {
+    window.addEventListener("load", init);
+  }
+  /* Yazı tipleri gecikirse güvenlik ağı */
+  setTimeout(function () { fitAll(); scaleAll(); document.body.classList.add("ready"); }, 2200);
+
+  window.addEventListener("resize", scaleAll);
+</script>

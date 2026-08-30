@@ -38,3 +38,13 @@ for (const tok of ['@@FONT_B64@@', '@@FRAME_B64@@', '@@QDATA_JSON@@', '@@NEWS_JS
 const out = R('dist', 'gunun-ayeti-atolyesi.html');
 fs.writeFileSync(out, html, 'utf8');
 console.log('yazıldı', (html.length / 1048576).toFixed(2) + ' MB ->', path.relative(process.cwd(), out));
+
+/* PWA dosyalarını dist'e kopyala */
+for (const f of ['manifest.json', 'sw.js']) {
+  fs.copyFileSync(R(f), R('dist', f));
+  console.log('  +', f);
+}
+for (const f of ['icon-192.png', 'icon-512.png']) {
+  fs.copyFileSync(R('assets', f), R('dist', f));
+  console.log('  +', f);
+}

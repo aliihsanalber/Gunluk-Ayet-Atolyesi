@@ -1,0 +1,1161 @@
+<title>Günün Ayeti Atölyesi</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Karla:wght@400;500;600;700&family=Lora:ital,wght@0,500;1,500&family=Noto+Naskh+Arabic:wght@400;500&family=Inter:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&family=Plus+Jakarta+Sans:wght@300;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Figtree:wght@300;400;500;600;700&display=swap');
+
+  @font-face {
+    font-family: 'UthmanicHafs';
+    src: url('data:font/otf;base64,@@FONT_B64@@') format('opentype');
+    font-weight: 400; font-display: block;
+  }
+
+  :root {
+    --bg: #E9E2D2; --surface: #F7F2E7; --surface-2: #EFE8D6; --sunk: #E1D8C2; --line: #D0C6AE;
+    --ink: #2A2419; --ink-dim: #6C6350; --gold: #937518; --gold-lit: #B08A34;
+    --stage: #D8CFBC; --shadow: rgba(58,46,18,0.22);
+    --card-bg: #F4ECE0; --card-rule: rgba(138,110,26,0.5);
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16130E; --surface: #201B13; --surface-2: #241E15; --sunk: #2C251A; --line: #392F20;
+      --ink: #ECE4D1; --ink-dim: #A99C7E; --gold: #C6A24E; --gold-lit: #DCBB6C;
+      --stage: #201B12; --shadow: rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16130E; --surface: #201B13; --surface-2: #241E15; --sunk: #2C251A; --line: #392F20;
+    --ink: #ECE4D1; --ink-dim: #A99C7E; --gold: #C6A24E; --gold-lit: #DCBB6C;
+    --stage: #201B12; --shadow: rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Karla', system-ui, sans-serif; -webkit-font-smoothing: antialiased; line-height: 1.5; }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+
+  .app { display: flex; flex-direction: column; min-height: 100%; }
+  @media (min-width: 1180px) { .app { height: 100dvh; overflow: hidden; } }
+
+  .topbar { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; padding: 10px 18px; border-bottom: 1px solid var(--line); background: var(--surface); flex-wrap: wrap; }
+  .brand { display: flex; flex-direction: column; gap: 3px; }
+  .brand h1 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 20px; letter-spacing: 0.01em; }
+  .brand .rule { height: 3px; width: 110px; border-top: 1.5px solid var(--gold); border-bottom: 1px solid var(--gold); }
+  .brand p { margin: 2px 0 0; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-dim); }
+  .topbtn { appearance: none; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; font-size: 13px; padding: 8px 12px; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+  .topbtn:hover { border-color: var(--gold); }
+  .topbtn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .workspace { flex: 1; display: grid; grid-template-columns: 1fr; min-height: 0; }
+  @media (min-width: 1180px) { .workspace { grid-template-columns: 344px minmax(0, 1fr); grid-template-rows: 100%; } }
+
+  /* ---- news ---- */
+  .news { background: var(--surface); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  @media (min-width: 1180px) { .news { border-bottom: 0; border-right: 1px solid var(--line); height: 100%; } }
+  .news-head { flex: 0 0 auto; width: 100%; appearance: none; background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 14px 18px; cursor: pointer; display: flex; align-items: baseline; gap: 10px; font: inherit; color: var(--ink); text-align: left; }
+  @media (min-width: 1180px) { .news-head { cursor: default; } }
+  .news-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 15px; flex: 1; }
+  .news-date { font-size: 11px; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+  .news-chevron { font-size: 12px; color: var(--ink-dim); transition: transform 0.15s; }
+  .news.collapsed .news-chevron { transform: rotate(-90deg); }
+  @media (min-width: 1180px) { .news-chevron { display: none; } }
+  .news-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .news.collapsed .news-body { display: none; }
+  .news-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 7px; }
+  @media (max-width: 1179px) { .news-body { max-height: 60vh; } }
+  .news-card { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .news-card:hover { border-color: var(--gold); }
+  .nc-main { text-align: left; width: 100%; appearance: none; cursor: pointer; background: transparent; border: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; font: inherit; color: var(--ink); }
+  .nc-main:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+  .nc-cat { align-self: flex-start; font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; }
+  .nc-title { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 13.5px; line-height: 1.35; }
+  .nc-note { font-size: 11.5px; color: var(--ink-dim); line-height: 1.4; }
+  .nc-ref { margin-top: 2px; font-size: 11px; color: var(--ink); display: flex; align-items: center; gap: 6px; border-top: 1px dashed var(--line); padding-top: 6px; }
+  .nc-ref b { color: var(--gold); font-weight: 700; }
+  .nc-ref::before { content: "\FD3E"; font-family: 'Noto Naskh Arabic', serif; color: var(--gold); opacity: 0.7; }
+  .nc-src { display: flex; flex-wrap: wrap; gap: 3px 9px; margin-top: 2px; border-top: 1px dashed var(--line); padding-top: 6px; font-size: 10px; color: var(--ink-dim); align-items: baseline; }
+  .nc-src a { font-size: 10px; color: var(--ink-dim); text-decoration: underline; text-underline-offset: 2px; }
+  .nc-src a:hover { color: var(--gold); }
+  .news-foot { flex: 0 0 auto; padding: 10px 14px 14px; font-size: 10.5px; color: var(--ink-dim); line-height: 1.45; }
+
+  /* ---- stage / cards ---- */
+  .stage { background: radial-gradient(140% 90% at 50% 0%, color-mix(in srgb, var(--stage) 84%, #fff) 0%, var(--stage) 62%), var(--stage); position: relative; overflow: hidden; min-height: 52vh; }
+  @media (min-width: 1180px) { .stage { min-height: 0; } }
+  .cards-row { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(var(--preview-scale, 0.3)); transform-origin: center; display: flex; gap: 56px; align-items: center; }
+
+  .card { width: 1080px; height: 1920px; position: relative; overflow: hidden; background: var(--card-bg); font-family: 'Lora', Georgia, serif; flex: 0 0 auto; filter: drop-shadow(0 18px 40px var(--shadow)); transition: outline-color 0.12s; outline: 6px solid transparent; outline-offset: 10px; cursor: pointer; }
+  .cards-row.multi .card.sel { outline-color: var(--gold); }
+  .card .ornate { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; pointer-events: none; }
+  .card[data-frame="ornate"] .ornate { display: block; }
+  .card .rule-frame { position: absolute; inset: 46px; border: 2.5px solid var(--card-rule); display: none; pointer-events: none; }
+  .card .rule-frame::after { content: ""; position: absolute; inset: 13px; border: 1px solid var(--card-rule); }
+  .card[data-frame="simple"] .rule-frame { display: block; }
+  .card-inner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 150px 132px; }
+  .card[data-frame="simple"] .card-inner { padding: 172px 148px; }
+  .card[data-frame="ornate"] .card-inner { padding: 292px 150px; }
+  .c-stack { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .c-source { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: var(--source-size, 50px); color: var(--source-ink, #8A6E1A); letter-spacing: 0.01em; margin-bottom: 0.55em; }
+  .c-besmele { font-family: 'UthmanicHafs', 'Lora', serif; direction: rtl; font-size: var(--besmele-size, 46px); line-height: 1.5; color: var(--card-ink, #234B32); opacity: 0.85; margin-bottom: 0.9em; }
+  .c-arabic { font-family: 'UthmanicHafs', serif; direction: rtl; font-size: var(--arabic-size, 92px); line-height: 1.9; color: var(--card-ink, #234B32); width: 100%; unicode-bidi: plaintext; }
+  .c-arabic .ayah { display: block; }
+  .c-arabic .badge {
+    white-space: nowrap; margin-inline-start: 0.16em;
+    font-family: 'Noto Naskh Arabic', serif;
+    font-feature-settings: "calt" 0, "liga" 0, "dlig" 0, "rlig" 0;
+    font-size: 0.82em;
+  }
+  .c-sep { width: 22%; border-top: 2px solid var(--card-rule); margin: 0.75em 0; }
+  .c-meal { font-family: var(--meal-font, 'Lora', Georgia, serif); font-style: italic; font-weight: 500; font-size: var(--meal-size, 52px); line-height: 1.62; color: var(--card-ink, #234B32); opacity: 0.92; width: 100%; text-wrap: balance; }
+  .card[data-besmele="0"] .c-besmele { display: none; }
+  .c-chip { position: absolute; right: 64px; bottom: 58px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 32px; color: var(--source-ink, #8A6E1A); opacity: 0.75; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; }
+  .card[data-frame="ornate"] .c-chip { right: 132px; bottom: 128px; }
+  .card[data-frame="simple"] .c-chip { right: 96px; bottom: 92px; }
+  .card[data-chip=""] .c-chip { display: none; }
+  .c-author { position: absolute; left: 0; right: 0; text-align: center; bottom: 96px; font-family: 'Karla', sans-serif; font-weight: 400; font-size: var(--author-size, 24px); color: var(--card-ink, #234B32); opacity: 0.55; letter-spacing: 0.04em; pointer-events: none; }
+  .card[data-frame="ornate"] .c-author { bottom: 180px; }
+  .card[data-frame="simple"] .c-author { bottom: 140px; }
+  .c-page { position: absolute; left: 0; right: 0; text-align: center; bottom: 52px; font-family: 'Karla', sans-serif; font-weight: 500; font-size: var(--page-size, 26px); color: var(--card-ink, #234B32); opacity: 0.38; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; pointer-events: none; }
+  .card[data-page=""] .c-page { display: none; }
+
+  /* ---- panel ---- */
+  .panel { background: var(--surface); border-top: 1px solid var(--line); padding: 4px 0 48px; overflow-y: auto; }
+  @media (min-width: 1180px) { .panel { border-top: 0; border-left: 1px solid var(--line); min-height: 0; height: 100%; } }
+  .group { padding: 16px 22px; border-bottom: 1px solid var(--line); }
+  .group:last-child { border-bottom: 0; }
+  .glabel { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+  .glabel::before, .glabel::after { content: "\FD3F"; font-family: 'Noto Naskh Arabic', serif; opacity: 0.5; font-size: 13px; }
+  .glabel::after { content: "\FD3E"; }
+  .glabel span { flex: 1; }
+  .glabel .selpill { flex: 0 0 auto; font-size: 10px; letter-spacing: 0.06em; color: var(--ink-dim); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; text-transform: none; font-weight: 600; }
+
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row + .row { margin-top: 9px; }
+  .ayah-label { font-size: 12.5px; color: var(--ink-dim); flex: 0 0 auto; }
+  .dash { color: var(--ink-dim); flex: 0 0 auto; }
+
+  button.act { appearance: none; font: inherit; border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 9px 12px; border-radius: var(--radius); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px; line-height: 1; }
+  button.act:hover { border-color: var(--gold); }
+  button.act:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  button.act:active { transform: translateY(1px); }
+  button.dice { flex: 1; background: var(--gold); border-color: var(--gold); color: #FBF7EC; font-weight: 700; padding: 11px 12px; font-size: 14.5px; }
+  button.dice:hover { background: var(--gold-lit); border-color: var(--gold-lit); }
+  button.nav { width: 38px; padding: 10px 0; font-size: 15px; flex: 0 0 auto; }
+
+  input.num { font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); color: var(--ink); width: 78px; font-size: 14px; text-align: center; font-variant-numeric: tabular-nums; }
+  input.num:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+
+  /* combobox */
+  .combo-wrap { position: relative; flex: 1; min-width: 0; }
+  input.combo { width: 100%; font: inherit; font-size: 13.5px; padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); color: var(--ink); }
+  input.combo:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .combo-list { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px); max-height: 288px; overflow-y: auto; background: var(--surface); border: 1px solid var(--gold); border-radius: 10px; box-shadow: 0 14px 34px var(--shadow); display: none; padding: 4px; }
+  .combo-list.open { display: block; }
+  .combo-list li { list-style: none; padding: 8px 10px; border-radius: 7px; font-size: 13px; cursor: pointer; display: flex; gap: 8px; }
+  .combo-list li .n { color: var(--ink-dim); font-variant-numeric: tabular-nums; min-width: 26px; text-align: right; }
+  .combo-list li[aria-selected="true"], .combo-list li:hover { background: color-mix(in srgb, var(--gold) 22%, var(--surface)); }
+
+  details.editor { margin-top: 12px; }
+  details.editor > summary { cursor: pointer; font-size: 12.5px; color: var(--ink-dim); list-style: none; display: inline-flex; align-items: center; gap: 6px; padding: 4px 0; }
+  details.editor > summary::-webkit-details-marker { display: none; }
+  details.editor > summary::before { content: "\270E"; color: var(--gold); }
+  .field { margin-top: 10px; }
+  .field label { display: block; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 4px; }
+  .field input, .field textarea { width: 100%; font: inherit; font-size: 13px; padding: 8px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); resize: vertical; }
+  .field textarea.ar { direction: rtl; font-family: 'UthmanicHafs', serif; font-size: 19px; line-height: 1.8; min-height: 90px; }
+  .field textarea.tr { min-height: 72px; }
+  .hint { font-size: 11.5px; color: var(--ink-dim); margin-top: 8px; line-height: 1.45; }
+
+  .seg { display: flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .seg button { flex: 1; appearance: none; font: inherit; font-size: 13px; padding: 9px 6px; border: 0; border-right: 1px solid var(--line); background: var(--bg); color: var(--ink-dim); cursor: pointer; }
+  .seg button:last-child { border-right: 0; }
+  .seg button[aria-pressed="true"] { background: var(--gold); color: #FBF7EC; font-weight: 700; }
+  .seg button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+
+  .sublabel { font-size: 11px; color: var(--ink-dim); margin: 12px 0 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .sublabel:first-of-type { margin-top: 2px; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+  .swatch { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); cursor: pointer; padding: 0; position: relative; }
+  .swatch[aria-pressed="true"] { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .swatch.custom { display: inline-flex; align-items: center; justify-content: center; font-size: 15px; color: var(--ink-dim); overflow: hidden; }
+  .swatch.custom input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .swatch-note { font-size: 11.5px; color: var(--ink-dim); margin-top: 9px; line-height: 1.4; }
+
+  .slider-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; margin-bottom: 4px; }
+  .slider-head .val { font-variant-numeric: tabular-nums; color: var(--ink-dim); }
+  input[type="range"] { width: 100%; accent-color: var(--gold); margin: 2px 0 12px; }
+  input[type="range"]:disabled { opacity: 0.4; }
+
+  .toggle { display: flex; align-items: center; gap: 10px; font-size: 13.5px; cursor: pointer; padding: 5px 0; }
+  .toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .toggle .track { width: 40px; height: 23px; border-radius: 999px; background: var(--sunk); border: 1px solid var(--line); position: relative; flex: 0 0 auto; transition: background 0.15s; }
+  .toggle .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px; border-radius: 50%; background: var(--ink-dim); transition: transform 0.15s, background 0.15s; }
+  .toggle input:checked + .track { background: color-mix(in srgb, var(--gold) 40%, var(--sunk)); }
+  .toggle input:checked + .track::after { transform: translateX(16px); background: var(--gold); }
+  .toggle input:focus-visible + .track { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .share-grid button { font-size: 12px; padding: 9px 4px; }
+  .actions button.primary { width: 100%; background: var(--gold); border-color: var(--gold); color: #FBF7EC; font-weight: 700; padding: 12px; font-size: 14.5px; margin-bottom: 8px; }
+  .actions button.primary:hover { background: var(--gold-lit); }
+
+  .modal { position: fixed; inset: 0; background: rgba(20,16,8,0.68); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 50; }
+  .modal.open { display: flex; }
+  .sheet { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; max-width: 448px; width: 100%; max-height: 92vh; overflow-y: auto; padding: 20px; }
+  .sheet h2 { margin: 0 0 4px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 18px; }
+  .sheet p.sub { margin: 0 0 14px; font-size: 12.5px; color: var(--ink-dim); }
+  .result-img { max-width: 100%; max-height: 46vh; width: auto; border: 1px solid var(--line); border-radius: 8px; display: block; background: #fff; margin: 0 auto 10px; }
+  .sheet .closex { float: right; margin: -6px -6px 0 0; border: 0; background: transparent; color: var(--ink-dim); font-size: 20px; cursor: pointer; line-height: 1; }
+  .save-hint { font-size: 12px; color: var(--ink-dim); margin: 12px 0 0; line-height: 1.5; border-top: 1px solid var(--line); padding-top: 12px; }
+  .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 13px; z-index: 60; opacity: 0; pointer-events: none; transition: opacity 0.2s; max-width: 90vw; text-align: center; }
+  .toast.show { opacity: 1; }
+
+  /* ---- nav toolbar above stage ---- */
+  .nav-ctl { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 8px 18px; border-bottom: 1px solid var(--line); background: var(--surface-2); flex-wrap: wrap; }
+  .nav-ctl .dice-ctl { background: var(--gold); border-color: var(--gold); color: #FBF7EC; font-weight: 700; padding: 7px 14px; font-size: 13px; white-space: nowrap; }
+  .nav-ctl .dice-ctl:hover { background: var(--gold-lit); border-color: var(--gold-lit); }
+  .nav-ctl .nav-btn { width: 34px; padding: 7px 0; font-size: 14px; }
+  .nav-ctl .combo-wrap { max-width: 240px; }
+  .nav-ctl input.num { width: 64px; font-size: 13px; padding: 7px 8px; }
+  .nav-ctl .ayah-label-ctl { font-size: 11px; color: var(--ink-dim); flex: 0 0 auto; }
+  .nav-ctl .dash-ctl { color: var(--ink-dim); }
+  .top-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .settings-overlay { position: fixed; inset: 0; z-index: 40; display: none; align-items: stretch; justify-content: flex-end; }
+  .settings-overlay.open { display: flex; }
+  .settings-overlay-bg { position: absolute; inset: 0; cursor: pointer; }
+  .settings-panel { position: relative; background: var(--surface); border-left: 1px solid var(--line); width: 440px; max-width: 92vw; max-height: 100vh; overflow-y: auto; padding: 0 0 60px; box-shadow: -8px 0 30px var(--shadow); }
+  .settings-open .stage { margin-right: 440px; }
+  .settings-head { display: flex; align-items: center; gap: 10px; padding: 16px 22px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); z-index: 1; }
+  .settings-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 16px; flex: 1; }
+  .settings-head .closex { border: 0; background: transparent; color: var(--ink-dim); font-size: 22px; cursor: pointer; padding: 0; line-height: 1; }
+  .settings-head .closex:hover { color: var(--ink); }
+  .brand-ctl { display: flex; flex-direction: column; gap: 2px; flex: 0 0 auto; }
+  .brand-ctl h1 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 17px; letter-spacing: 0.01em; }
+  .brand-ctl .rule { height: 2px; width: 80px; border-top: 1.5px solid var(--gold); border-bottom: 1px solid var(--gold); }
+  .brand-ctl p { margin: 1px 0 0; font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-dim); }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand-ctl">
+      <h1>Günün Ayeti Atölyesi</h1>
+      <div class="rule"></div>
+      <p>ayet kartı hazırlama</p>
+    </div>
+    <div class="top-actions">
+      <button class="topbtn" id="settingsBtn" type="button" aria-label="Ayarlar" title="Ayarlar">&#9881; Ayarlar</button>
+      <button class="topbtn" id="shareBtn" type="button" aria-label="Paylaş" title="Paylaş">&#9654; Paylaş</button>
+      <button class="topbtn" id="themeBtn" type="button" aria-label="Tema değiştir">
+        <span id="themeIcon">&#9790;</span><span id="themeTxt">Koyu</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="nav-ctl">
+    <button class="act dice-ctl" id="diceBtn" type="button">&#127922; Rastgele ayet</button>
+    <button class="act nav-btn" id="prevBtn" type="button" aria-label="Önceki ayet">&#8249;</button>
+    <div class="combo-wrap">
+      <input class="combo" id="sureInput" placeholder="Sûre adı veya no" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="sureList" aria-label="Sûre">
+      <ul class="combo-list" id="sureList" role="listbox"></ul>
+    </div>
+    <button class="act nav-btn" id="nextBtn" type="button" aria-label="Sonraki ayet">&#8250;</button>
+    <span class="ayah-label-ctl">Ayet</span>
+    <input class="num" id="ayahStart" type="number" min="1" inputmode="numeric" placeholder="1" aria-label="Başlangıç ayeti">
+    <span class="dash-ctl">&ndash;</span>
+    <input class="num" id="ayahEnd" type="number" min="1" inputmode="numeric" placeholder="1" aria-label="Bitiş ayeti">
+  </div>
+
+  <div class="workspace">
+    <section class="news" id="newsPanel">
+      <button class="news-head" id="newsToggle" type="button" aria-expanded="true">
+        <h2>Gündem</h2>
+        <span class="news-date" id="newsDate"></span>
+        <span class="news-chevron">&#9662;</span>
+      </button>
+      <div class="news-body">
+        <div class="news-list" id="newsList"></div>
+        <p class="news-foot" id="newsFoot"></p>
+      </div>
+    </section>
+
+    <section class="stage" id="stage">
+      <div class="cards-row" id="cardsRow"></div>
+    </section>
+  </div>
+</div>
+
+<div class="settings-overlay" id="settingsOverlay">
+  <div class="settings-overlay-bg" id="settingsBg"></div>
+  <div class="settings-panel" aria-label="Ayarlar">
+    <div class="settings-head">
+      <h2>&#9881; Ayarlar</h2>
+      <button class="closex" id="settingsClose" type="button" aria-label="Kapat">&times;</button>
+    </div>
+
+    <div class="group">
+      <p class="glabel"><span>Meâl seçimi</span></p>
+      <select id="mealSelect" style="width:100%;font:inherit;font-size:13px;padding:9px 10px;border:1px solid var(--line);border-radius:var(--radius);background:var(--bg);color:var(--ink);cursor:pointer">
+        <option value="diyanet">Diyanet İşleri Meali</option>
+        <option value="elmalili">Elmalılı Hamdi Yazır Meali</option>
+        <option value="feyzul">Feyzü'l-Furkân Meali</option>
+        <option value="ali_bulac">Ali Bulaç Meali</option>
+      </select>
+      <p class="swatch-note">Meâl kaynağını değiştirince kart otomatik güncellenir.</p>
+    </div>
+
+    <div class="group">
+      <p class="glabel"><span>Çerçeve</span></p>
+      <div class="seg" id="frameSeg" role="group" aria-label="Çerçeve türü">
+        <button type="button" data-frame="none" aria-pressed="false">Çerçevesiz</button>
+        <button type="button" data-frame="simple" aria-pressed="false">Sade dikdörtgen</button>
+        <button type="button" data-frame="ornate" aria-pressed="true">Süslü</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <p class="glabel"><span>Zemin rengi</span></p>
+      <div class="swatches" id="bgSwatches"></div>
+    </div>
+
+    <div class="group">
+      <p class="glabel"><span>Renkler</span><span class="selpill" id="colorSel">kart 1</span></p>
+      <p class="sublabel">Ayet &amp; meâl rengi</p>
+      <div class="swatches" id="inkSwatches"></div>
+      <p class="sublabel">Başlık (sûre / ayet) rengi</p>
+      <div class="swatches" id="srcInkSwatches"></div>
+      <p class="swatch-note">Renkler yalnız seçili kartı etkiler.</p>
+    </div>
+
+    <div class="group">
+      <p class="glabel"><span>Yazı boyutu</span><span class="selpill" id="sizeSel">kart 1</span></p>
+      <label class="toggle"><input type="checkbox" id="autoFit" checked><span class="track"></span><span>Otomatik sığdır</span></label>
+      <div style="margin-top:12px">
+        <div class="slider-head"><span>Arapça</span><span class="val" id="arVal">92 px</span></div>
+        <input type="range" id="arRange" min="30" max="150" step="1" value="92">
+      </div>
+      <div>
+        <div class="slider-head"><span>Türkçe meâl</span><span class="val" id="trVal">52 px</span></div>
+        <input type="range" id="trRange" min="22" max="100" step="1" value="52">
+      </div>
+      <div>
+        <div class="slider-head"><span>Başlık</span><span class="val" id="srcVal">50 px</span></div>
+        <input type="range" id="srcRange" min="26" max="86" step="1" value="50">
+      </div>
+      <div>
+        <div class="slider-head"><span>Meâl sahibi</span><span class="val" id="authorVal">24 px</span></div>
+        <input type="range" id="authorRange" min="12" max="48" step="1" value="24">
+      </div>
+      <div>
+        <div class="slider-head"><span>Sayfa no</span><span class="val" id="pageVal">26 px</span></div>
+        <input type="range" id="pageRange" min="12" max="48" step="1" value="26">
+      </div>
+      <p class="swatch-note">Boyutlar tüm kartları etkiler.</p>
+      <div style="margin-top:10px">
+        <p class="sublabel">Meâl yazı tipi</p>
+        <div class="seg" id="mealFontSeg" role="group" aria-label="Meâl fontu">
+          <button type="button" data-font="Lora" aria-pressed="true" style="font-family:Lora,serif;font-style:italic">Lora</button>
+          <button type="button" data-font="Inter" aria-pressed="false" style="font-family:Inter,sans-serif">Inter</button>
+          <button type="button" data-font="DM Sans" aria-pressed="false" style="font-family:'DM Sans',sans-serif">DM Sans</button>
+          <button type="button" data-font="Plus Jakarta Sans" aria-pressed="false" style="font-family:'Plus Jakarta Sans',sans-serif">Jakarta</button>
+          <button type="button" data-font="Outfit" aria-pressed="false" style="font-family:Outfit,sans-serif">Outfit</button>
+          <button type="button" data-font="Sora" aria-pressed="false" style="font-family:Sora,sans-serif">Sora</button>
+          <button type="button" data-font="Figtree" aria-pressed="false" style="font-family:Figtree,sans-serif">Figtree</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="group">
+      <p class="glabel"><span>Kart bölme</span></p>
+      <div class="seg" id="splitSeg" role="group" aria-label="Kart bölme">
+        <button type="button" data-split="auto" aria-pressed="true">Otomatik</button>
+        <button type="button" data-split="off" aria-pressed="false">Tek kart</button>
+        <button type="button" data-split="on" aria-pressed="false">Böl</button>
+      </div>
+      <label class="toggle" style="margin-top:8px"><input type="checkbox" id="besmeleTgl" checked><span class="track"></span><span>Besmele göster (ilk kart)</span></label>
+      <p class="swatch-note">Sığmayan ayet(ler) otomatik ayrı kartlara bölünür.</p>
+    </div>
+
+    <div class="group">
+      <p class="glabel"><span>Düzenle</span></p>
+      <details class="editor" id="editor">
+        <summary>Seçili kartın metnini düzenle</summary>
+        <div class="field"><label for="fSource">Kaynak satırı</label><input id="fSource" type="text" spellcheck="false"></div>
+        <div class="field"><label for="fArabic">Arapça metin</label><textarea id="fArabic" class="ar" spellcheck="false"></textarea></div>
+        <div class="field"><label for="fMeal">Türkçe meâl</label><textarea id="fMeal" class="tr" spellcheck="false"></textarea></div>
+        <p class="hint" id="mealNote"></p>
+      </details>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="sheet">
+    <button class="closex" id="modalClose" type="button" aria-label="Kapat">&times;</button>
+    <h2 id="modalTitle">Kart hazır</h2>
+    <p class="sub" id="modalSub">Paylaşmaya hazır PNG.</p>
+    <div id="resultImgs"></div>
+    <div class="share-grid" style="margin-bottom:10px">
+      <button class="act" data-share="whatsapp" type="button">WhatsApp</button>
+      <button class="act" data-share="telegram" type="button">Telegram</button>
+      <button class="act" data-share="instagram" type="button">Instagram</button>
+      <button class="act" data-share="x" type="button">X</button>
+      <button class="act" data-share="facebook" type="button">Facebook</button>
+      <button class="act" data-share="more" type="button">Diğer&hellip;</button>
+    </div>
+    <div class="share-grid">
+      <button class="act" id="mCopy" type="button" style="grid-column:1/3">Panoya kopyala</button>
+      <button class="act" id="mDownload" type="button">İndir</button>
+    </div>
+    <p class="save-hint" id="saveHint"></p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script id="qdata" type="application/json">@@QDATA_JSON@@</script>
+<script id="news" type="application/json">@@NEWS_JSON@@</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.js"></script>
+<script>
+(function () {
+  "use strict";
+  var Q = JSON.parse(document.getElementById("qdata").textContent);
+  try { Q.news = JSON.parse(document.getElementById("news").textContent); } catch (e) { Q.news = null; }
+
+  var BG_SWATCHES = [
+    { n: "Krem", v: "#F4ECE0" }, { n: "Fildişi", v: "#FBF7EF" }, { n: "Kâğıt beyazı", v: "#FCFCFA" },
+    { n: "Kum", v: "#EFE7D4" }, { n: "Adaçayı", v: "#E7EEE3" }, { n: "Su yeşili", v: "#E2ECE8" },
+    { n: "Açık gök", v: "#E5ECF3" }, { n: "Pudra", v: "#F2E9E5" },
+    { n: "Gece lacivert", v: "#1B2A3A" }, { n: "Zümrüt", v: "#173A2E" }, { n: "Koyu kahve", v: "#2C2419" }
+  ];
+  var INK_SWATCHES = [
+    { n: "Koyu yeşil", v: "#234B32" }, { n: "Siyah", v: "#211F1A" }, { n: "Koyu kahve", v: "#3A2A1A" },
+    { n: "Lacivert", v: "#1E3A5F" }, { n: "Bordo", v: "#5A2330" }, { n: "Antik altın", v: "#8A6E1A" },
+    { n: "Krem", v: "#F3ECDD" }, { n: "Beyaz", v: "#FCFBF7" }, { n: "Açık altın", v: "#DCBE7A" }
+  ];
+  var SRC_SWATCHES = [
+    { n: "Antik altın", v: "#8A6E1A" }, { n: "Koyu altın", v: "#9A7B1E" }, { n: "Bronz", v: "#7A5C2A" },
+    { n: "Koyu yeşil", v: "#234B32" }, { n: "Siyah", v: "#211F1A" }, { n: "Bordo", v: "#5A2330" },
+    { n: "Açık altın", v: "#DCBE7A" }, { n: "Krem", v: "#F3ECDD" }
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var stage = $("stage"), cardsRow = $("cardsRow");
+  var sureInput = $("sureInput"), sureList = $("sureList"), ayahStart = $("ayahStart"), ayahEnd = $("ayahEnd");
+  var fSource = $("fSource"), fArabic = $("fArabic"), fMeal = $("fMeal");
+  var arRange = $("arRange"), trRange = $("trRange"), srcRange = $("srcRange"), authorRange = $("authorRange"), pageRange = $("pageRange");
+  var arVal = $("arVal"), trVal = $("trVal"), srcVal = $("srcVal"), authorVal = $("authorVal"), pageVal = $("pageVal");
+  var autoFitTgl = $("autoFit"), besmeleTgl = $("besmeleTgl");
+  var toastEl = $("toast");
+
+  var LS = "gunun-ayeti-atolyesi.v4";
+  var state = {
+    sure: 2, a1: 255, a2: 255,
+    frame: "ornate", bg: "#F4ECE0",
+    auto: true, besmele: true, splitMode: "auto",
+    mealKey: "diyanet", mealFont: "Lora", authorSize: 24, pageNumSize: 26,
+    pages: [], sel: 0
+  };
+  var DEF = { ink: "#234B32", srcInk: "#8A6E1A", mealFont: "Lora", authorSize: 24, pageNumSize: 26 };
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem(LS) || "{}");
+      ["frame", "bg", "auto", "besmele", "splitMode"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
+      if (s.ink) DEF.ink = s.ink;
+      if (s.srcInk) DEF.srcInk = s.srcInk;
+      if (s.mealKey) state.mealKey = s.mealKey;
+      if (s.mealFont) state.mealFont = s.mealFont;
+      if (s.authorSize) DEF.authorSize = s.authorSize;
+      if (s.pageNumSize) DEF.pageNumSize = s.pageNumSize;
+      if (s.theme) document.documentElement.setAttribute("data-theme", s.theme);
+    } catch (e) {}
+  }
+  function save() {
+    try {
+      var pg = state.pages[state.sel] || {};
+      localStorage.setItem(LS, JSON.stringify({
+        frame: state.frame, bg: state.bg, auto: state.auto, besmele: state.besmele, splitMode: state.splitMode,
+        mealKey: state.mealKey, mealFont: state.mealFont, authorSize: state.authorSize, pageNumSize: state.pageNumSize,
+        ink: pg.ink || DEF.ink, srcInk: pg.srcInk || DEF.srcInk,
+        theme: document.documentElement.getAttribute("data-theme") || ""
+      }));
+    } catch (e) {}
+  }
+
+  var AR_DIGITS = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
+  function toArabicNum(n) { return String(n).split("").map(function (d) { return AR_DIGITS[+d]; }).join(""); }
+  function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function norm(s) {
+    return (s || "").toLocaleLowerCase("tr")
+      .replace(/[îí]/g, "i").replace(/[âá]/g, "a").replace(/[û]/g, "u").replace(/[ā]/g, "a").replace(/['’`]/g, "").trim();
+  }
+  function toast(m) {
+    toastEl.textContent = m; toastEl.classList.add("show");
+    clearTimeout(toast._t); toast._t = setTimeout(function () { toastEl.classList.remove("show"); }, 2600);
+  }
+  function sureCount(s) { return Q.counts[s - 1]; }
+  function sureName(s) { return Q.names[s - 1]; }
+  function sureLabel(s) { return s + ". " + sureName(s) + " Sûresi"; }
+  function refLabel(s, a1, a2) { return s + "-" + sureName(s) + " Sûresi: " + (a1 === a2 ? a1 : a1 + "-" + a2); }
+
+  function ayahAr(s, v) { return (Q.ar[s - 1][v - 1] || "").trim(); }
+  function getMealKey() { return state.mealKey || Q.defaultMeal || "diyanet"; }
+  function getMeal() { return Q.meals[getMealKey()] || Q.meals[Object.keys(Q.meals)[0]]; }
+  function ayahTr(s, v) { var m = getMeal(); return (m.tr[s - 1][v - 1] || "").trim().replace(/\s*$/, ""); }
+  function mealName() { return getMeal().name || ""; }
+  function mealAuthor() { return getMeal().name || ""; }
+  function mealSentence(v, txt) { return v + ". " + txt + (/[.!?…”"]$/.test(txt) ? "" : "."); }
+
+  function composeRange(s, a1, a2) {
+    var arParts = [], mealParts = [];
+    for (var v = a1; v <= a2; v++) {
+      arParts.push(ayahAr(s, v) + " ﴿" + toArabicNum(v) + "﴾");
+      mealParts.push(mealSentence(v, ayahTr(s, v)));
+    }
+    return { src: refLabel(s, a1, a2), arabic: arParts.join(" "), meal: "“" + mealParts.join(" ") + "”" };
+  }
+
+  /* ---- arabic render ---- */
+  function buildArabic(raw) {
+    var t = (raw || "").trim();
+    if (!t) return "";
+    var rx = /﴿([^﴾]+)﴾/g, out = "", last = 0, m;
+    while ((m = rx.exec(t)) !== null) {
+      var seg = t.slice(last, m.index).trim();
+      if (seg) out += '<span class="ayah">' + esc(seg) + '<span class="badge">﴿' + esc(m[1]) + '﴾</span></span>';
+      last = rx.lastIndex;
+    }
+    var tail = t.slice(last).trim();
+    if (tail) out += '<span class="ayah">' + esc(tail) + "</span>";
+    return out || '<span class="ayah">' + esc(t) + "</span>";
+  }
+
+  /* ---- meaning split ---- */
+  var WAQF = /[ۖ-ۜۘ]/;
+  function splitArabicByWaqf(ar) {
+    // separate trailing ayah marker
+    var marker = "", body = ar;
+    var mm = ar.match(/\s*(﴿[^﴾]+﴾)\s*$/);
+    if (mm) { marker = " " + mm[1]; body = ar.slice(0, mm.index).trim(); }
+    var re = /[ۖ-ۜۘ]/g, pos = [], m;
+    while ((m = re.exec(body)) !== null) pos.push(m.index);
+    var cut;
+    if (pos.length) {
+      var mid = body.length / 2;
+      cut = pos.reduce(function (a, b) { return Math.abs(b - mid) < Math.abs(a - mid) ? b : a; });
+      cut = cut + 1;
+    } else {
+      var w = body.split(/\s+/); var half = Math.ceil(w.length / 2);
+      cut = w.slice(0, half).join(" ").length;
+    }
+    var p1 = body.slice(0, cut).trim();
+    var p2 = body.slice(cut).trim() + marker;
+    return [p1, p2];
+  }
+  function splitMealBySentence(meal) {
+    var c = meal.replace(/^[“"'\s]+/, "").replace(/[”"'\s]+$/, "");
+    var lead = "";
+    var lm = c.match(/^(\d+\.\s*)/);
+    if (lm) { lead = lm[1]; c = c.slice(lm[0].length); }
+    var sents = c.split(/(?<=[.!?…])\s+/).filter(Boolean);
+    if (sents.length < 2) {
+      var w = c.split(/\s+/); var h = Math.ceil(w.length / 2);
+      return ["“" + lead + w.slice(0, h).join(" ") + "…”", "“…" + w.slice(h).join(" ") + "”"];
+    }
+    var total = c.length, acc = 0, i1 = [], i2 = [];
+    sents.forEach(function (x) { if (acc < total / 2) { i1.push(x); acc += x.length; } else i2.push(x); });
+    if (!i2.length) { i2.push(i1.pop()); }
+    return ["“" + lead + i1.join(" ") + "”", "“" + i2.join(" ") + "”"];
+  }
+
+  /* ---- page model ---- */
+  function newPage(o) {
+    return {
+      src: o.src, arabic: o.arabic, meal: o.meal,
+      showBesmele: !!o.showBesmele, chip: o.chip || "",
+      mealAuthor: o.mealAuthor || "", pageLabel: o.pageLabel || "",
+      ink: DEF.ink, srcInk: DEF.srcInk,
+      arSize: 92, trSize: 52, srcSize: 50, manual: false
+    };
+  }
+
+  var measureCard = null;
+  function ensureMeasure() {
+    if (measureCard) return measureCard;
+    var c = document.createElement("div");
+    c.className = "card";
+    c.style.cssText = "position:absolute;left:-99999px;top:0;filter:none;outline:none;";
+    c.innerHTML = cardHTML();
+    document.body.appendChild(c);
+    measureCard = c;
+    return c;
+  }
+  function cardHTML() {
+    return '<img class="ornate" alt="" src="' + ORNATE_SRC + '">' +
+      '<div class="rule-frame"></div>' +
+      '<div class="card-inner"><div class="c-stack">' +
+      '<div class="c-source"></div>' +
+      '<div class="c-besmele" dir="rtl">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>' +
+      '<div class="c-arabic" dir="rtl"></div>' +
+      '<div class="c-sep"></div>' +
+      '<div class="c-meal"></div>' +
+      '<div class="c-author"></div>' +
+      '</div></div><div class="c-chip"></div><div class="c-page"></div>';
+  }
+  var ORNATE_SRC = "data:image/png;base64,@@FRAME_B64@@";
+
+  function paintCard(el, pg) {
+    el.dataset.frame = state.frame;
+    el.dataset.besmele = pg.showBesmele ? "1" : "0";
+    el.dataset.chip = pg.chip || "";
+    el.style.setProperty("--card-bg", state.bg);
+    el.style.setProperty("--card-ink", pg.ink);
+    el.style.setProperty("--source-ink", pg.srcInk);
+    el.style.setProperty("--arabic-size", pg.arSize + "px");
+    el.style.setProperty("--meal-size", pg.trSize + "px");
+    el.style.setProperty("--source-size", pg.srcSize + "px");
+    el.style.setProperty("--besmele-size", clamp(pg.trSize * 0.98, 30, 58) + "px");
+    el.style.setProperty("--meal-font", state.mealFont || DEF.mealFont);
+    el.style.setProperty("--author-size", (state.authorSize || DEF.authorSize) + "px");
+    el.style.setProperty("--page-size", (state.pageNumSize || DEF.pageNumSize) + "px");
+    el.querySelector(".c-source").textContent = pg.src;
+    el.querySelector(".c-arabic").innerHTML = buildArabic(pg.arabic);
+    el.querySelector(".c-meal").textContent = pg.meal;
+    el.querySelector(".c-chip").textContent = pg.chip || "";
+    el.querySelector(".c-author").textContent = pg.mealAuthor || mealAuthor();
+    var pgEl = el.querySelector(".c-page");
+    if (pgEl) { pgEl.textContent = pg.pageLabel || ""; el.dataset.page = pg.pageLabel || ""; }
+  }
+  function overflowOf(el) {
+    var inner = el.querySelector(".card-inner"), stack = el.querySelector(".c-stack");
+    var cs = getComputedStyle(inner);
+    var availH = inner.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    var availW = inner.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    return {
+      over: stack.scrollHeight > availH + 1 ||
+            el.querySelector(".c-arabic").scrollWidth > availW + 1 ||
+            el.querySelector(".c-meal").scrollWidth > availW + 1,
+      availH: availH, availW: availW, stackH: stack.scrollHeight
+    };
+  }
+  function autoFitPage(el, pg) {
+    var inner = el.querySelector(".card-inner"), stack = el.querySelector(".c-stack");
+    var arEl = el.querySelector(".c-arabic"), meEl = el.querySelector(".c-meal");
+    var cs = getComputedStyle(inner);
+    var availH = inner.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    var availW = inner.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var n = (pg.arabic || "").replace(/\s+/g, "").length;
+    var arCap = clamp(76 + (n - 28) * 0.36, 76, 140);
+    var mealCap = clamp(34 + (n - 40) * 0.12, 34, 60);
+    var lo = 28, hi = arCap, best = lo;
+    for (var i = 0; i < 22; i++) {
+      var mid = (lo + hi) / 2;
+      var mealPx = clamp(mid * 0.60, 22, mealCap);
+      el.style.setProperty("--arabic-size", mid + "px");
+      el.style.setProperty("--meal-size", mealPx + "px");
+      el.style.setProperty("--source-size", clamp(mealPx * 0.94, 30, 60) + "px");
+      el.style.setProperty("--besmele-size", clamp(mealPx * 0.98, 30, 58) + "px");
+      var fits = stack.scrollHeight <= availH * 0.94 && arEl.scrollWidth <= availW + 1 && meEl.scrollWidth <= availW + 1;
+      if (fits) { best = mid; lo = mid; } else { hi = mid; }
+    }
+    pg.arSize = Math.round(best);
+    pg.trSize = Math.round(clamp(best * 0.60, 22, mealCap));
+    pg.srcSize = Math.round(clamp(pg.trSize * 0.94, 30, 60));
+  }
+
+  /* ---- build pages ---- */
+  var CRAMPED_AR = 52;   // bu puntonun altına inen tek kart "sıkışık" sayılır -> bölünür
+  function fitPage(pg) {
+    var mc = ensureMeasure();
+    paintCard(mc, pg); autoFitPage(mc, pg); paintCard(mc, pg);
+    var o = overflowOf(mc).over;
+    return { over: o, cramped: pg.arSize < CRAMPED_AR || o };
+  }
+
+  function buildPages() {
+    var base = composeRange(state.sure, state.a1, state.a2);
+
+    var pages;
+    if (state.splitMode === "off") {
+      var pOff = newPage({ src: base.src, arabic: base.arabic, meal: base.meal, showBesmele: state.besmele, mealAuthor: mealAuthor() });
+      fitPage(pOff);
+      pages = [pOff];
+    } else {
+      var pSingle = newPage({ src: base.src, arabic: base.arabic, meal: base.meal, showBesmele: state.besmele, mealAuthor: mealAuthor() });
+      var sf = fitPage(pSingle);
+      if (state.splitMode === "auto" && !sf.cramped) {
+        pages = [pSingle];
+      } else if (state.a2 > state.a1) {
+        pages = [];
+        var count = state.a2 - state.a1 + 1;
+        for (var v = state.a1; v <= state.a2; v++) {
+          var pv = newPage({
+            src: refLabel(state.sure, v, v),
+            arabic: ayahAr(state.sure, v) + " ﴿" + toArabicNum(v) + "﴾",
+            meal: "\u201c" + mealSentence(v, ayahTr(state.sure, v)) + "\u201d",
+            showBesmele: v === state.a1 && state.besmele,
+            chip: (v - state.a1 + 1) + " / " + count,
+            mealAuthor: mealAuthor()
+          });
+          var f = fitPage(pv);
+          if (f.cramped) pages.push.apply(pages, longSplit(pv));
+          else pages.push(pv);
+        }
+        renumberChips(pages);
+      } else {
+        pages = longSplit(pSingle);
+      }
+    }
+    state.pages = pages;
+    state.sel = clamp(state.sel, 0, pages.length - 1);
+  }
+  function renumberChips(pages) {
+    if (pages.length < 2) { pages.forEach(function (p) { p.chip = ""; p.pageLabel = ""; }); return; }
+    pages.forEach(function (p, i) {
+      p.chip = (i + 1) + " / " + pages.length;
+      p.pageLabel = (i + 1) + " - " + pages.length;
+    });
+  }
+
+  function longSplit(pg) {
+    var ar = splitArabicByWaqf(pg.arabic);
+    var me = splitMealBySentence(pg.meal);
+    var p1 = newPage({ src: pg.src, arabic: ar[0], meal: me[0], showBesmele: pg.showBesmele, chip: "1 / 2", pageLabel: "1 - 2", mealAuthor: mealAuthor() });
+    var p2 = newPage({ src: pg.src, arabic: ar[1], meal: me[1], showBesmele: false, chip: "2 / 2", pageLabel: "2 - 2", mealAuthor: mealAuthor() });
+    [p1, p2].forEach(fitPage);
+    return [p1, p2];
+  }
+
+  /* ---- render preview ---- */
+  function render() {
+    cardsRow.innerHTML = "";
+    cardsRow.classList.toggle("multi", state.pages.length > 1);
+    state.pages.forEach(function (pg, i) {
+      var el = document.createElement("div");
+      el.className = "card" + (i === state.sel ? " sel" : "");
+      el.innerHTML = cardHTML();
+      paintCard(el, pg);
+      if (pg.manual || !state.auto) {
+        el.style.setProperty("--arabic-size", pg.arSize + "px");
+        el.style.setProperty("--meal-size", pg.trSize + "px");
+        el.style.setProperty("--source-size", pg.srcSize + "px");
+        el.style.setProperty("--besmele-size", clamp(pg.trSize * 0.98, 30, 58) + "px");
+      }
+      el.addEventListener("click", function () { selectPage(i); });
+      cardsRow.appendChild(el);
+    });
+    fitPreview();
+    syncControls();
+  }
+  function selectPage(i) {
+    state.sel = clamp(i, 0, state.pages.length - 1);
+    Array.prototype.forEach.call(cardsRow.children, function (el, k) { el.classList.toggle("sel", k === state.sel); });
+    syncControls();
+  }
+
+  function fitPreview() {
+    var n = state.pages.length || 1;
+    var rowW = n * 1080 + (n - 1) * 56;
+    var w = Math.max(120, stage.clientWidth - 44), h = Math.max(180, stage.clientHeight - 44);
+    cardsRow.style.setProperty("--preview-scale", clamp(Math.min(w / rowW, h / 1920), 0.06, 0.92).toFixed(4));
+  }
+
+  /* ---- controls <-> selected page ---- */
+  function syncControls() {
+    var pg = state.pages[state.sel]; if (!pg) return;
+    var lbl = "kart " + (state.sel + 1) + (state.pages.length > 1 ? " / " + state.pages.length : "");
+    $("colorSel").textContent = lbl; $("sizeSel").textContent = lbl;
+    fSource.value = pg.src; fArabic.value = pg.arabic; fMeal.value = pg.meal;
+    arRange.value = Math.round(pg.arSize); trRange.value = Math.round(pg.trSize); srcRange.value = Math.round(pg.srcSize);
+    arVal.textContent = Math.round(pg.arSize) + " px"; trVal.textContent = Math.round(pg.trSize) + " px"; srcVal.textContent = Math.round(pg.srcSize) + " px";
+    authorRange.value = state.authorSize || DEF.authorSize; authorVal.textContent = (state.authorSize || DEF.authorSize) + " px";
+    pageRange.value = state.pageNumSize || DEF.pageNumSize; pageVal.textContent = (state.pageNumSize || DEF.pageNumSize) + " px";
+    var dis = state.auto && !pg.manual;
+    arRange.disabled = dis; trRange.disabled = dis; srcRange.disabled = dis;
+    $("bgSwatches")._refresh && $("bgSwatches")._refresh();
+    $("inkSwatches")._refresh && $("inkSwatches")._refresh();
+    $("srcInkSwatches")._refresh && $("srcInkSwatches")._refresh();
+  }
+  function repaintSel() {
+    var el = cardsRow.children[state.sel], pg = state.pages[state.sel];
+    if (el && pg) { paintCard(el, pg); }
+  }
+  function autofitSel() {
+    var pg = state.pages[state.sel]; if (!pg) return;
+    var mc = ensureMeasure(); paintCard(mc, pg); autoFitPage(mc, pg);
+    repaintSel(); syncControls();
+  }
+
+  /* ---- nav ---- */
+  function loadRef(s, a1, a2) {
+    state.sure = clamp(s, 1, 114);
+    var cnt = sureCount(state.sure);
+    state.a1 = clamp(a1, 1, cnt);
+    state.a2 = clamp(a2 || a1, state.a1, cnt);
+    ayahStart.max = cnt; ayahEnd.max = cnt;
+    ayahStart.value = state.a1; ayahEnd.value = state.a2;
+    if (document.activeElement !== sureInput) sureInput.value = sureLabel(state.sure);
+    state.sel = 0;
+    buildPages();
+    render();
+  }
+  function stepAyah(d) {
+    var s = state.sure, a = state.a1 + d;
+    if (a < 1) { s = s > 1 ? s - 1 : 114; a = sureCount(s); }
+    else if (a > sureCount(s)) { s = s < 114 ? s + 1 : 1; a = 1; }
+    loadRef(s, a, a);
+  }
+  function randomPick() { var p = Q.picks[Math.floor(Math.random() * Q.picks.length)]; loadRef(p[0], p[1], p[2]); }
+
+  /* ---- combobox ---- */
+  var comboItems = [], comboIdx = -1;
+  function renderCombo(filter) {
+    var q = norm(filter);
+    comboItems = [];
+    var frag = document.createDocumentFragment();
+    for (var s = 1; s <= 114; s++) {
+      var nm = sureName(s), nn = norm(nm);
+      var mnum = /^\d+$/.test(filter.trim()) ? (+filter.trim() === s) : false;
+      if (q && !mnum && nn.indexOf(q) < 0 && String(s).indexOf(q) !== 0) continue;
+      comboItems.push(s);
+      var li = document.createElement("li");
+      li.setAttribute("role", "option");
+      li.dataset.s = s;
+      li.innerHTML = '<span class="n">' + s + '</span><span>' + esc(nm) + ' Sûresi</span>';
+      li.addEventListener("mousedown", function (e) { e.preventDefault(); pickCombo(+this.dataset.s); });
+      frag.appendChild(li);
+    }
+    sureList.innerHTML = "";
+    sureList.appendChild(frag);
+    comboIdx = -1;
+    if (comboItems.length && norm(filter)) { comboIdx = 0; highlightCombo(); }
+  }
+  function highlightCombo() {
+    Array.prototype.forEach.call(sureList.children, function (li, i) {
+      li.setAttribute("aria-selected", i === comboIdx ? "true" : "false");
+      if (i === comboIdx) li.scrollIntoView({ block: "nearest" });
+    });
+  }
+  function openCombo() { sureList.classList.add("open"); sureInput.setAttribute("aria-expanded", "true"); }
+  function closeCombo() { sureList.classList.remove("open"); sureInput.setAttribute("aria-expanded", "false"); }
+  function pickCombo(s) {
+    closeCombo();
+    sureInput.value = sureLabel(s);
+    sureInput.blur();
+    loadRef(s, 1, 1);
+  }
+  sureInput.addEventListener("focus", function () { renderCombo(""); openCombo(); sureInput.select(); });
+  sureInput.addEventListener("input", function () { renderCombo(sureInput.value); openCombo(); });
+  sureInput.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowDown") { e.preventDefault(); comboIdx = Math.min(comboItems.length - 1, comboIdx + 1); highlightCombo(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); comboIdx = Math.max(0, comboIdx - 1); highlightCombo(); }
+    else if (e.key === "Enter") { e.preventDefault(); if (comboIdx >= 0) pickCombo(comboItems[comboIdx]); else { var g = matchSure(sureInput.value); if (g) pickCombo(g); } }
+    else if (e.key === "Escape") { closeCombo(); sureInput.blur(); }
+  });
+  sureInput.addEventListener("blur", function () {
+    setTimeout(function () {
+      closeCombo();
+      var g = matchSure(sureInput.value);
+      if (g && g !== state.sure) loadRef(g, 1, 1);
+      else sureInput.value = sureLabel(state.sure);
+    }, 120);
+  });
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest(".combo-wrap")) closeCombo();
+  });
+  function matchSure(text) {
+    var t = (text || "").trim();
+    var mn = t.match(/^(\d{1,3})/);
+    if (mn) { var k = +mn[1]; if (k >= 1 && k <= 114) return k; }
+    var q = norm(t); if (!q) return null;
+    for (var s = 1; s <= 114; s++) if (norm(sureName(s)) === q) return s;
+    for (var s2 = 1; s2 <= 114; s2++) if (norm(sureName(s2)).indexOf(q) === 0) return s2;
+    for (var s3 = 1; s3 <= 114; s3++) if (norm(sureName(s3)).indexOf(q) >= 0) return s3;
+    return null;
+  }
+
+  /* ---- export & share ---- */
+  var downloadsReady = (window.claude && typeof window.claude.use === "function")
+    ? window.claude.use("downloads").catch(function () { return null; })
+    : Promise.resolve(null);
+
+  async function renderOnePng(idx) {
+    var el = cardsRow.children[idx];
+    if (!el) throw new Error("kart bulunamadı");
+    try { await document.fonts.ready; } catch (e) {}
+    await new Promise(function (r) { setTimeout(r, 60); });
+    var opts = {
+      width: 1080, height: 1920, pixelRatio: 2, backgroundColor: state.bg,
+      style: { transform: "none", margin: "0", filter: "none", outline: "0", "outline-offset": "0" }
+    };
+    if (!renderOnePng._primed) { try { await window.htmlToImage.toBlob(el, opts); } catch (e) {} renderOnePng._primed = true; }
+    var blob = await window.htmlToImage.toBlob(el, opts);
+    if (!blob) throw new Error("görsel üretilemedi");
+    return blob;
+  }
+  function fileBase() {
+    return "ayet-" + refLabel(state.sure, state.a1, state.a2).replace(/[^0-9A-Za-zĞğÜüŞşİıÖöÇç]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  var lastFiles = [];
+  async function buildFiles() {
+    lastFiles = [];
+    try {
+      for (var i = 0; i < state.pages.length; i++) {
+        var suf = state.pages.length > 1 ? "-" + (i + 1) : "";
+        lastFiles.push(new File([await renderOnePng(i)], fileBase() + suf + ".png", { type: "image/png" }));
+      }
+      return true;
+    } catch (e) { toast("Oluşturulamadı: " + (e && e.message ? e.message : e)); return false; }
+  }
+  async function ensureFiles() { return lastFiles.length ? true : await buildFiles(); }
+  async function doExport() { if (await buildFiles()) showResult(); }
+  function showResult() {
+    var w = $("resultImgs"); w.innerHTML = "";
+    lastFiles.forEach(function (f) {
+      var img = document.createElement("img");
+      img.className = "result-img"; img.alt = f.name; img.src = URL.createObjectURL(f);
+      w.appendChild(img);
+    });
+    $("modalSub").textContent = lastFiles.length > 1 ? lastFiles.length + " kart üretildi." : "Paylaşmaya hazır PNG.";
+    var touch = matchMedia("(pointer: coarse)").matches;
+    $("saveHint").textContent = touch
+      ? "Platform tuşu → paylaşım ekranı (gönderi / durum / hikâye). Ya da görsele basılı tutup “Görseli indir”."
+      : "Platform tuşu görseli panoya kopyalar ve siteyi açar. “İndir” dosyayı kaydeder.";
+    $("modal").classList.add("open");
+  }
+  var SHARE_URLS = { whatsapp: "https://web.whatsapp.com/", telegram: "https://web.telegram.org/", instagram: "https://www.instagram.com/", x: "https://x.com/compose/post", facebook: "https://www.facebook.com/" };
+  var SHARE_LABEL = { whatsapp: "WhatsApp", telegram: "Telegram", instagram: "Instagram", x: "X", facebook: "Facebook", more: "" };
+  async function share(platform) {
+    if (!(await ensureFiles())) return;
+    if (platform === "whatsapp") {
+      if (lastFiles.length > 1) {
+        // Çok kart → tümünü indir, WhatsApp Web'i aç, kullanıcı sürüklesin
+        $("modal").classList.remove("open");
+        await downloadFiles();
+        try { window.open("https://web.whatsapp.com/", "_blank"); } catch (e) {}
+        toast("Kartlar indirildi. WhatsApp sohbetine sürükleyin.");
+      } else {
+        try { await navigator.clipboard.write([new window.ClipboardItem({ "image/png": lastFiles[0] })]); } catch (e) {}
+        try { window.open("https://web.whatsapp.com/", "_blank"); } catch (e) {}
+        toast("WhatsApp açıldı. Ctrl+V yapıştırın.");
+      }
+      return;
+    }
+    var canFiles = navigator.canShare && navigator.canShare({ files: lastFiles });
+    if (platform === "more" || (canFiles && matchMedia("(pointer: coarse)").matches)) {
+      if (canFiles) { try { await navigator.share({ files: lastFiles, title: refLabel(state.sure, state.a1, state.a2) }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+      if (platform === "more") { toast("Bu cihaz doğrudan paylaşımı desteklemiyor — İndir'i kullanın."); return; }
+    }
+    var copied = false;
+    try { await navigator.clipboard.write([new window.ClipboardItem({ "image/png": lastFiles[0] })]); copied = true; } catch (e) {}
+    try { window.open(SHARE_URLS[platform] || "about:blank", "_blank", "noopener"); } catch (e) {}
+    toast(copied ? SHARE_LABEL[platform] + " açıldı — görsel panoda, yeni gönderiye yapıştırın." : SHARE_LABEL[platform] + " açıldı — İndir ile kaydedin.");
+  }
+  async function copyImage() {
+    if (!(await ensureFiles())) return;
+    try { await navigator.clipboard.write([new window.ClipboardItem({ "image/png": lastFiles[0] })]); toast("Panoya kopyalandı."); }
+    catch (e) { toast("Kopyalanamadı — “İndir” kullanın."); }
+  }
+  async function downloadFiles() {
+    if (!(await ensureFiles())) return;
+    var ns = null; try { ns = await downloadsReady; } catch (e) {}
+    for (var i = 0; i < lastFiles.length; i++) {
+      var f = lastFiles[i];
+      if (ns) { try { await ns.save({ filename: f.name, data: f }); continue; } catch (e) { if (e && e.code === "declined") continue; if (e && e.code === "rate_limited") { toast("Biraz bekleyin."); continue; } } }
+      var a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name;
+      document.body.appendChild(a); a.click(); a.remove();
+      await new Promise(function (r) { setTimeout(r, 250); });
+    }
+  }
+
+  /* ---- UI build ---- */
+  function buildNews() {
+    var N = Q.news; if (!N) { $("newsPanel").style.display = "none"; return; }
+    $("newsDate").textContent = N.date || "";
+    $("newsFoot").textContent = "Bu başlıklar sayfa güncellendiğinde (" + (N.date || "") + ") dünya ve İslam dünyası gündeminden derlendi; suç, cinsel içerik ve İslami değerlere aykırı viral içerik alınmadı.";
+    var list = $("newsList");
+    N.items.forEach(function (it) {
+      var r = it.ref;
+      var rl = r[0] + "-" + sureName(r[0]) + " Sûresi: " + (r[1] === r[2] ? r[1] : r[1] + "-" + r[2]);
+      var wrap = document.createElement("div"); wrap.className = "news-card";
+      var btn = document.createElement("button"); btn.className = "nc-main"; btn.type = "button";
+      btn.innerHTML = '<span class="nc-cat">' + esc(it.cat) + '</span><span class="nc-title">' + esc(it.title) + '</span><span class="nc-note">' + esc(it.note) + '</span><span class="nc-ref"><b>' + esc(rl) + '</b>' + (it.refTxt ? ' · ' + esc(it.refTxt) : '') + '</span>';
+      btn.addEventListener("click", function () {
+        loadRef(r[0], r[1], r[2]);
+        if (matchMedia("(max-width: 1179px)").matches) { $("newsPanel").classList.add("collapsed"); $("newsToggle").setAttribute("aria-expanded", "false"); stage.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      });
+      wrap.appendChild(btn);
+      if (it.src && it.src.length) {
+        var sd = document.createElement("div"); sd.className = "nc-src";
+        sd.appendChild(document.createTextNode("Kaynak: "));
+        it.src.forEach(function (s) { var a = document.createElement("a"); a.href = s.u; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = s.t; sd.appendChild(a); });
+        wrap.appendChild(sd);
+      }
+      list.appendChild(wrap);
+    });
+  }
+  function rgbToHex(s) {
+    var m = s.match(/\d+/g); if (!m) return s.toLowerCase();
+    return "#" + m.slice(0, 3).map(function (n) { return ("0" + (+n).toString(16)).slice(-2); }).join("");
+  }
+  function buildSwatches(hostId, list, getCur, setCur) {
+    var host = $(hostId);
+    list.forEach(function (sw) {
+      var b = document.createElement("button");
+      b.className = "swatch"; b.type = "button"; b.style.background = sw.v; b.title = sw.n; b.setAttribute("aria-label", sw.n);
+      b.addEventListener("click", function () { setCur(sw.v); });
+      host.appendChild(b);
+    });
+    var cust = document.createElement("label"); cust.className = "swatch custom"; cust.title = "Özel renk";
+    var inp = document.createElement("input"); inp.type = "color"; inp.setAttribute("aria-label", "Özel renk");
+    inp.addEventListener("input", function (e) { setCur(e.target.value); });
+    cust.appendChild(document.createTextNode("+")); cust.appendChild(inp); host.appendChild(cust);
+    host._refresh = function () {
+      Array.prototype.forEach.call(host.querySelectorAll(".swatch"), function (b) {
+        if (b.classList.contains("custom")) return;
+        b.setAttribute("aria-pressed", String(rgbToHex(b.style.background) === (getCur() || "").toLowerCase()));
+      });
+    };
+    host._refresh();
+  }
+  function syncFrameSeg() { try { Array.prototype.forEach.call($("frameSeg").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.frame === state.frame)); }); } catch(e){} }
+  function syncSplitSeg() { try { Array.prototype.forEach.call($("splitSeg").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.split === state.splitMode)); }); } catch(e){} }
+  function syncMealFontSeg() { try { Array.prototype.forEach.call($("mealFontSeg").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.font === state.mealFont)); }); } catch(e){} }
+  function syncTheme() {
+    var d = document.documentElement.getAttribute("data-theme");
+    var dark = d === "dark" || (!d && matchMedia("(prefers-color-scheme: dark)").matches);
+    $("themeIcon").innerHTML = dark ? "&#9728;" : "&#9790;";
+    $("themeTxt").textContent = dark ? "Açık" : "Koyu";
+  }
+
+  /* ---- events ---- */
+  $("settingsBtn").addEventListener("click", function () { $("settingsOverlay").classList.add("open"); document.body.classList.add("settings-open"); setTimeout(fitPreview, 50); });
+  $("settingsClose").addEventListener("click", function () { $("settingsOverlay").classList.remove("open"); document.body.classList.remove("settings-open"); setTimeout(fitPreview, 50);  });
+  $("settingsBg").addEventListener("click", function () { $("settingsOverlay").classList.remove("open"); document.body.classList.remove("settings-open"); setTimeout(fitPreview, 50); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { $("settingsOverlay").classList.remove("open"); document.body.classList.remove("settings-open"); setTimeout(fitPreview, 50); } });
+
+  $("shareBtn").addEventListener("click", doExport);
+
+  $("diceBtn").addEventListener("click", randomPick);
+  $("prevBtn").addEventListener("click", function () { stepAyah(-1); });
+  $("nextBtn").addEventListener("click", function () { stepAyah(1); });
+
+  var ayahDeb;
+  function ayahLive() {
+    clearTimeout(ayahDeb);
+    ayahDeb = setTimeout(function () {
+      var a1 = clamp(parseInt(ayahStart.value, 10) || 1, 1, sureCount(state.sure));
+      var er = parseInt(ayahEnd.value, 10);
+      var a2 = clamp(isNaN(er) ? a1 : er, a1, sureCount(state.sure));
+      loadRef(state.sure, a1, a2);
+    }, 320);
+  }
+  ["input", "change"].forEach(function (ev) { ayahStart.addEventListener(ev, ayahLive); ayahEnd.addEventListener(ev, ayahLive); });
+
+  fSource.addEventListener("input", function () { var p = state.pages[state.sel]; if (p) { p.src = fSource.value; repaintSel(); } });
+  fArabic.addEventListener("input", function () { var p = state.pages[state.sel]; if (p) { p.arabic = fArabic.value; repaintSel(); if (state.auto && !p.manual) autofitSel(); } });
+  fMeal.addEventListener("input", function () { var p = state.pages[state.sel]; if (p) { p.meal = fMeal.value; repaintSel(); if (state.auto && !p.manual) autofitSel(); } });
+
+  $("frameSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    state.frame = b.dataset.frame; syncFrameSeg();
+    buildPages(); render(); save();
+  });
+  $("mealFontSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    state.mealFont = b.dataset.font; DEF.mealFont = state.mealFont;
+    syncMealFontSeg();
+    render(); save();
+  });
+  $("splitSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    state.splitMode = b.dataset.split; syncSplitSeg();
+    buildPages(); render(); save();
+  });
+  autoFitTgl.addEventListener("change", function () {
+    state.auto = autoFitTgl.checked;
+    state.pages.forEach(function (p) { p.manual = false; });
+    if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { paintCard(mc, p); autoFitPage(mc, p); }); }
+    render(); save();
+  });
+  function manualSet(which, v) {
+    var p = state.pages[state.sel]; if (!p) return;
+    p.manual = true; autoFitTgl.checked = false; state.auto = false;
+    if (which === "ar") p.arSize = v; else if (which === "tr") p.trSize = v; else p.srcSize = v;
+    repaintSel(); syncControls(); save();
+  }
+  arRange.addEventListener("input", function () { manualSet("ar", +arRange.value); });
+  trRange.addEventListener("input", function () { manualSet("tr", +trRange.value); });
+  srcRange.addEventListener("input", function () { manualSet("src", +srcRange.value); });
+  authorRange.addEventListener("input", function () {
+    state.authorSize = +authorRange.value; DEF.authorSize = state.authorSize;
+    Array.prototype.forEach.call(cardsRow.children, function (el, i) {
+      var pg = state.pages[i]; if (pg && el) paintCard(el, pg);
+    });
+    authorVal.textContent = state.authorSize + " px"; save();
+  });
+  pageRange.addEventListener("input", function () {
+    state.pageNumSize = +pageRange.value; DEF.pageNumSize = state.pageNumSize;
+    Array.prototype.forEach.call(cardsRow.children, function (el, i) {
+      var pg = state.pages[i]; if (pg && el) paintCard(el, pg);
+    });
+    pageVal.textContent = state.pageNumSize + " px"; save();
+  });
+
+  besmeleTgl.addEventListener("change", function () { state.besmele = besmeleTgl.checked; buildPages(); render(); save(); });
+
+  document.querySelectorAll("[data-share]").forEach(function (b) { b.addEventListener("click", function () { share(b.dataset.share); }); });
+  $("mCopy").addEventListener("click", copyImage);
+  $("mDownload").addEventListener("click", downloadFiles);
+  $("modalClose").addEventListener("click", function () { $("modal").classList.remove("open"); });
+  $("modal").addEventListener("click", function (e) { if (e.target === $("modal")) $("modal").classList.remove("open"); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") $("modal").classList.remove("open"); });
+
+  $("themeBtn").addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    var next = cur === "dark" ? "light" : (cur === "light" ? "dark" : (matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark"));
+    document.documentElement.setAttribute("data-theme", next);
+    syncTheme(); save(); fitPreview();
+  });
+
+  new ResizeObserver(fitPreview).observe(stage);
+  window.addEventListener("resize", fitPreview);
+  $("newsToggle").addEventListener("click", function () {
+    if (matchMedia("(min-width: 1180px)").matches) return;
+    var c = $("newsPanel").classList.toggle("collapsed");
+    $("newsToggle").setAttribute("aria-expanded", String(!c));
+    fitPreview();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('input[type="range"], input.num'), function (el) {
+    el.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      var host = el.closest(".panel") || document.scrollingElement || document.documentElement;
+      host.scrollTop += e.deltaY;
+    }, { passive: false });
+  });
+
+  /* ---- init ---- */
+  try {
+  load();
+  $("mealNote").textContent = "Meâl: " + mealName() + ". Paylaşmadan önce metni bir mushaf ile karşılaştırın.";
+  buildNews();
+  buildSwatches("bgSwatches", BG_SWATCHES, function () { return state.bg; }, function (v) { state.bg = v; state.pages.forEach(function(p,i){ paintCard(cardsRow.children[i], p); }); $("bgSwatches")._refresh(); save(); });
+  buildSwatches("inkSwatches", INK_SWATCHES, function () { var p = state.pages[state.sel]; return p ? p.ink : DEF.ink; }, function (v) { var p = state.pages[state.sel]; if (p) { p.ink = v; DEF.ink = v; repaintSel(); $("inkSwatches")._refresh(); save(); } });
+  buildSwatches("srcInkSwatches", SRC_SWATCHES, function () { var p = state.pages[state.sel]; return p ? p.srcInk : DEF.srcInk; }, function (v) { var p = state.pages[state.sel]; if (p) { p.srcInk = v; DEF.srcInk = v; repaintSel(); $("srcInkSwatches")._refresh(); save(); } });
+  syncFrameSeg(); syncSplitSeg(); syncMealFontSeg(); syncTheme();
+  $("mealSelect").value = state.mealKey || "diyanet";
+  $("mealSelect").addEventListener("change", function () {
+    state.mealKey = this.value;
+    $("mealNote").textContent = "Meâl: " + mealName() + ". Paylaşmadan önce metni bir mushaf ile karşılaştırın.";
+    buildPages(); render(); save();
+  });
+  autoFitTgl.checked = state.auto; besmeleTgl.checked = state.besmele;
+  if (matchMedia("(max-width: 1179px)").matches) { $("newsPanel").classList.add("collapsed"); $("newsToggle").setAttribute("aria-expanded", "false"); }
+  var p0 = Q.picks[Math.floor(Math.random() * Q.picks.length)];
+  loadRef(p0[0], p0[1], p0[2]);
+  fitPreview();
+  document.fonts.ready.then(function () { if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { paintCard(mc, p); autoFitPage(mc, p); }); } render(); });
+  } catch(e) { toast("Başlatma hatası: " + (e.message || e)); console.error(e); }
+})();
+</script>

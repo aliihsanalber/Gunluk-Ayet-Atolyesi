@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ayet Atölyesi</string>
+    <string name="title_activity_main">Ayet Atölyesi</string>
+    <string name="package_name">com.aliihsanalber.ayetatolyesi</string>
+    <string name="custom_url_scheme">com.aliihsanalber.ayetatolyesi</string>
+</resources>

@@ -1126,8 +1126,21 @@
   }
   var SHARE_URLS = { whatsapp: "https://web.whatsapp.com/", telegram: "https://web.telegram.org/", instagram: "https://www.instagram.com/", x: "https://x.com/compose/post", facebook: "https://www.facebook.com/" };
   var SHARE_LABEL = { whatsapp: "WhatsApp", telegram: "Telegram", instagram: "Instagram", x: "X", facebook: "Facebook", more: "" };
+  /* Android uygulaması (Capacitor): WebView'da navigator.share yok -> yerel paylaşım ekranı */
+  function isNative() { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
+  function blobToB64(b) { return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(String(fr.result).split(",")[1]); }; fr.onerror = rej; fr.readAsDataURL(b); }); }
+  async function nativeShare() {
+    var P = window.Capacitor.Plugins, uris = [];
+    for (var i = 0; i < lastFiles.length; i++) {
+      var r = await P.Filesystem.writeFile({ path: lastFiles[i].name, data: await blobToB64(lastFiles[i]), directory: "CACHE" });
+      uris.push(r.uri);
+    }
+    try { await P.Share.share({ title: refLabel(state.sure, state.a1, state.a2), files: uris, dialogTitle: "Kartı paylaş / kaydet" }); }
+    catch (e) { if (!(e && /cancel/i.test(String(e.message || e)))) toast("Paylaşılamadı: " + (e && e.message || e)); }
+  }
   async function share(platform) {
     if (!(await ensureFiles())) return;
+    if (isNative()) { await nativeShare(); return; }
     if (platform === "whatsapp") {
       if (lastFiles.length > 1) {
         // Çok kart → tümünü indir, WhatsApp Web'i aç, kullanıcı sürüklesin
@@ -1159,6 +1172,7 @@
   }
   async function downloadFiles() {
     if (!(await ensureFiles())) return;
+    if (isNative()) { await nativeShare(); return; }   /* paylaşım ekranından Galeri/Drive'a kaydedilebilir */
     var ns = null; try { ns = await downloadsReady; } catch (e) {}
     for (var i = 0; i < lastFiles.length; i++) {
       var f = lastFiles[i];

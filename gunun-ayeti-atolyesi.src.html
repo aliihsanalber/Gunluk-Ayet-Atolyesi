@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Karla:wght@400;500;600;700&family=Lora:ital,wght@0,500;1,500&family=Noto+Naskh+Arabic:wght@400;500&family=Inter:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&family=Plus+Jakarta+Sans:wght@300;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Figtree:wght@300;400;500;600;700&family=Poppins:wght@400;500;600&family=Montserrat:wght@400;500;600&family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;500;600&family=Lato:wght@400;700&family=Nunito:wght@400;500;600;700&family=Raleway:wght@400;500;600&family=Work+Sans:wght@400;500;600&family=Mulish:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&family=Playfair+Display:wght@400;500;600&family=Merriweather:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Karla:wght@400;500;600;700&family=Lora:ital,wght@0,500;1,500&family=Noto+Naskh+Arabic:wght@400;500&family=Amiri+Quran&family=Scheherazade+New:wght@400;500&family=Lateef:wght@400;500&family=Inter:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&family=Plus+Jakarta+Sans:wght@300;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Figtree:wght@300;400;500;600;700&family=Poppins:wght@400;500;600&family=Montserrat:wght@400;500;600&family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;500;600&family=Lato:wght@400;700&family=Nunito:wght@400;500;600;700&family=Raleway:wght@400;500;600&family=Work+Sans:wght@400;500;600&family=Mulish:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&family=Playfair+Display:wght@400;500;600&family=Merriweather:wght@400;700&display=swap');
 
   @font-face {
     font-family: 'UthmanicHafs';
@@ -76,8 +76,8 @@
   /* Boşluğu sayfaya yay: yığın tüm kart içi yüksekliğini kaplar, öğeler arası ve alt/üst boşluk eşitlenir. Ölçüm kartı (.measure) doğal yükseklikte kalır. */
   .card[data-spread="1"]:not(.measure) .c-stack { height: 100%; justify-content: space-evenly; }
   .c-source { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: var(--source-size, 50px); color: var(--source-ink, #8A6E1A); letter-spacing: 0.01em; margin-bottom: 0.55em; }
-  .c-besmele { font-family: 'UthmanicHafs', 'Lora', serif; direction: rtl; font-size: var(--besmele-size, 46px); line-height: 1.5; color: var(--card-ink, #234B32); opacity: 0.85; margin-bottom: 0.9em; }
-  .c-arabic { font-family: 'UthmanicHafs', serif; direction: rtl; font-size: var(--arabic-size, 92px); line-height: 1.9; color: var(--card-ink, #234B32); width: 100%; unicode-bidi: plaintext; }
+  .c-besmele { font-family: var(--ar-font, 'UthmanicHafs'), 'Noto Naskh Arabic', serif; direction: rtl; font-size: var(--besmele-size, 46px); line-height: 1.5; color: var(--card-ink, #234B32); opacity: 0.85; margin-bottom: 0.9em; }
+  .c-arabic { font-family: var(--ar-font, 'UthmanicHafs'), 'Noto Naskh Arabic', serif; direction: rtl; font-size: var(--arabic-size, 92px); line-height: var(--ar-lh, 1.9); color: var(--card-ink, #234B32); width: 100%; unicode-bidi: plaintext; }
   .c-arabic .ayah { display: block; }
   .c-arabic .badge {
     white-space: nowrap; margin-inline-start: 0.16em;
@@ -355,6 +355,11 @@
       </div>
       <p class="swatch-note">Boyutlar tüm kartları etkiler.</p>
       <div style="margin-top:10px">
+        <p class="sublabel">Arapça yazı tipi</p>
+        <div class="fontgrid" id="arFontSeg" role="group" aria-label="Arapça font"></div>
+        <p class="hint">Kur'an programlarında yaygın yazı tipleri. Mushaf yazısı için "Medine Mushafı (Hafs)" önerilir.</p>
+      </div>
+      <div style="margin-top:14px">
         <p class="sublabel">Meâl yazı tipi</p>
         <div class="fontgrid" id="mealFontSeg" role="group" aria-label="Meâl fontu"></div>
         <label class="toggle" style="margin-top:8px"><input type="checkbox" id="mealItalic"><span class="track"></span><span>Meâl italik (eğik)</span></label>
@@ -471,7 +476,7 @@
     sure: 2, a1: 255, a2: 255,
     frame: "ornate", bg: "#F4ECE0",
     auto: true, spread: true, justify: false, besmele: true, splitMode: "auto",
-    mealKey: "diyanet", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null,
+    mealKey: "diyanet", arFont: "UthmanicHafs", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null,
     authorSize: 24, pageNumSize: 26,
     pages: [], sel: 0
   };
@@ -484,6 +489,7 @@
       if (s.srcInk) DEF.srcInk = s.srcInk;
       if (s.mealKey) state.mealKey = s.mealKey;
       if (s.mealFont) state.mealFont = s.mealFont;
+      if (s.arFont) state.arFont = s.arFont;
       if (s.mealItalic !== undefined) state.mealItalic = !!s.mealItalic;
       if (s.besmeleSize) state.besmeleSize = +s.besmeleSize;
       if (s.randDays !== undefined && s.randDays !== null) state.randDays = +s.randDays;
@@ -498,7 +504,7 @@
       var pg = state.pages[state.sel] || {};
       localStorage.setItem(LS, JSON.stringify({
         frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, justify: state.justify, besmele: state.besmele, splitMode: state.splitMode,
-        mealKey: state.mealKey, mealFont: state.mealFont, mealItalic: state.mealItalic, besmeleSize: state.besmeleSize, randDays: state.randDays,
+        mealKey: state.mealKey, arFont: state.arFont, mealFont: state.mealFont, mealItalic: state.mealItalic, besmeleSize: state.besmeleSize, randDays: state.randDays,
         last: [state.sure, state.a1, state.a2], authorSize: state.authorSize, pageNumSize: state.pageNumSize,
         ink: pg.ink || DEF.ink, srcInk: pg.srcInk || DEF.srcInk,
         theme: document.documentElement.getAttribute("data-theme") || ""
@@ -657,6 +663,14 @@
     { n: "Poppins" }, { n: "Montserrat" }, { n: "Roboto" }, { n: "Open Sans" }, { n: "Lato" }, { n: "Nunito" },
     { n: "Raleway" }, { n: "Work Sans" }, { n: "Mulish" }, { n: "Source Sans 3", label: "Source Sans" }
   ];
+  var AR_FONTS = [
+    { n: "UthmanicHafs", label: "Medine Mushafı (Hafs)", lh: 1.9 },
+    { n: "Amiri Quran", label: "Amiri Quran", lh: 2.0 },
+    { n: "Scheherazade New", label: "Scheherazade", lh: 1.9 },
+    { n: "Noto Naskh Arabic", label: "Noto Naskh", lh: 1.9 },
+    { n: "Lateef", label: "Lateef", lh: 1.6 }
+  ];
+  var AR_INFO = {}; AR_FONTS.forEach(function (f) { AR_INFO[f.n] = f; });
   var FONT_INFO = {}; MEAL_FONTS.forEach(function (f) { FONT_INFO[f.n] = f; });
   var measureCard = null;
   function ensureMeasure() {
@@ -696,6 +710,9 @@
     el.style.setProperty("--meal-size", pg.trSize + "px");
     el.style.setProperty("--source-size", pg.srcSize + "px");
     el.style.setProperty("--besmele-size", besSz(pg.trSize) + "px");
+    var af = AR_INFO[state.arFont] || AR_INFO.UthmanicHafs;
+    el.style.setProperty("--ar-font", "'" + af.n + "'");
+    el.style.setProperty("--ar-lh", af.lh);
     var mf = state.mealFont || DEF.mealFont, mfi = FONT_INFO[mf] || {};
     el.style.setProperty("--meal-font", "'" + mf + "', " + (mfi.serif ? "Georgia, serif" : "system-ui, sans-serif"));
     el.style.setProperty("--meal-style", state.mealItalic ? "italic" : "normal");
@@ -1163,6 +1180,19 @@
     state.frame = b.dataset.frame; syncFrameSeg();
     buildPages(); render(); save();
   });
+  function syncArFontSeg() { Array.prototype.forEach.call($("arFontSeg").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.font === state.arFont)); }); }
+  function buildArFontGrid() {
+    var host = $("arFontSeg"); host.innerHTML = "";
+    AR_FONTS.forEach(function (f) {
+      var b = document.createElement("button");
+      b.type = "button"; b.dataset.font = f.n; b.textContent = f.label;
+      b.style.cssText = "grid-column: span 3;";
+      b.innerHTML = '<span style="font-family:\'' + f.n + '\',serif;font-size:22px;line-height:1.5;display:block;direction:rtl">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ</span><span style="font-size:11.5px">' + f.label + '</span>';
+      b.setAttribute("aria-pressed", "false");
+      host.appendChild(b);
+    });
+    syncArFontSeg();
+  }
   function buildFontGrid() {
     var host = $("mealFontSeg"); host.innerHTML = "";
     MEAL_FONTS.forEach(function (f) {
@@ -1177,6 +1207,12 @@
     if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { if (!p.manual) { paintCard(mc, p); autoFitPage(mc, p); } }); }
     render();
   }
+  $("arFontSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    state.arFont = b.dataset.font; syncArFontSeg(); repaintAll(); save();
+    var fam = "40px '" + state.arFont + "'";
+    (document.fonts && document.fonts.load ? document.fonts.load(fam, "بِسْمِ ٱللَّهِ ﴿١﴾") : Promise.resolve()).catch(function () {}).then(refit);
+  });
   $("mealFontSeg").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
     state.mealFont = b.dataset.font; DEF.mealFont = state.mealFont;
@@ -1318,7 +1354,8 @@
   buildSwatches("bgSwatches", BG_SWATCHES, function () { return state.bg; }, function (v) { state.bg = v; state.pages.forEach(function(p,i){ paintCard(cardsRow.children[i], p); }); $("bgSwatches")._refresh(); save(); });
   buildSwatches("inkSwatches", INK_SWATCHES, function () { var p = state.pages[state.sel]; return p ? p.ink : DEF.ink; }, function (v) { var p = state.pages[state.sel]; if (p) { p.ink = v; DEF.ink = v; repaintSel(); $("inkSwatches")._refresh(); save(); } });
   buildSwatches("srcInkSwatches", SRC_SWATCHES, function () { var p = state.pages[state.sel]; return p ? p.srcInk : DEF.srcInk; }, function (v) { var p = state.pages[state.sel]; if (p) { p.srcInk = v; DEF.srcInk = v; repaintSel(); $("srcInkSwatches")._refresh(); save(); } });
-  buildFontGrid(); $("mealItalic").checked = state.mealItalic;
+  if (!AR_INFO[state.arFont]) state.arFont = "UthmanicHafs";
+  buildArFontGrid(); buildFontGrid(); $("mealItalic").checked = state.mealItalic;
   fillMealSelect(); refreshCatalog();
   syncFrameSeg(); syncSplitSeg(); syncMealFontSeg(); syncTheme();
   $("mealSelect").addEventListener("change", function () {

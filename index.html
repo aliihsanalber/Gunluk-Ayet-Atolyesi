@@ -357,6 +357,8 @@
       <div style="margin-top:10px">
         <p class="sublabel">Arapça yazı tipi</p>
         <div class="fontgrid" id="arFontSeg" role="group" aria-label="Arapça font"></div>
+        <div class="row" style="margin-top:8px"><button type="button" class="act mini" id="arFontUpload">＋ Font dosyası yükle</button><input type="file" id="arFontFile" accept=".ttf,.otf,.woff,.woff2" multiple hidden></div>
+        <p class="hint">Yüklediğin font yalnızca bu cihazın tarayıcısında saklanır, hiçbir yere gönderilmez. Kendi fontlarını (ör. lisanslı mushaf fontları) böyle kullanabilirsin.</p>
         <p class="hint">Kur'an programlarında yaygın yazı tipleri. Mushaf yazısı için "Medine Mushafı (Hafs)" önerilir.</p>
       </div>
       <div style="margin-top:14px">
@@ -1180,6 +1182,33 @@
     state.frame = b.dataset.frame; syncFrameSeg();
     buildPages(); render(); save();
   });
+  /* ---- kullanıcının yüklediği fontlar (IndexedDB; cihazdan çıkmaz) ---- */
+  var FONTDB = "ayet-fontlar";
+  function fdb() {
+    return new Promise(function (res, rej) {
+      var q = indexedDB.open(FONTDB, 1);
+      q.onupgradeneeded = function () { q.result.createObjectStore("f", { keyPath: "name" }); };
+      q.onsuccess = function () { res(q.result); }; q.onerror = function () { rej(q.error); };
+    });
+  }
+  function fdbDo(mode, fn) {
+    return fdb().then(function (db) { return new Promise(function (res, rej) {
+      var tx = db.transaction("f", mode), st = tx.objectStore("f"), out = fn(st);
+      tx.oncomplete = function () { res(out && out.result); }; tx.onerror = function () { rej(tx.error); };
+    }); });
+  }
+  function registerCustomFont(name, blob) {
+    var url = URL.createObjectURL(blob), st = document.createElement("style");
+    st.dataset.userFont = name;
+    st.textContent = "@font-face{font-family:'" + name.replace(/'/g, "") + "';src:url(" + url + ");font-display:swap}";
+    document.head.appendChild(st);
+    if (!AR_INFO[name]) { var f = { n: name, label: name.replace(/^Yüklü: /, ""), lh: 1.9, custom: true }; AR_FONTS.push(f); AR_INFO[name] = f; }
+  }
+  function loadCustomFonts() {
+    return fdbDo("readonly", function (st) { return st.getAll(); }).then(function (rows) {
+      (rows || []).forEach(function (r) { registerCustomFont(r.name, new Blob([r.buf], { type: r.type || "font/ttf" })); });
+    }).catch(function () {});
+  }
   function syncArFontSeg() { Array.prototype.forEach.call($("arFontSeg").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.font === state.arFont)); }); }
   function buildArFontGrid() {
     var host = $("arFontSeg"); host.innerHTML = "";
@@ -1190,6 +1219,12 @@
       b.innerHTML = '<span style="font-family:\'' + f.n + '\',serif;font-size:22px;line-height:1.5;display:block;direction:rtl">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ</span><span style="font-size:11.5px">' + f.label + '</span>';
       b.setAttribute("aria-pressed", "false");
       host.appendChild(b);
+      if (f.custom) {
+        var x = document.createElement("button");
+        x.type = "button"; x.dataset.del = f.n; x.textContent = "Sil"; x.className = "act mini";
+        x.style.cssText = "grid-column: span 3; margin-top:-2px;";
+        host.appendChild(x);
+      }
     });
     syncArFontSeg();
   }
@@ -1207,7 +1242,35 @@
     if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { if (!p.manual) { paintCard(mc, p); autoFitPage(mc, p); } }); }
     render();
   }
+  $("arFontUpload").addEventListener("click", function () { $("arFontFile").click(); });
+  $("arFontFile").addEventListener("change", function () {
+    var files = Array.prototype.slice.call($("arFontFile").files || []), last = null;
+    Promise.all(files.map(function (f) {
+      var name = "Yüklü: " + f.name.replace(/\.[^.]+$/, "");
+      return f.arrayBuffer().then(function (buf) {
+        return fdbDo("readwrite", function (st) { return st.put({ name: name, buf: buf, type: f.type }); }).then(function () {
+          var old = document.querySelector('style[data-user-font="' + name.replace(/"/g, "") + '"]'); if (old) old.remove();
+          registerCustomFont(name, new Blob([buf], { type: f.type || "font/ttf" })); last = name;
+        });
+      }).catch(function () { toast("Font kaydedilemedi: " + f.name); });
+    })).then(function () {
+      $("arFontFile").value = "";
+      buildArFontGrid();
+      if (last) { toast("Font yüklendi: " + last.replace(/^Yüklü: /, "")); $("arFontSeg").querySelector('button[data-font="' + last.replace(/"/g, "") + '"]').click(); }
+    });
+  });
   $("arFontSeg").addEventListener("click", function (e) {
+    var d = e.target.closest("button[data-del]");
+    if (d) {
+      var n = d.dataset.del;
+      fdbDo("readwrite", function (st) { return st.delete(n); }).catch(function () {}).then(function () {
+        var st = document.querySelector('style[data-user-font="' + n.replace(/"/g, "") + '"]'); if (st) st.remove();
+        AR_FONTS.splice(AR_FONTS.indexOf(AR_INFO[n]), 1); delete AR_INFO[n];
+        if (state.arFont === n) { state.arFont = "UthmanicHafs"; save(); }
+        buildArFontGrid(); refit();
+      });
+      return;
+    }
     var b = e.target.closest("button"); if (!b) return;
     state.arFont = b.dataset.font; syncArFontSeg(); repaintAll(); save();
     var fam = "40px '" + state.arFont + "'";
@@ -1354,7 +1417,12 @@
   buildSwatches("bgSwatches", BG_SWATCHES, function () { return state.bg; }, function (v) { state.bg = v; state.pages.forEach(function(p,i){ paintCard(cardsRow.children[i], p); }); $("bgSwatches")._refresh(); save(); });
   buildSwatches("inkSwatches", INK_SWATCHES, function () { var p = state.pages[state.sel]; return p ? p.ink : DEF.ink; }, function (v) { var p = state.pages[state.sel]; if (p) { p.ink = v; DEF.ink = v; repaintSel(); $("inkSwatches")._refresh(); save(); } });
   buildSwatches("srcInkSwatches", SRC_SWATCHES, function () { var p = state.pages[state.sel]; return p ? p.srcInk : DEF.srcInk; }, function (v) { var p = state.pages[state.sel]; if (p) { p.srcInk = v; DEF.srcInk = v; repaintSel(); $("srcInkSwatches")._refresh(); save(); } });
-  if (!AR_INFO[state.arFont]) state.arFont = "UthmanicHafs";
+  buildArFontGrid();
+  loadCustomFonts().then(function () {
+    if (!AR_INFO[state.arFont]) state.arFont = "UthmanicHafs";
+    buildArFontGrid();
+    document.fonts.ready.then(refit);
+  });
   buildArFontGrid(); buildFontGrid(); $("mealItalic").checked = state.mealItalic;
   fillMealSelect(); refreshCatalog();
   syncFrameSeg(); syncSplitSeg(); syncMealFontSeg(); syncTheme();

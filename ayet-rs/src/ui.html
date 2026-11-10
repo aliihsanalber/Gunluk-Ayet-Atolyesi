@@ -42,12 +42,11 @@
   <div>
     <section>
       <h2>Ayet</h2>
-      <label for="sure">Sûre (numara veya ad)</label>
-      <input id="sure" type="text" list="sureList" placeholder="örn. 94 veya İnşirâh" autocomplete="off">
-      <datalist id="sureList"></datalist>
+      <label for="sure">Sûre</label>
+      <select id="sure"></select>
       <div class="row">
-        <div><label for="a1">Ayet (başlangıç)</label><input id="a1" type="number" min="1" value="1"></div>
-        <div><label for="a2">Bitiş</label><input id="a2" type="number" min="1" value="1"></div>
+        <div><label for="a1">Ayet (başlangıç)</label><select id="a1"></select></div>
+        <div><label for="a2">Bitiş</label><select id="a2"></select></div>
       </div>
       <label for="meal">Meâl</label><select id="meal"></select>
       <div class="row" style="margin-top:10px">
@@ -89,13 +88,18 @@ const post = (u, b) => fetch(u, {method:'POST', body:JSON.stringify(b)}).then(r 
 let META, ORIG = [], BASE = 1, loadTimer, renderTimer, seq = 0;
 const COLORS = {bg:'#f4ece0', ink:'#234b32', baslik:'#8a6e1a'};
 
-function norm(s){ return s.toLocaleLowerCase('tr').replace(/[îí]/g,'i').replace(/[âá]/g,'a').replace(/[ûū]/g,'u').replace(/[ā]/g,'a').replace(/['’`]/g,'').trim(); }
-function sureNo(){
-  const t = $('sure').value.trim(); if (!t) return 0;
-  const m = t.match(/^(\d+)/); if (m) return +m[1];
-  const k = norm(t.replace(/\s*s[uû]resi$/i,''));
-  const i = META.names.findIndex(n => norm(n) === k);
-  return i + 1;
+const sureNo = () => +$('sure').value || 0;
+function fillAyet(sel, from, to, cur){
+  sel.innerHTML = '';
+  for (let i = from; i <= to; i++) sel.add(new Option(i, i));
+  sel.value = Math.min(Math.max(cur, from), to);
+}
+// sûre/başlangıç değişince ayet listelerini yeniden kur
+function syncAyet(){
+  const n = META.counts[sureNo() - 1] || 1;
+  const a1 = Math.min(Math.max(+$('a1').value || 1, 1), n);
+  fillAyet($('a1'), 1, n, a1);
+  fillAyet($('a2'), a1, n, Math.max(+$('a2').value || a1, a1));
 }
 function setMsg(t){ $('msg').textContent = t || ''; }
 
@@ -104,8 +108,6 @@ function loadVerses(){
   loadTimer = setTimeout(async () => {
     const s = sureNo(), a1 = +$('a1').value, a2 = +$('a2').value;
     if (!s) return setMsg('Sûre bulunamadı.');
-    if (a2 < a1) $('a2').value = a2 = a1;
-    $('a1').max = $('a2').max = META.counts[s-1];
     const r = await post('/api/verses', {meal:$('meal').value, sure:s, a1, a2});
     if (r.error) return setMsg(r.error);
     setMsg(''); BASE = a1; ORIG = r.texts;
@@ -151,20 +153,23 @@ $('dlAll').onclick = () => document.querySelectorAll('a.dl').forEach((a, i) => s
 
 function pick(i){
   const [s, a1, a2] = META.picks[i % META.picks.length];
-  $('sure').value = `${s} ${META.names[s-1]}`; $('a1').value = a1; $('a2').value = a2; loadVerses();
+  $('sure').value = s; syncAyet(); $('a1').value = a1; syncAyet(); $('a2').value = a2; loadVerses();
 }
 $('today').onclick = () => pick(Math.floor(Date.now() / 86400000));
 $('rand').onclick = () => pick(Math.floor(Math.random() * META.picks.length));
-for (const id of ['sure','a1','a2','meal']) $(id).addEventListener('input', loadVerses);
+$('sure').addEventListener('input', () => { $('a1').value = 1; syncAyet(); $('a2').value = $('a1').value; loadVerses(); });
+$('a1').addEventListener('input', () => { syncAyet(); loadVerses(); });
+$('a2').addEventListener('input', loadVerses);
+$('meal').addEventListener('input', loadVerses);
 for (const id of ['frame','split','besmele','bg','ink','baslik']) $(id).addEventListener('input', scheduleRender);
 $('resetColors').onclick = () => { for (const k in COLORS) $(k).value = COLORS[k]; scheduleRender(); };
 
 fetch('/api/meta').then(r => r.json()).then(m => {
   META = m;
-  $('sureList').innerHTML = m.names.map((n, i) => `<option value="${i+1} ${n}">`).join('');
+  $('sure').innerHTML = m.names.map((n, i) => `<option value="${i+1}">${i+1} · ${n} (${m.counts[i]} ayet)</option>`).join('');
   $('meal').innerHTML = m.meals.map(x => `<option value="${x.key}">${x.name}</option>`).join('');
   $('meal').value = m.default;
-  $('sure').value = '94 ' + m.names[93]; $('a1').value = 5; $('a2').value = 6;
+  $('sure').value = 94; syncAyet(); $('a1').value = 5; syncAyet(); $('a2').value = 6;
   loadVerses();
 });
 </script>

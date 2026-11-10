@@ -69,9 +69,10 @@
   .card .rule-frame { position: absolute; inset: 46px; border: 2.5px solid var(--card-rule); display: none; pointer-events: none; }
   .card .rule-frame::after { content: ""; position: absolute; inset: 13px; border: 1px solid var(--card-rule); }
   .card[data-frame="simple"] .rule-frame { display: block; }
-  .card-inner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 150px 132px; }
-  .card[data-frame="simple"] .card-inner { padding: 172px 148px; }
-  .card[data-frame="ornate"] .card-inner { padding: 292px 150px; }
+  /* Alt dolgu, sabit konumlu meâl sahibi satırına (.c-author) yer bırakır: metin bloğu onunla yapışmaz. */
+  .card-inner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 150px 132px 210px; }
+  .card[data-frame="simple"] .card-inner { padding: 172px 148px 260px; }
+  .card[data-frame="ornate"] .card-inner { padding: 292px 150px 300px; }
   .c-stack { display: flex; flex-direction: column; align-items: center; width: 100%; }
   /* Boşluğu sayfaya yay: yığın tüm kart içi yüksekliğini kaplar, öğeler arası ve alt/üst boşluk eşitlenir. Ölçüm kartı (.measure) doğal yükseklikte kalır. */
   .card[data-spread="1"]:not(.measure) .c-stack { height: 100%; justify-content: space-evenly; }

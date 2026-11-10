@@ -565,12 +565,24 @@
     }).catch(function () {});
   }
   function mealSentence(v, txt) { return v + ". " + txt + (/[.!?…”"]$/.test(txt) ? "" : "."); }
+  /* Bazı meâller ardışık ayetleri tek metin olarak verir (aynı metin her ayette tekrarlanır).
+     Aynı metni taşıyan komşu ayetler bir grup sayılır: etiket "99-100", metin bir kez yazılır. */
+  function mealGroup(s, v) {
+    var t = ayahTr(s, v), n = sureCount(s), a = v, b = v;
+    if (!t) return { a: v, b: v };
+    while (a > 1 && ayahTr(s, a - 1) === t) a--;
+    while (b < n && ayahTr(s, b + 1) === t) b++;
+    return { a: a, b: b };
+  }
+  function mealLabel(s, v) { var g = mealGroup(s, v); return g.a === g.b ? String(v) : g.a + "-" + g.b; }
 
   function composeRange(s, a1, a2) {
     var arParts = [], mealParts = [];
     for (var v = a1; v <= a2; v++) {
       arParts.push(ayahAr(s, v) + " ﴿" + toArabicNum(v) + "﴾");
-      mealParts.push(mealSentence(v, ayahTr(s, v)));
+      var g = mealGroup(s, v);
+      if (v > a1 && g.a < v) continue;   /* grubun devamı: metin zaten yazıldı */
+      mealParts.push(mealSentence(g.a === g.b ? v : g.a + "-" + g.b, ayahTr(s, v)));
     }
     return { src: refLabel(s, a1, a2), arabic: arParts.join(" "), meal: "“" + mealParts.join(" ") + "”" };
   }
@@ -764,7 +776,7 @@
           var pv = newPage({
             src: refLabel(state.sure, v, v),
             arabic: ayahAr(state.sure, v) + " ﴿" + toArabicNum(v) + "﴾",
-            meal: "\u201c" + mealSentence(v, ayahTr(state.sure, v)) + "\u201d",
+            meal: "\u201c" + mealSentence(mealLabel(state.sure, v), ayahTr(state.sure, v)) + "\u201d",
             showBesmele: v === state.a1 && state.besmele,
             chip: (v - state.a1 + 1) + " / " + count,
             mealAuthor: mealAuthor()

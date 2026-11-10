@@ -121,9 +121,15 @@ pub fn ayah_with_marker(q: &Quran, s: usize, v: usize) -> String {
     format!("{} ﴿{}﴾", q.ayah_ar(s, v), arabic_num(v))
 }
 
-pub fn compose_range(q: &Quran, meal: &str, s: usize, a1: usize, a2: usize) -> (String, String, String) {
+/// Bir aralıktaki ayetlerin (numarasız) meâl metinleri.
+pub fn verse_texts(q: &Quran, meal: &str, s: usize, a1: usize, a2: usize) -> Vec<String> {
+    (a1..=a2).map(|v| q.ayah_tr(meal, s, v)).collect()
+}
+
+/// `texts[i]` = a1+i. ayetin (düzenlenmiş olabilecek) meâl metni.
+pub fn compose_range(q: &Quran, texts: &[String], s: usize, a1: usize, a2: usize) -> (String, String, String) {
     let ar: Vec<String> = (a1..=a2).map(|v| ayah_with_marker(q, s, v)).collect();
-    let tr: Vec<String> = (a1..=a2).map(|v| meal_sentence(v, &q.ayah_tr(meal, s, v))).collect();
+    let tr: Vec<String> = (a1..=a2).map(|v| meal_sentence(v, texts[v - a1].trim())).collect();
     (q.ref_label(s, a1, a2), ar.join(" "), format!("“{}”", tr.join(" ")))
 }
 
@@ -213,8 +219,55 @@ pub fn split_meal_by_sentence(meal: &str) -> (String, String) {
     (format!("“{lead}{}”", i1.join(" ")), format!("“{}”", i2.join(" ")))
 }
 
+/// Düzenleme dosyası: her ayet "N: meâl metni" biçiminde (devam satırları eklenir).
+pub fn to_edit_file(a1: usize, texts: &[String]) -> String {
+    let mut o = String::from("# Meâl metinlerini düzenleyin; her ayet \"NUMARA: metin\" biçimindedir.\n# '#' ile başlayan satırlar yok sayılır. Kaydedip kapatın.\n\n");
+    for (i, t) in texts.iter().enumerate() {
+        o.push_str(&format!("{}: {}\n\n", a1 + i, t));
+    }
+    o
+}
+
+/// `to_edit_file` çıktısını okur; dosyada olmayan ayetler `texts`'teki hâliyle kalır.
+pub fn apply_edit_file(a1: usize, texts: &mut [String], content: &str) {
+    let mut cur: Option<usize> = None;
+    let mut buf: Vec<String> = Vec::new();
+    let flush = |cur: Option<usize>, buf: &mut Vec<String>, texts: &mut [String]| {
+        if let Some(i) = cur {
+            let t = buf.join(" ").trim().to_string();
+            if !t.is_empty() {
+                texts[i] = t;
+            }
+        }
+        buf.clear();
+    };
+    for line in content.lines() {
+        if line.trim_start().starts_with('#') {
+            continue;
+        }
+        let head = line.split_once(':').and_then(|(n, rest)| n.trim().parse::<usize>().ok().map(|n| (n, rest)));
+        match head {
+            Some((n, rest)) if n >= a1 && n - a1 < texts.len() => {
+                flush(cur, &mut buf, texts);
+                cur = Some(n - a1);
+                buf.push(rest.trim().to_string());
+            }
+            _ => buf.push(line.trim().to_string()),
+        }
+    }
+    flush(cur, &mut buf, texts);
+}
+
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn duzenleme_dosyasi_gidis_donus() {
+        let mut t = vec!["bir".to_string(), "iki".to_string()];
+        let f = super::to_edit_file(5, &t).replace("iki", "ikinci\ndevam");
+        super::apply_edit_file(5, &mut t, &f);
+        assert_eq!(t, vec!["bir".to_string(), "ikinci devam".to_string()]);
+    }
+
     use super::*;
 
     #[test]

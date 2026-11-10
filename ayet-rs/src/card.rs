@@ -37,6 +37,16 @@ pub enum SplitMode {
 
 pub type Rgb = [u8; 3];
 
+/// "#RRGGBB" / "RRGGBB" -> renk
+pub fn parse_hex(s: &str) -> Option<Rgb> {
+    let h = s.trim().trim_start_matches('#');
+    if h.len() != 6 || !h.is_ascii() {
+        return None;
+    }
+    let p = |i: usize| u8::from_str_radix(&h[i..i + 2], 16).ok();
+    Some([p(0)?, p(2)?, p(4)?])
+}
+
 #[derive(Clone)]
 pub struct Style_ {
     pub bg: Rgb,
@@ -313,10 +323,10 @@ fn renumber(pages: &mut [Page]) {
 }
 
 /// Seçilen ayet aralığını kartlara böler (web aracındaki `buildPages` ile aynı mantık).
-pub fn build_pages(r: &mut Renderer, q: &crate::data::Quran, meal: &str, s: usize, a1: usize, a2: usize, besmele: bool, mode: SplitMode, frame: Frame) -> Vec<Page> {
+pub fn build_pages(r: &mut Renderer, q: &crate::data::Quran, meal: &str, texts: &[String], s: usize, a1: usize, a2: usize, besmele: bool, mode: SplitMode, frame: Frame) -> Vec<Page> {
     use crate::data::*;
     let author = q.meals[meal].name.clone();
-    let (src, arabic, mealtxt) = compose_range(q, meal, s, a1, a2);
+    let (src, arabic, mealtxt) = compose_range(q, texts, s, a1, a2);
     let single = Page { src, arabic, meal: mealtxt, besmele, author: author.clone(), ..Default::default() };
     if mode == SplitMode::Off {
         return vec![single];
@@ -331,7 +341,7 @@ pub fn build_pages(r: &mut Renderer, q: &crate::data::Quran, meal: &str, s: usiz
             let pv = Page {
                 src: q.ref_label(s, v, v),
                 arabic: ayah_with_marker(q, s, v),
-                meal: format!("“{}”", meal_sentence(v, &q.ayah_tr(meal, s, v))),
+                meal: format!("“{}”", meal_sentence(v, texts[v - a1].trim())),
                 besmele: v == a1 && besmele,
                 author: author.clone(),
                 ..Default::default()

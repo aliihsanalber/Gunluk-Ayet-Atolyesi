@@ -118,12 +118,24 @@ ve süslü çerçeve derleme anında gömülür → tek dosyalık çalıştırı
 ```bash
 cd ayet-rs
 cargo build --release
-./target/release/ayet kart inşirah 5-6 --cikti kartlar     # 94:5-6
+./target/release/ayet web              # → http://localhost:8792  (önerilen kullanım)
+```
+
+**`ayet web`** tarayıcıda açılan yerel arayüzdür: sûre/ayet seçimi, meâl kaynağı,
+**ayet başına düzenlenebilir meâl metni** ("Orijinaline dön" düğmesiyle), çerçeve,
+renkler, canlı önizleme ve PNG indirme ("Günün ayeti" / "Rastgele öne çıkan" dahil).
+Kartlar Rust tarafında çizilir; ek bağımlılık yoktur.
+
+Komut satırı:
+
+```bash
+./target/release/ayet kart 94:5-6                            # kartlar/ klasörüne yazar
+./target/release/ayet kart 94 5-6 --duzenle                  # meâli editörde düzelt, sonra kart çıkar
+./target/release/ayet kart 94:5 --meal-metni "Kendi meâl metnim"
+./target/release/ayet kart 94:5-6 --meal-dosya meal.txt      # "5: metin" / "6: metin" satırları
 ./target/release/ayet kart 2 255 --cerceve sade --meal elmalili
 ./target/release/ayet kart 103 1-3 --cerceve yok --zemin '#1a1d24' --yazi '#e8dcc0'
-./target/release/ayet gunun                                  # öne çıkan ayetlerden bugünkü
-./target/release/ayet ara sabır                              # meâllerde ara
-./target/release/ayet sureler | mealler | yardim
+./target/release/ayet gunun | ara sabır | sureler | mealler | yardim
 cargo test --release
 ```
 

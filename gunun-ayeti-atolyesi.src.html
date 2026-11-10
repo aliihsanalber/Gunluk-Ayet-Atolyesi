@@ -93,6 +93,10 @@
   .card[data-arjustify="1"]:not([data-arjoff="1"]) .c-arabic { text-align: justify; text-align-last: center; text-justify: inter-word; }
   .card[data-arjustify="1"] .c-arabic .ayah { display: inline; }
   .card[data-arjustify="1"] .c-arabic .ayah + .ayah::before { content: " "; }
+  /* Her ayetin meâli ayrı blok: numara satır başında; yaslıyken ayetin son satırı sola yaslı kalır. */
+  .c-meal .m-line { display: block; }
+  .c-meal .m-line + .m-line { margin-top: 0.3em; }
+  .card[data-justify="1"] .c-meal .m-line:not(:only-child) { text-align-last: left; }
   .card[data-besmele="0"] .c-besmele { display: none; }
   .c-chip { position: absolute; right: 64px; bottom: 58px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 32px; color: var(--source-ink, #8A6E1A); opacity: 0.75; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; }
   .card[data-frame="ornate"] .c-chip { right: 132px; bottom: 128px; }
@@ -597,7 +601,7 @@
       if (v > a1 && g.a < v) continue;   /* grubun devamı: metin zaten yazıldı */
       mealParts.push(mealSentence(g.a === g.b ? v : g.a + "-" + g.b, ayahTr(s, v)));
     }
-    return { src: refLabel(s, a1, a2), arabic: arParts.join(" "), meal: "“" + mealParts.join(" ") + "”" };
+    return { src: refLabel(s, a1, a2), arabic: arParts.join(" "), meal: "“" + mealParts.join("\n") + "”" };
   }
 
   /* ---- arabic render ---- */
@@ -640,6 +644,15 @@
   function splitMealBySentence(meal) {
     var c = meal.replace(/^[“"'\s]+/, "").replace(/[”"'\s]+$/, "");
     var lead = "";
+    if (c.indexOf("\n") >= 0) {   /* ayet ayet: ayet sınırında böl */
+      var ls = c.split("\n").filter(Boolean), tot = ls.join("").length, ac = 0, a1 = [], a2 = [];
+      if (ls.length > 1) {
+        ls.forEach(function (x) { if (ac < tot / 2) { a1.push(x); ac += x.length; } else a2.push(x); });
+        if (!a2.length) a2.push(a1.pop());
+        return ["“" + a1.join("\n") + "”", "“" + a2.join("\n") + "”"];
+      }
+      c = ls[0] || c;
+    }
     var lm = c.match(/^(\d+\.\s*)/);
     if (lm) { lead = lm[1]; c = c.slice(lm[0].length); }
     var sents = c.split(/(?<=[.!?…])\s+/).filter(Boolean);
@@ -728,7 +741,8 @@
     el.style.setProperty("--page-size", (state.pageNumSize || DEF.pageNumSize) + "px");
     el.querySelector(".c-source").textContent = pg.src;
     el.querySelector(".c-arabic").innerHTML = buildArabic(pg.arabic);
-    el.querySelector(".c-meal").textContent = pg.meal;
+    var mealEl = el.querySelector(".c-meal"); mealEl.textContent = "";
+    String(pg.meal || "").split("\n").forEach(function (ln) { var d = document.createElement("div"); d.className = "m-line"; d.textContent = ln; mealEl.appendChild(d); });
     el.querySelector(".c-chip").textContent = pg.chip || "";
     el.querySelector(".c-author").textContent = pg.mealAuthor || mealAuthor();
     var pgEl = el.querySelector(".c-page");

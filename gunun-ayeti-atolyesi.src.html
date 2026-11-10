@@ -90,7 +90,7 @@
   /* İki yana yasla (Word'deki gibi); son satır ortalı kalır, balance kapatılır ki satırlar tam genişliği kullansın. */
   .card[data-justify="1"] .c-meal { text-align: justify; text-align-last: center; text-wrap: wrap; hyphens: auto; }
   /* Arapçayı iki yana yasla: ayetler tek paragraf gibi akar, son satır ortalı. */
-  .card[data-arjustify="1"] .c-arabic { text-align: justify; text-align-last: center; text-justify: inter-word; }
+  .card[data-arjustify="1"]:not([data-arjoff="1"]) .c-arabic { text-align: justify; text-align-last: center; text-justify: inter-word; }
   .card[data-arjustify="1"] .c-arabic .ayah { display: inline; }
   .card[data-arjustify="1"] .c-arabic .ayah + .ayah::before { content: " "; }
   .card[data-besmele="0"] .c-besmele { display: none; }
@@ -733,6 +733,34 @@
     el.querySelector(".c-author").textContent = pg.mealAuthor || mealAuthor();
     var pgEl = el.querySelector(".c-page");
     if (pgEl) { pgEl.textContent = pg.pageLabel || ""; el.dataset.page = pg.pageLabel || ""; }
+    arJustifyGuard(el);
+  }
+  /* Arapçayı yaslama koruması: yaslanmamış hâlde (son satır hariç) herhangi bir satır kutunun %78'inden azını
+     dolduruyorsa (kısa ayet / kelime az), yaslamak kelime aralarını aşırı açar -> o kartta yaslama kapatılır. */
+  var AR_JUSTIFY_MIN_FILL = 0.78;
+  function arJustifyGuard(el) {
+    delete el.dataset.arjoff;
+    if (!state.arJustify) return;
+    var ar = el.querySelector(".c-arabic");
+    el.dataset.arjoff = "1";                       /* doğal (yaslanmamış) satır kırılımını ölç */
+    var box = ar.getBoundingClientRect(), W = box.width;
+    if (W > 0) {
+      var rg = document.createRange(); rg.selectNodeContents(ar);
+      var rects = Array.prototype.filter.call(rg.getClientRects(), function (q) { return q.width >= 1 && q.height < W; })
+        .sort(function (x, y) { return (x.top + x.bottom) - (y.top + y.bottom); });
+      var tol = (parseFloat(getComputedStyle(ar).fontSize) || 40) * (AR_INFO[state.arFont] || AR_INFO.UthmanicHafs).lh * box.width / (ar.offsetWidth || box.width) * 0.45;
+      var rows = [];
+      rects.forEach(function (q) {
+        var cy = (q.top + q.bottom) / 2, row = rows[rows.length - 1];
+        if (row && Math.abs(cy - row.cy) < tol) { row.l = Math.min(row.l, q.left); row.r = Math.max(row.r, q.right); }
+        else rows.push({ cy: cy, l: q.left, r: q.right });
+      });
+      var minFill = 1;
+      for (var i = 0; i < rows.length - 1; i++) minFill = Math.min(minFill, (rows[i].r - rows[i].l) / W);
+      el.dataset.arfill = rows.length > 1 ? minFill.toFixed(2) : "-";
+      if (minFill < AR_JUSTIFY_MIN_FILL) return;   /* yaslama kapalı kalır */
+    }
+    delete el.dataset.arjoff;
   }
   function overflowOf(el) {
     var inner = el.querySelector(".card-inner"), stack = el.querySelector(".c-stack");
@@ -852,6 +880,7 @@
       }
       el.addEventListener("click", function () { selectPage(i); });
       cardsRow.appendChild(el);
+      arJustifyGuard(el);   /* ölçüm için kart DOM'da olmalı */
     });
     fitPreview();
     syncControls();

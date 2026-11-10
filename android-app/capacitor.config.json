@@ -1,0 +1,7 @@
+{
+  "appId": "com.aliihsanalber.ayetatolyesi",
+  "appName": "Ayet Atölyesi",
+  "webDir": "www",
+  "backgroundColor": "#F4ECE0",
+  "android": { "allowMixedContent": false }
+}

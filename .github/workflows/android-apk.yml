@@ -1,0 +1,37 @@
+name: Android APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['android-app/**', 'index.html', 'meals/**', '.github/workflows/android-apk.yml']
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - name: Web içeriğini hazırla ve eşitle
+        working-directory: android-app
+        run: |
+          npm install
+          node prepare-www.js
+          npx cap sync android
+      - name: APK derle (debug imzalı, doğrudan kurulabilir)
+        working-directory: android-app/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+      - name: APK'yı adlandır
+        run: cp android-app/android/app/build/outputs/apk/debug/app-debug.apk ayet-atolyesi.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: ayet-atolyesi-apk, path: ayet-atolyesi.apk }
+      - name: Release'e ekle (son sürüm)
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          gh release delete apk-latest --yes --cleanup-tag || true
+          gh release create apk-latest ayet-atolyesi.apk --title "Ayet Atölyesi (Android APK)" --notes "Otomatik derlenen APK. Telefonda indirip kurun (Bilinmeyen kaynaklara izin gerekir)."

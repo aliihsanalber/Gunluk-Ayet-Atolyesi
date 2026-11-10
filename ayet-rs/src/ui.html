@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Günün Ayeti Atölyesi</title>
+<style>
+  :root { --bg:#E9E2D2; --panel:#F7F2E7; --line:#D0C6AE; --ink:#2A2419; --dim:#6C6350; --gold:#937518; --accent:#234B32; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#16130E; --panel:#201B13; --line:#392F20; --ink:#ECE4D1; --dim:#A99C7E; --gold:#C6A24E; --accent:#7FB293; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 system-ui,sans-serif; }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
+  h1 { margin:0; font-size:18px; color:var(--gold); }
+  header span { color:var(--dim); font-size:13px; }
+  main { display:grid; grid-template-columns:minmax(300px,420px) 1fr; gap:18px; padding:18px 20px; align-items:start; }
+  @media (max-width:820px) { main { grid-template-columns:1fr; } }
+  section { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:14px; }
+  h2 { margin:0 0 10px; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); }
+  label { display:block; font-size:13px; color:var(--dim); margin:8px 0 3px; }
+  input, select, textarea, button { font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:7px 9px; }
+  input[type=text], input[type=number], select, textarea { width:100%; }
+  input[type=color] { padding:2px; height:34px; width:100%; }
+  textarea { resize:vertical; min-height:70px; line-height:1.45; }
+  .row { display:flex; gap:8px; } .row > * { flex:1; min-width:0; }
+  button { cursor:pointer; } button:hover { border-color:var(--gold); }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button.small { padding:3px 8px; font-size:12px; color:var(--dim); }
+  .verse { margin-top:8px; } .verse .top { display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--dim); }
+  .verse.edited textarea { border-color:var(--gold); }
+  #cards { display:flex; flex-wrap:wrap; gap:16px; }
+  .card { flex:1 1 260px; max-width:420px; }
+  .card img { width:100%; border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,.25); display:block; }
+  .card .bar { display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:13px; color:var(--dim); }
+  a.dl { color:var(--accent); font-weight:600; text-decoration:none; border:1px solid var(--accent); border-radius:8px; padding:4px 10px; }
+  #msg { color:#b3402a; font-size:13px; min-height:18px; } #busy { color:var(--dim); font-size:13px; }
+  .check { display:flex; gap:8px; align-items:center; margin-top:10px; color:var(--ink); font-size:14px; } .check input { width:auto; }
+</style>
+</head>
+<body>
+<header><h1>Günün Ayeti Atölyesi</h1><span>ayet + meâl kartı hazırlama</span></header>
+<main>
+  <div>
+    <section>
+      <h2>Ayet</h2>
+      <label for="sure">Sûre</label>
+      <select id="sure"></select>
+      <div class="row">
+        <div><label for="a1">Ayet (başlangıç)</label><select id="a1"></select></div>
+        <div><label for="a2">Bitiş</label><select id="a2"></select></div>
+      </div>
+      <label for="meal">Meâl</label><select id="meal"></select>
+      <div class="row" style="margin-top:10px">
+        <button id="today">Günün ayeti</button>
+        <button id="rand">Rastgele öne çıkan</button>
+      </div>
+    </section>
+    <section>
+      <h2>Meâl metni <span style="text-transform:none;letter-spacing:0">(düzenlenebilir)</span></h2>
+      <div id="verses"></div>
+      <p style="font-size:12px;color:var(--dim);margin:10px 0 0">Değiştirdiğiniz ayetin çerçevesi altın renge döner. Sûre, ayet veya meâl kaynağını değiştirirseniz metinler yeniden yüklenir.</p>
+    </section>
+    <section>
+      <h2>Görünüm</h2>
+      <div class="row">
+        <div><label for="frame">Çerçeve</label><select id="frame"><option value="suslu">Süslü</option><option value="sade">Sade</option><option value="yok">Yok</option></select></div>
+        <div><label for="split">Kartlara bölme</label><select id="split"><option value="otomatik">Otomatik</option><option value="kapali">Tek kart</option><option value="zorla">Zorla böl</option></select></div>
+      </div>
+      <div class="row">
+        <div><label for="bg">Zemin</label><input id="bg" type="color" value="#f4ece0"></div>
+        <div><label for="ink">Ayet+meâl</label><input id="ink" type="color" value="#234b32"></div>
+        <div><label for="baslik">Başlık</label><input id="baslik" type="color" value="#8a6e1a"></div>
+      </div>
+      <div class="check"><input id="besmele" type="checkbox" checked><label for="besmele" style="margin:0;color:inherit">Besmele ekle</label></div>
+      <div style="margin-top:10px"><button class="small" id="resetColors">Renkleri sıfırla</button></div>
+    </section>
+  </div>
+  <div>
+    <div class="row" style="margin-bottom:10px;align-items:center">
+      <div id="msg"></div><div id="busy" style="text-align:right"></div>
+    </div>
+    <div id="cards"></div>
+    <div style="margin-top:14px"><button id="dlAll" class="primary" hidden>Hepsini indir</button></div>
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const post = (u, b) => fetch(u, {method:'POST', body:JSON.stringify(b)}).then(r => r.json());
+let META, ORIG = [], BASE = 1, loadTimer, renderTimer, seq = 0;
+const COLORS = {bg:'#f4ece0', ink:'#234b32', baslik:'#8a6e1a'};
+
+const sureNo = () => +$('sure').value || 0;
+function fillAyet(sel, from, to, cur){
+  sel.innerHTML = '';
+  for (let i = from; i <= to; i++) sel.add(new Option(i, i));
+  sel.value = Math.min(Math.max(cur, from), to);
+}
+// sûre/başlangıç değişince ayet listelerini yeniden kur
+function syncAyet(){
+  const n = META.counts[sureNo() - 1] || 1;
+  const a1 = Math.min(Math.max(+$('a1').value || 1, 1), n);
+  fillAyet($('a1'), 1, n, a1);
+  fillAyet($('a2'), a1, n, Math.max(+$('a2').value || a1, a1));
+}
+function setMsg(t){ $('msg').textContent = t || ''; }
+
+function loadVerses(){
+  clearTimeout(loadTimer);
+  loadTimer = setTimeout(async () => {
+    const s = sureNo(), a1 = +$('a1').value, a2 = +$('a2').value;
+    if (!s) return setMsg('Sûre bulunamadı.');
+    const r = await post('/api/verses', {meal:$('meal').value, sure:s, a1, a2});
+    if (r.error) return setMsg(r.error);
+    setMsg(''); BASE = a1; ORIG = r.texts;
+    const box = $('verses'); box.innerHTML = '';
+    r.texts.forEach((t, i) => {
+      const d = document.createElement('div'); d.className = 'verse';
+      d.innerHTML = `<div class="top"><span>${a1+i}. ayet</span><button class="small">Orijinaline dön</button></div><textarea></textarea>`;
+      const ta = d.querySelector('textarea'); ta.value = t;
+      ta.addEventListener('input', () => { d.classList.toggle('edited', ta.value !== ORIG[i]); scheduleRender(); });
+      d.querySelector('button').onclick = () => { ta.value = ORIG[i]; d.classList.remove('edited'); scheduleRender(); };
+      box.appendChild(d);
+    });
+    scheduleRender();
+  }, 250);
+}
+
+function scheduleRender(){ clearTimeout(renderTimer); renderTimer = setTimeout(render, 350); }
+async function render(){
+  const s = sureNo(); if (!s) return;
+  const my = ++seq; $('busy').textContent = 'Çiziliyor…';
+  const texts = [...document.querySelectorAll('#verses textarea')].map(t => t.value);
+  const r = await post('/api/render', {
+    meal:$('meal').value, sure:s, a1:+$('a1').value, a2:+$('a2').value, texts,
+    frame:$('frame').value, split:$('split').value, besmele:$('besmele').checked,
+    bg:$('bg').value, ink:$('ink').value, baslik:$('baslik').value
+  }).catch(e => ({error:String(e)}));
+  if (my !== seq) return; $('busy').textContent = '';
+  if (r.error) return setMsg(r.error);
+  setMsg('');
+  const box = $('cards'); box.innerHTML = '';
+  r.pages.forEach((p, i) => {
+    const name = `ayet_${s}_${$('a1').value}${+$('a2').value>+$('a1').value?'-'+$('a2').value:''}${r.pages.length>1?'_'+(i+1):''}.png`;
+    const d = document.createElement('div'); d.className = 'card';
+    d.innerHTML = `<img alt=""><div class="bar"><span></span><a class="dl">PNG indir</a></div>`;
+    d.querySelector('img').src = 'data:image/png;base64,' + p.png;
+    d.querySelector('span').textContent = r.pages.length > 1 ? `Kart ${i+1} / ${r.pages.length}` : p.src;
+    const a = d.querySelector('a'); a.href = 'data:image/png;base64,' + p.png; a.download = name;
+    box.appendChild(d);
+  });
+  $('dlAll').hidden = r.pages.length < 2;
+}
+$('dlAll').onclick = () => document.querySelectorAll('a.dl').forEach((a, i) => setTimeout(() => a.click(), i * 250));
+
+function pick(i){
+  const [s, a1, a2] = META.picks[i % META.picks.length];
+  $('sure').value = s; syncAyet(); $('a1').value = a1; syncAyet(); $('a2').value = a2; loadVerses();
+}
+$('today').onclick = () => pick(Math.floor(Date.now() / 86400000));
+$('rand').onclick = () => pick(Math.floor(Math.random() * META.picks.length));
+$('sure').addEventListener('input', () => { $('a1').value = 1; syncAyet(); $('a2').value = $('a1').value; loadVerses(); });
+$('a1').addEventListener('input', () => { syncAyet(); loadVerses(); });
+$('a2').addEventListener('input', loadVerses);
+$('meal').addEventListener('input', loadVerses);
+for (const id of ['frame','split','besmele','bg','ink','baslik']) $(id).addEventListener('input', scheduleRender);
+$('resetColors').onclick = () => { for (const k in COLORS) $(k).value = COLORS[k]; scheduleRender(); };
+
+fetch('/api/meta').then(r => r.json()).then(m => {
+  META = m;
+  $('sure').innerHTML = m.names.map((n, i) => `<option value="${i+1}">${i+1} · ${n} (${m.counts[i]} ayet)</option>`).join('');
+  $('meal').innerHTML = m.meals.map(x => `<option value="${x.key}">${x.name}</option>`).join('');
+  $('meal').value = m.default;
+  $('sure').value = 94; syncAyet(); $('a1').value = 5; syncAyet(); $('a2').value = 6;
+  loadVerses();
+});
+</script>
+</body>
+</html>

@@ -12,7 +12,8 @@ const MEAL_SOURCES = [
   { key: 'diyanet', file: 'tr_diyanet.json', name: 'Diyanet İşleri Meali', author: 'Diyanet İşleri Başkanlığı' },
   { key: 'elmalili', file: 'tr_elmalili.json', name: 'Elmalılı Hamdi Yazır Meali', author: 'Elmalılı Hamdi Yazır' },
   { key: 'feyzul', file: 'tr_feyzul.json', name: 'Feyzü\'l-Furkân Meali', author: 'Prof. Dr. Hasan Tahsin Feyizli' },
-  { key: 'ali_bulac', file: 'tr_ali_bulac.json', name: 'Ali Bulaç Meali', author: 'Ali Bulaç' }
+  { key: 'ali_bulac', file: 'tr_ali_bulac.json', name: 'Ali Bulaç Meali', author: 'Ali Bulaç' },
+  { key: 'yasar', file: 'tr_yasar.json', name: 'Yaşar Nuri Öztürk Meali', author: 'Yaşar Nuri Öztürk' }
 ];
 
 const meals = {};
@@ -36,8 +37,13 @@ const NAMES = ["Fâtiha","Bakara","Âl-i İmrân","Nisâ","Mâide","En'âm","A'r
 "Kāria","Tekâsür","Asr","Hümeze","Fîl","Kureyş","Mâûn","Kevser","Kâfirûn","Nasr",
 "Tebbet","İhlâs","Felak","Nâs"];
 
+/* Kaynak veride açık tanvin (U+08F0–08F2) ile sondaki elif arasında boşluk var ("يُسۡرࣰ ا") ve
+   Hafs fontu bu işaretleri içermez; elif bitiştirilir, işaretler standart tanvine eşlenir. */
+const fixAr = (t) => t
+  .replace(/([\u08F0-\u08F2]) \u0627(?=\s|$)/g, '$1\u0627')
+  .replace(/\u08F0/g, '\u064B').replace(/\u08F1/g, '\u064C').replace(/\u08F2/g, '\u064D');
 const arBy = {};
-for (const v of ar) (arBy[v.chapter] = arBy[v.chapter] || {})[v.verse] = v.text;
+for (const v of ar) (arBy[v.chapter] = arBy[v.chapter] || {})[v.verse] = fixAr(v.text);
 
 const counts = [], A = [];
 for (let s = 1; s <= 114; s++) {
@@ -60,6 +66,26 @@ for (const [key, src] of Object.entries(meals)) {
   mealData[key] = { tr: T, name: src.name, author: src.author };
 }
 
+
+
+/* Gömülü veri (index.html): yalnız varsayılan meâl. Diğer meâller meals/<anahtar>.json
+   olarak ayrı dosyada tutulur ve seçilince yüklenir (sayfa hafif kalır).
+   Yeni meâl eklemek = meals/ içine dosya koymak + meals/index.json'a satır eklemek. */
+const DEFAULT = 'diyanet';
+const MEALS_DIR = path.join(__dirname, 'meals');
+fs.mkdirSync(MEALS_DIR, { recursive: true });
+const catalog = [];
+for (const [key, m] of Object.entries(mealData)) {
+  fs.writeFileSync(path.join(MEALS_DIR, key + '.json'), JSON.stringify({ name: m.name, author: m.author, tr: m.tr }));
+  catalog.push({ key, name: m.name, author: m.author });
+}
+/* mevcut dosyalardan gelen ek meâller (ör. kuranmeali.com'dan) kataloğu korur */
+try {
+  const old = JSON.parse(fs.readFileSync(path.join(MEALS_DIR, 'index.json'), 'utf8'));
+  for (const o of old) if (!catalog.some((c) => c.key === o.key) && fs.existsSync(path.join(MEALS_DIR, o.key + '.json'))) catalog.push(o);
+} catch (e) {}
+fs.writeFileSync(path.join(MEALS_DIR, 'index.json'), JSON.stringify(catalog, null, 1));
+
 const PICKS = [
   [2,152,152],[2,153,153],[2,186,186],[2,255,255],[2,286,286],[2,45,45],[2,216,216],[2,201,201],
   [3,159,159],[3,173,173],[3,139,139],[3,103,103],[3,134,134],[3,200,200],
@@ -74,13 +100,14 @@ const OUT = {
   names: NAMES,
   counts,
   ar: A,
-  meals: mealData,
-  defaultMeal: 'diyanet',
+  meals: { [DEFAULT]: mealData[DEFAULT] },
+  catalog,
+  defaultMeal: DEFAULT,
   picks: PICKS
 };
 
 fs.writeFileSync(D('qdata.json'), JSON.stringify(OUT));
 console.log('qdata.json', (fs.statSync(D('qdata.json')).size / 1024 / 1024).toFixed(2) + ' MB');
-console.log('meals:', Object.keys(mealData).join(', '));
+console.log('meals/:', catalog.map((c) => c.key).join(', '));
 console.log('2:255 (Diyanet) =', mealData.diyanet.tr[1][254].slice(0, 50));
-console.log('2:255 (Elmalılı) =', mealData.elmalili.tr[1][254].slice(0, 50));
+console.log('2:255 (Yaşar) =', mealData.yasar.tr[1][254].slice(0, 50));

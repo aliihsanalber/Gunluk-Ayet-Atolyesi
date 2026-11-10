@@ -1,0 +1,97 @@
+[
+ {
+  "key": "diyanet",
+  "name": "Diyanet İşleri Meali",
+  "author": "Diyanet İşleri Başkanlığı"
+ },
+ {
+  "key": "elmalili",
+  "name": "Elmalılı Hamdi Yazır Meali",
+  "author": "Elmalılı Hamdi Yazır"
+ },
+ {
+  "key": "feyzul",
+  "name": "Feyzü'l-Furkân Meali",
+  "author": "Prof. Dr. Hasan Tahsin Feyizli"
+ },
+ {
+  "key": "ali_bulac",
+  "name": "Ali Bulaç Meali",
+  "author": "Ali Bulaç"
+ },
+ {
+  "key": "yasar",
+  "name": "Yaşar Nuri Öztürk Meali",
+  "author": "Yaşar Nuri Öztürk"
+ },
+ {
+  "key": "aparliyan",
+  "name": "Abdullah Parlıyan Meali",
+  "author": "Abdullah Parlıyan"
+ },
+ {
+  "key": "ahmettekin",
+  "name": "Ahmet Tekin Meali",
+  "author": "Ahmet Tekin"
+ },
+ {
+  "key": "ahmetvarol",
+  "name": "Ahmet Varol Meali",
+  "author": "Ahmet Varol"
+ },
+ {
+  "key": "diyanetislerieski",
+  "name": "Diyanet İşleri Meali (Eski)",
+  "author": "Diyanet İşleri Başkanlığı"
+ },
+ {
+  "key": "diyanetisleriyeni",
+  "name": "Diyanet İşleri Meali (Yeni)",
+  "author": "Diyanet İşleri Başkanlığı"
+ },
+ {
+  "key": "kuranyolu",
+  "name": "Kur'an Yolu (Diyanet İşleri)",
+  "author": "Diyanet İşleri Başkanlığı"
+ },
+ {
+  "key": "diyanetvakfi",
+  "name": "Diyanet Vakfı Meali",
+  "author": "Diyanet Vakfı"
+ },
+ {
+  "key": "elmaliliorj",
+  "name": "Elmalılı Meali (Orijinal)",
+  "author": "Elmalılı Hamdi Yazır"
+ },
+ {
+  "key": "hayrat",
+  "name": "Hayrat Neşriyat Meali",
+  "author": "Hayrat Neşriyat"
+ },
+ {
+  "key": "ihsanaktas",
+  "name": "İhsan Aktaş Meali",
+  "author": "İhsan Aktaş"
+ },
+ {
+  "key": "mahmutkisa",
+  "name": "Mahmut Kısa Meali",
+  "author": "Mahmut Kısa"
+ },
+ {
+  "key": "omernasuhi",
+  "name": "Ömer Nasuhi Bilmen Meali",
+  "author": "Ömer Nasuhi Bilmen"
+ },
+ {
+  "key": "syildirim",
+  "name": "Suat Yıldırım Meali",
+  "author": "Suat Yıldırım"
+ },
+ {
+  "key": "spiris",
+  "name": "Şaban Piriş Meali",
+  "author": "Şaban Piriş"
+ }
+]

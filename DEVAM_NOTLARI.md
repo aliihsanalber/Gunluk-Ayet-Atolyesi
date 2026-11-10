@@ -3,8 +3,8 @@
 Bu dosya, bir oturumda yapılanları ve bekleyen işleri yeni oturuma aktarmak için yazıldı.
 Yeni oturumda önce bunu okuyun.
 
-- **Dal:** `claude/daily-verse-workshop-rust-7ci8iy` (GitHub'a push edildi; `main`'e **birleştirilmedi**, PR açılmadı)
-- **Canlı site:** https://aliihsanalber.github.io/Gunluk-Ayet-Atolyesi/ (GitHub Pages; büyük ihtimalle `main`'den yayınlanıyor, bu yüzden aşağıdaki değişiklikler dal birleşene kadar sitede görünmez)
+- **Dal:** `claude/daily-verse-workshop-rust-7ci8iy`. Altı PR (#1–#6) `main`'e **birleştirildi**; tüm özellikler canlı sitede. Yeni işe başlarken dalı `main`'in son hâlinden yeniden başlat (`git fetch origin main && git checkout -B claude/daily-verse-workshop-rust-7ci8iy origin/main`).
+- **Canlı site:** https://aliihsanalber.github.io/Gunluk-Ayet-Atolyesi/ (GitHub Pages, `main`'den yayınlanır). Depo **herkese açık (public)**; kullanıcı bunu bilerek kabul etti ("telif sorunu olmaz", meâller depoda).
 - **Kullanıcı:** Türkçe konuşuyor. Her akşam telefondan (Chrome) ayet seçip düzenleyip WhatsApp'ta paylaşıyor. **Asıl kullandığı araç web sürümü**; Rust sürümü yedek/ek.
 
 ---
@@ -60,37 +60,42 @@ README güncellendi (Rust bölümü, v5 notları, yayın akışı).
 
 ---
 
-## 2. Bekleyen işler
+### 1.4 Sonradan eklenenler (v5 sonrası, hepsi `main`'de)
+- **Meâller (14 yeni, toplam 19):** Abdullah Parlıyan, Ahmet Tekin, Ahmet Varol, Diyanet Eski/Yeni, Kur'an Yolu, Diyanet Vakfı, Elmalılı Orijinal, Hayrat, İhsan Aktaş, Mahmut Kısa, Ömer Nasuhi Bilmen, Suat Yıldırım, Şaban Piriş (+ önceki 5). Scraper: `data/scrape_kuranmeali.py` (tek istek = ayetin tüm meâlleri; anahtarlar sitedeki `value=` adları; tüm meâller çekilebilir, yalnız seçilenler repoya yazıldı). Rust `EXTRA_MEALS` da güncel.
+- **Meâl ön ek temizliği:** 10 meâlde "99-100." / "3, 4." gibi aralık ön ekleri vardı; temizlendi. Aynı metni taşıyan ardışık ayetler uygulamada grup sayılır (`mealGroup`/`mealLabel`): kartta metin bir kez, "99-100." etiketiyle.
+- **Kart düzeni:** "Boşluğu sayfaya yay" (`data-spread`, varsayılan açık; ölçüm kartı `.measure` doğal yükseklikte kalır). "Meâli iki yana yasla" (`data-justify`). Çok ayetli kartta her ayet ayrı `.m-line` bloğu: numara satır başında, yaslıyken ayetin son satırı sola yaslı. Meâl metni ayetleri `\n` ile ayırır; uzun kartı bölme (`splitMealBySentence`) ayet sınırından böler.
+- **Arapça yazı tipi:** Medine Mushafı/Hafs (varsayılan), Amiri Quran, Scheherazade New, Noto Naskh, Lateef (`AR_FONTS`). **Kendi font dosyanı yükle** (.ttf/.otf/.woff/.woff2): IndexedDB (`ayet-fontlar`) + blob `@font-face`; cihazdan çıkmaz, repoya girmez, PNG dışa aktarmada çalışır (telefonda doğrulandı).
+- **Arapçayı iki yana yasla** (`data-arjustify`): ayetler inline akar. **Koruma** `arJustifyGuard`: yaslanmamış hâlde (son satır hariç) herhangi bir satır kutunun %78'inden azsa o kartta yaslama kapanır (`AR_JUSTIFY_MIN_FILL`, `data-arjoff`). Ölçüm için kart DOM'da olmalı (`render` içinde `appendChild` sonrası çağrılır).
+- Telefonda doğrulananlar: PNG çıktısı (yeni yazı tipleriyle), 13:40-43 tek kartta sığıyor.
 
-### 2.1 kuranmeali.com meâlleri (KISMEN YAPILDI)
-- **Eklendi (14 meâl):** Abdullah Parlıyan, Ahmet Tekin, Ahmet Varol, Diyanet Eski/Yeni, Kur'an Yolu, Diyanet Vakfı, Elmalılı Orijinal, Hayrat, İhsan Aktaş, Mahmut Kısa, Ömer Nasuhi Bilmen, Suat Yıldırım, Şaban Piriş. Scraper: `data/scrape_kuranmeali.py` (tek istek = ayetin tüm meâlleri; yeni meâl için aynı betik, anahtarlar sitedeki `value=` adları).
-- Kullanıcının görsellerinde üstte kesik kalan (Gölpınarlı/Akgül?) ve Suat Yıldırım altındaki meâllerin seçili olup olmadığı belirsiz; sorulacak.
-- Aşağıdaki not, ilk plan:
-- Altyapı hazır: her meâl `meals/<anahtar>.json` = `{"name":..., "author":..., "tr":[[sûre1 ayetleri],[sûre2],...,[sûre114]]}` + `meals/index.json`'a `{key,name,author}` satırı.
-- **Yapılacak:** siteyi aç, meâl listesini ve sayfa yapısını çıkar, bir scraper yaz (`data/scrape_feyzul.py` örnek), her meâlin 114 sûresini çek, dosyaları üret, kataloğa ekle, `ayet-rs/src/data.rs` `EXTRA_MEALS`'a da ekle.
-- **Telif/koşul:** çoğu meâl telifli olabilir. Önce sitenin kullanım koşullarına/robots.txt'ye bak. Hepsini herkese açık repoya koymadan önce kullanıcıya sor (kendi kullanımı mı, herkese açık Pages mi).
-- Boyut: her meâl ~1 MB JSON; çok meâlde repo büyür (gerekirse sıkıştırma/seçmeli ekleme düşünülebilir).
+---
 
-### 2.2 tevhidmeali.com/mushaf/2 Arapça fontu (EKLENMEMESİ ÖNERİLDİ)
-- Font `Shaikh Hamdullah Mushaf`: "All rights reserved" telifi, 142 karakterlik alt küme; repoya konmadı.
-- Sayfanın CSS'inden `font-family` / `@font-face` / font dosyası adresini bul.
-- Lisansı kontrol et; uygunsa `assets/`'e koyup `build.js`/`src.html` içindeki `UthmanicHafs` gömmesini güncelle (şu an `KFGQPC Uthmanic Script HAFS`, `assets/HafsUthmanicScript-Regular.otf`).
-- Dikkat: font değişirse sığdırma ölçüleri ve rozet (`﴿N﴾`) görünümü yeniden test edilmeli; Rust sürümü `ayet-rs/src/card.rs`'te font aile adı `KFGQPC Uthmanic Script HAFS` ve `../../fonts/HafsUthmanicScript-Regular.otf` yolunu kullanıyor.
+## 2. Bekleyen işler / açık konular
+
+### 2.1 Meâller
+- Kullanıcının görsellerinde kesik kalan seçimler belirsiz: Gölpınarlı / Akgül (listenin başı) ve Suat Yıldırım'ın altındakiler (Süleyman Ateş, Yaşar Nuri vb.). Kullanıcı "bu kadar meâl yeter" dedi; yeni istek gelirse `data/scrape_kuranmeali.py` ile eklenir (`meals/<anahtar>.json` + `meals/index.json` + Rust `EXTRA_MEALS`).
+- Ön ek temizliğinden sonra birkaç yüz üst üste binen/farklı yazılmış aralıkta yineleme tam temizlenmemiş olabilir.
+- Her meâl ~1 MB; `meals/` toplam ~23 MB. Sayfa yalnız seçilen meâli yükler.
+
+### 2.2 Abay fontları (Shaikh Hamdullah Mushaf / KK_Abay / Amasya) — EKLENMEDİ
+- Diyanet kuran sitesi, tevhidmeali ve kurankelimemeali bu fontları kullanıyor. Telif: "All rights reserved", Amasya'da "çoğaltmak için yazılı izin gerekir (göstermek/yazdırmak serbest)". **Repoya konmadı.**
+- Çözüm: kullanıcı fontu kendisi indirip uygulamadaki **"Font dosyası yükle"** ile kullanır. Yazılı izin alınırsa doğrudan repoya konabilir.
+- Rust sürümü `ayet-rs/src/card.rs` hâlâ yalnız Hafs'ı kullanıyor (Arapça font seçimi web'e özel).
 
 ### 2.3 Diğer
-- **`main`'e birleştirme / PR:** Kullanıcı açıkça istemedikçe PR açma. Birleşmeden telefondaki site değişmez. Sorulmuştu, cevap gelmedi.
-- **Yazı tiplerini telefonda gözle doğrula:** Test ortamında Google Fonts erişilemediği için Poppins/Montserrat vb. **gerçek glifleriyle görülmedi**; seçim ve CSS davranışı test edildi (font-family doğru uygulanıyor). Türkçe karakterler (ğ ş ı İ ö ç ü) tüm yazı tiplerinde doğru çıkıyor mu bak.
-- **PNG dışa aktarma** (html-to-image, cdnjs) test ortamında denenmedi (cdnjs engelli). Yeni yazı tipleriyle **Paylaş → PNG** akışı telefonda denenmeli; html-to-image web fontlarını gömer.
-- **94:6'nın son kartta doğru çıktığı** gözle son kez teyit edilmedi (veri düzeltmesi yapıldı, kod testi geçti).
 - **Eski Gündem routine'i** hâlâ çalışıyor olabilir: https://claude.ai/code/routines/trig_01CxgPvBxjPxMuS9P7EW6J3P — artık gereksiz; kullanıcı durdurmalı (oradan durdurulamadı).
-- Claude Artifact adresi (README'deki eski `claude.ai/code/artifact/...`) artık güncel değil; kullanıcı GitHub Pages kullanıyor.
+- Rust sürümü: kullanıcı Windows'ta Rust kurmayı denedi (Visual C++ ön koşulu); tamamlandığı doğrulanmadı. "Şimdilik web sürümü" dedi.
+- `data/news.json` kullanılmıyor, silinebilir.
+- Yazı tipleri (19 meâl yazı tipi + 5 Arapça) Google Fonts'tan yüklenir; çevrimdışıyken yedek fontlara düşer.
+- Yaslama eşiği (%78) kullanıcıya bırakıldı; telefonda sorun görülürse `AR_JUSTIFY_MIN_FILL` değiştirilir.
+- PR kuralı: kullanıcı bu oturumda her seferinde PR'ın açılıp birleştirilmesini istedi/onayladı; yine de yeni işte sor.
 
 ---
 
 ## 3. Ortam ve ağ (önemli)
 
-- Mevcut/önceki oturum "Default" ortamdaydı ve `kuranmeali.com`, `tevhidmeali.com` erişilemezdi (`403` / `ENOTFOUND`).
-- Bu repo için **kişisel ortam oluşturuldu: `gunluk-ayet-atolyesi`** (`env_01PQ5vSXkn8aYppdUMtX3GFH`). İzinli adresler: `www.kuranmeali.com`, `kuranmeali.com`, `tevhidmeali.com`, `www.tevhidmeali.com`, `fonts.googleapis.com`, `fonts.gstatic.com`, `generativelanguage.googleapis.com`. Paket yöneticileri izinli.
+- "Default" ortamda `kuranmeali.com`, `tevhidmeali.com` erişilemezdi (`403`). Bu repo için kişisel ortam kullanılınca erişim çalıştı.
+- Bu repo için **kişisel ortam oluşturuldu: `gunluk-ayet-atolyesi`** (`env_01PQ5vSXkn8aYppdUMtX3GFH`). İzinli adresler: `www.kuranmeali.com`, `kuranmeali.com`, `tevhidmeali.com`, `www.tevhidmeali.com`, `fonts.googleapis.com`, `fonts.gstatic.com`, `generativelanguage.googleapis.com`, `www.kurankelimemeali.com`, `kurankelimemeali.com`, `kuran.diyanet.gov.tr` (son üçü font sayfalarını incelemek için eklendi). Paket yöneticileri izinli.
 - **Yeni oturumu bu ortamda başlatın** (ortam menüsünden "gunluk-ayet-atolyesi"). Aksi halde siteler yine engelli olur.
 - Claude in Chrome / Remote Control **bağlanmadı** (bulut oturumundan bilgisayara erişilemedi). Gerekmezse kullanmayın; ağ izni yeterli.
 - GitHub push: bu oturumun başında 403 vardı, kullanıcı erişimi düzeltince push çalıştı. Yeni oturumda tekrar sorun olursa https://claude.ai/connect-github adresinden bağlanması gerekir.

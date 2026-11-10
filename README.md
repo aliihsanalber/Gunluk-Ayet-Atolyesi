@@ -109,6 +109,28 @@ atolye/
   dist/             ← build çıktısı (git'e girmez)
 ```
 
+## Rust sürümü (`ayet-rs/`)
+
+Aynı kartları **tarayıcı olmadan**, tek bir Rust programıyla PNG olarak üretir
+(Arapça şekillendirme `cosmic-text`, çizim `tiny-skia`; Kur'an verisi, Hafs fontu
+ve süslü çerçeve derleme anında gömülür → tek dosyalık çalıştırılabilir).
+
+```bash
+cd ayet-rs
+cargo build --release
+./target/release/ayet kart inşirah 5-6 --cikti kartlar     # 94:5-6
+./target/release/ayet kart 2 255 --cerceve sade --meal elmalili
+./target/release/ayet kart 103 1-3 --cerceve yok --zemin '#1a1d24' --yazi '#e8dcc0'
+./target/release/ayet gunun                                  # öne çıkan ayetlerden bugünkü
+./target/release/ayet ara sabır                              # meâllerde ara
+./target/release/ayet sureler | mealler | yardim
+cargo test --release
+```
+
+Web aracıyla aynı mantık: otomatik punto sığdırma, sığmayan ayetlerin ayrı
+kartlara bölünmesi (ardışık ayetler → ayet başına kart; tek uzun ayet → durak
+işaretinden ikiye), `1 / 2` numarası, çerçeve (yok/sade/süslü), renkler, 4 meâl.
+
 ## Özellikler (v4)
 
 - Aranabilir sûre seçici (tıkla → 1–114 kaydırmalı liste; yaz → canlı filtre)

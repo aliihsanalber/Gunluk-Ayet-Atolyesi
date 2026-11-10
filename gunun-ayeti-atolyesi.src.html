@@ -73,6 +73,8 @@
   .card[data-frame="simple"] .card-inner { padding: 172px 148px; }
   .card[data-frame="ornate"] .card-inner { padding: 292px 150px; }
   .c-stack { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  /* Boşluğu sayfaya yay: yığın tüm kart içi yüksekliğini kaplar, öğeler arası ve alt/üst boşluk eşitlenir. Ölçüm kartı (.measure) doğal yükseklikte kalır. */
+  .card[data-spread="1"]:not(.measure) .c-stack { height: 100%; justify-content: space-evenly; }
   .c-source { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: var(--source-size, 50px); color: var(--source-ink, #8A6E1A); letter-spacing: 0.01em; margin-bottom: 0.55em; }
   .c-besmele { font-family: 'UthmanicHafs', 'Lora', serif; direction: rtl; font-size: var(--besmele-size, 46px); line-height: 1.5; color: var(--card-ink, #234B32); opacity: 0.85; margin-bottom: 0.9em; }
   .c-arabic { font-family: 'UthmanicHafs', serif; direction: rtl; font-size: var(--arabic-size, 92px); line-height: 1.9; color: var(--card-ink, #234B32); width: 100%; unicode-bidi: plaintext; }
@@ -324,6 +326,7 @@
     <div class="group">
       <p class="glabel"><span>Yazı boyutu</span><span class="selpill" id="sizeSel">kart 1</span></p>
       <label class="toggle"><input type="checkbox" id="autoFit" checked><span class="track"></span><span>Otomatik sığdır</span></label>
+      <label class="toggle"><input type="checkbox" id="spreadTgl" checked><span class="track"></span><span>Boşluğu sayfaya yay</span></label>
       <div style="margin-top:12px">
         <div class="slider-head"><span>Arapça</span><span class="val"><input class="szin" id="arNum" type="number" inputmode="numeric" min="8" max="400" step="1" aria-label="Arapça boyutu (px)"> px</span><span hidden id="arVal">92 px</span></div>
         <input type="range" id="arRange" min="30" max="150" step="1" value="92">
@@ -457,14 +460,14 @@
   var arVal = $("arVal"), trVal = $("trVal"), srcVal = $("srcVal"), authorVal = $("authorVal"), pageVal = $("pageVal");
   var arNum = $("arNum"), trNum = $("trNum"), srcNum = $("srcNum"), authorNum = $("authorNum"), pageNum = $("pageNum"), besNum = $("besNum"), besRange = $("besRange");
   function setNum(el, v) { if (document.activeElement !== el) el.value = Math.round(v); }
-  var autoFitTgl = $("autoFit"), besmeleTgl = $("besmeleTgl");
+  var autoFitTgl = $("autoFit"), besmeleTgl = $("besmeleTgl"), spreadTgl = $("spreadTgl");
   var toastEl = $("toast");
 
   var LS = "gunun-ayeti-atolyesi.v4";
   var state = {
     sure: 2, a1: 255, a2: 255,
     frame: "ornate", bg: "#F4ECE0",
-    auto: true, besmele: true, splitMode: "auto",
+    auto: true, spread: true, besmele: true, splitMode: "auto",
     mealKey: "diyanet", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null,
     authorSize: 24, pageNumSize: 26,
     pages: [], sel: 0
@@ -473,7 +476,7 @@
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(LS) || "{}");
-      ["frame", "bg", "auto", "besmele", "splitMode"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
+      ["frame", "bg", "auto", "spread", "besmele", "splitMode"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
       if (s.ink) DEF.ink = s.ink;
       if (s.srcInk) DEF.srcInk = s.srcInk;
       if (s.mealKey) state.mealKey = s.mealKey;
@@ -491,7 +494,7 @@
     try {
       var pg = state.pages[state.sel] || {};
       localStorage.setItem(LS, JSON.stringify({
-        frame: state.frame, bg: state.bg, auto: state.auto, besmele: state.besmele, splitMode: state.splitMode,
+        frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, besmele: state.besmele, splitMode: state.splitMode,
         mealKey: state.mealKey, mealFont: state.mealFont, mealItalic: state.mealItalic, besmeleSize: state.besmeleSize, randDays: state.randDays,
         last: [state.sure, state.a1, state.a2], authorSize: state.authorSize, pageNumSize: state.pageNumSize,
         ink: pg.ink || DEF.ink, srcInk: pg.srcInk || DEF.srcInk,
@@ -644,7 +647,7 @@
   function ensureMeasure() {
     if (measureCard) return measureCard;
     var c = document.createElement("div");
-    c.className = "card";
+    c.className = "card measure";
     c.style.cssText = "position:absolute;left:-99999px;top:0;filter:none;outline:none;";
     c.innerHTML = cardHTML();
     document.body.appendChild(c);
@@ -668,6 +671,7 @@
   function paintCard(el, pg) {
     el.dataset.frame = state.frame;
     el.dataset.besmele = pg.showBesmele ? "1" : "0";
+    el.dataset.spread = state.spread ? "1" : "0";
     el.dataset.chip = pg.chip || "";
     el.style.setProperty("--card-bg", state.bg);
     el.style.setProperty("--card-ink", pg.ink);
@@ -1222,6 +1226,7 @@
   besRange.addEventListener("input", function () { setBesmele(+besRange.value); });
   numIn(besNum, function (v) { setBesmele(v); });
   $("besAuto").addEventListener("click", function () { setBesmele(null); });
+  spreadTgl.addEventListener("change", function () { state.spread = spreadTgl.checked; render(); save(); });
   besmeleTgl.addEventListener("change", function () { state.besmele = besmeleTgl.checked; buildPages(); render(); save(); });
 
   document.querySelectorAll("[data-share]").forEach(function (b) { b.addEventListener("click", function () { share(b.dataset.share); }); });
@@ -1310,7 +1315,7 @@
       else toast(mealName());
     }).catch(function () { sel.value = getMealKey(); toast("Meâl yüklenemedi — bağlantıyı kontrol edin."); });
   });
-  autoFitTgl.checked = state.auto; besmeleTgl.checked = state.besmele;
+  autoFitTgl.checked = state.auto; spreadTgl.checked = state.spread; besmeleTgl.checked = state.besmele;
   $("randDays").value = state.randDays; updateRandInfo();
   $("randDays").addEventListener("input", function () {
     var v = parseInt($("randDays").value, 10); if (!isFinite(v) || v < 0) return;

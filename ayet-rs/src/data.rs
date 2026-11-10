@@ -5,11 +5,25 @@ use serde::Deserialize;
 use std::collections::BTreeMap;
 
 const QDATA: &str = include_str!("../../data/qdata.json");
-const EXTRA_MEALS: [(&str, &str); 4] = [
+const EXTRA_MEALS: [(&str, &str); 18] = [
     ("elmalili", include_str!("../../meals/elmalili.json")),
     ("feyzul", include_str!("../../meals/feyzul.json")),
     ("ali_bulac", include_str!("../../meals/ali_bulac.json")),
     ("yasar", include_str!("../../meals/yasar.json")),
+    ("aparliyan", include_str!("../../meals/aparliyan.json")),
+    ("ahmettekin", include_str!("../../meals/ahmettekin.json")),
+    ("ahmetvarol", include_str!("../../meals/ahmetvarol.json")),
+    ("diyanetislerieski", include_str!("../../meals/diyanetislerieski.json")),
+    ("diyanetisleriyeni", include_str!("../../meals/diyanetisleriyeni.json")),
+    ("kuranyolu", include_str!("../../meals/kuranyolu.json")),
+    ("diyanetvakfi", include_str!("../../meals/diyanetvakfi.json")),
+    ("elmaliliorj", include_str!("../../meals/elmaliliorj.json")),
+    ("hayrat", include_str!("../../meals/hayrat.json")),
+    ("ihsanaktas", include_str!("../../meals/ihsanaktas.json")),
+    ("mahmutkisa", include_str!("../../meals/mahmutkisa.json")),
+    ("omernasuhi", include_str!("../../meals/omernasuhi.json")),
+    ("syildirim", include_str!("../../meals/syildirim.json")),
+    ("spiris", include_str!("../../meals/spiris.json")),
 ];
 
 #[derive(Deserialize)]

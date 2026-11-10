@@ -62,13 +62,17 @@ README güncellendi (Rust bölümü, v5 notları, yayın akışı).
 
 ## 2. Bekleyen işler
 
-### 2.1 kuranmeali.com'daki TÜM meâller (yapılmadı — ağ engeli)
+### 2.1 kuranmeali.com meâlleri (KISMEN YAPILDI)
+- **Eklendi (14 meâl):** Abdullah Parlıyan, Ahmet Tekin, Ahmet Varol, Diyanet Eski/Yeni, Kur'an Yolu, Diyanet Vakfı, Elmalılı Orijinal, Hayrat, İhsan Aktaş, Mahmut Kısa, Ömer Nasuhi Bilmen, Suat Yıldırım, Şaban Piriş. Scraper: `data/scrape_kuranmeali.py` (tek istek = ayetin tüm meâlleri; yeni meâl için aynı betik, anahtarlar sitedeki `value=` adları).
+- Kullanıcının görsellerinde üstte kesik kalan (Gölpınarlı/Akgül?) ve Suat Yıldırım altındaki meâllerin seçili olup olmadığı belirsiz; sorulacak.
+- Aşağıdaki not, ilk plan:
 - Altyapı hazır: her meâl `meals/<anahtar>.json` = `{"name":..., "author":..., "tr":[[sûre1 ayetleri],[sûre2],...,[sûre114]]}` + `meals/index.json`'a `{key,name,author}` satırı.
 - **Yapılacak:** siteyi aç, meâl listesini ve sayfa yapısını çıkar, bir scraper yaz (`data/scrape_feyzul.py` örnek), her meâlin 114 sûresini çek, dosyaları üret, kataloğa ekle, `ayet-rs/src/data.rs` `EXTRA_MEALS`'a da ekle.
 - **Telif/koşul:** çoğu meâl telifli olabilir. Önce sitenin kullanım koşullarına/robots.txt'ye bak. Hepsini herkese açık repoya koymadan önce kullanıcıya sor (kendi kullanımı mı, herkese açık Pages mi).
 - Boyut: her meâl ~1 MB JSON; çok meâlde repo büyür (gerekirse sıkıştırma/seçmeli ekleme düşünülebilir).
 
-### 2.2 tevhidmeali.com/mushaf/2 Arapça fontu (yapılmadı — ağ engeli)
+### 2.2 tevhidmeali.com/mushaf/2 Arapça fontu (EKLENMEMESİ ÖNERİLDİ)
+- Font `Shaikh Hamdullah Mushaf`: "All rights reserved" telifi, 142 karakterlik alt küme; repoya konmadı.
 - Sayfanın CSS'inden `font-family` / `@font-face` / font dosyası adresini bul.
 - Lisansı kontrol et; uygunsa `assets/`'e koyup `build.js`/`src.html` içindeki `UthmanicHafs` gömmesini güncelle (şu an `KFGQPC Uthmanic Script HAFS`, `assets/HafsUthmanicScript-Regular.otf`).
 - Dikkat: font değişirse sığdırma ölçüleri ve rozet (`﴿N﴾`) görünümü yeniden test edilmeli; Rust sürümü `ayet-rs/src/card.rs`'te font aile adı `KFGQPC Uthmanic Script HAFS` ve `../../fonts/HafsUthmanicScript-Regular.otf` yolunu kullanıyor.

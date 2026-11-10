@@ -5,6 +5,12 @@ use serde::Deserialize;
 use std::collections::BTreeMap;
 
 const QDATA: &str = include_str!("../../data/qdata.json");
+const EXTRA_MEALS: [(&str, &str); 4] = [
+    ("elmalili", include_str!("../../meals/elmalili.json")),
+    ("feyzul", include_str!("../../meals/feyzul.json")),
+    ("ali_bulac", include_str!("../../meals/ali_bulac.json")),
+    ("yasar", include_str!("../../meals/yasar.json")),
+];
 
 #[derive(Deserialize)]
 pub struct Meal {
@@ -27,7 +33,13 @@ pub struct Quran {
 
 impl Quran {
     pub fn load() -> Quran {
-        serde_json::from_str(QDATA).expect("qdata.json okunamadı")
+        let mut q: Quran = serde_json::from_str(QDATA).expect("qdata.json okunamadı");
+        // Varsayılan dışındaki meâller meals/ klasöründe ayrı dosyalardır.
+        // Yeni meâl eklenince buraya da bir satır eklenir.
+        for (key, json) in EXTRA_MEALS {
+            q.meals.insert(key.to_string(), serde_json::from_str(json).expect("meal dosyası okunamadı"));
+        }
+        q
     }
 
     /// Sûre numarası (1-114) ya da (aksan/büyük-küçük harf duyarsız) sûre adı.

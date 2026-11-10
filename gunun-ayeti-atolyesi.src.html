@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Karla:wght@400;500;600;700&family=Lora:ital,wght@0,500;1,500&family=Noto+Naskh+Arabic:wght@400;500&family=Inter:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&family=Plus+Jakarta+Sans:wght@300;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Figtree:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Karla:wght@400;500;600;700&family=Lora:ital,wght@0,500;1,500&family=Noto+Naskh+Arabic:wght@400;500&family=Inter:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&family=Plus+Jakarta+Sans:wght@300;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Figtree:wght@300;400;500;600;700&family=Poppins:wght@400;500;600&family=Montserrat:wght@400;500;600&family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;500;600&family=Lato:wght@400;700&family=Nunito:wght@400;500;600;700&family=Raleway:wght@400;500;600&family=Work+Sans:wght@400;500;600&family=Mulish:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&family=Playfair+Display:wght@400;500;600&family=Merriweather:wght@400;700&display=swap');
 
   @font-face {
     font-family: 'UthmanicHafs';
@@ -54,37 +54,8 @@
   .topbtn:hover { border-color: var(--gold); }
   .topbtn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
-  .workspace { flex: 1; display: grid; grid-template-columns: 1fr; min-height: 0; }
-  @media (min-width: 1180px) { .workspace { grid-template-columns: 344px minmax(0, 1fr); grid-template-rows: 100%; } }
+  .workspace { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); min-height: 0; }
 
-  /* ---- news ---- */
-  .news { background: var(--surface); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
-  @media (min-width: 1180px) { .news { border-bottom: 0; border-right: 1px solid var(--line); height: 100%; } }
-  .news-head { flex: 0 0 auto; width: 100%; appearance: none; background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 14px 18px; cursor: pointer; display: flex; align-items: baseline; gap: 10px; font: inherit; color: var(--ink); text-align: left; }
-  @media (min-width: 1180px) { .news-head { cursor: default; } }
-  .news-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 15px; flex: 1; }
-  .news-date { font-size: 11px; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
-  .news-chevron { font-size: 12px; color: var(--ink-dim); transition: transform 0.15s; }
-  .news.collapsed .news-chevron { transform: rotate(-90deg); }
-  @media (min-width: 1180px) { .news-chevron { display: none; } }
-  .news-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
-  .news.collapsed .news-body { display: none; }
-  .news-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 7px; }
-  @media (max-width: 1179px) { .news-body { max-height: 60vh; } }
-  .news-card { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; display: flex; flex-direction: column; gap: 6px; }
-  .news-card:hover { border-color: var(--gold); }
-  .nc-main { text-align: left; width: 100%; appearance: none; cursor: pointer; background: transparent; border: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; font: inherit; color: var(--ink); }
-  .nc-main:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
-  .nc-cat { align-self: flex-start; font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; }
-  .nc-title { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 13.5px; line-height: 1.35; }
-  .nc-note { font-size: 11.5px; color: var(--ink-dim); line-height: 1.4; }
-  .nc-ref { margin-top: 2px; font-size: 11px; color: var(--ink); display: flex; align-items: center; gap: 6px; border-top: 1px dashed var(--line); padding-top: 6px; }
-  .nc-ref b { color: var(--gold); font-weight: 700; }
-  .nc-ref::before { content: "\FD3E"; font-family: 'Noto Naskh Arabic', serif; color: var(--gold); opacity: 0.7; }
-  .nc-src { display: flex; flex-wrap: wrap; gap: 3px 9px; margin-top: 2px; border-top: 1px dashed var(--line); padding-top: 6px; font-size: 10px; color: var(--ink-dim); align-items: baseline; }
-  .nc-src a { font-size: 10px; color: var(--ink-dim); text-decoration: underline; text-underline-offset: 2px; }
-  .nc-src a:hover { color: var(--gold); }
-  .news-foot { flex: 0 0 auto; padding: 10px 14px 14px; font-size: 10.5px; color: var(--ink-dim); line-height: 1.45; }
 
   /* ---- stage / cards ---- */
   .stage { background: radial-gradient(140% 90% at 50% 0%, color-mix(in srgb, var(--stage) 84%, #fff) 0%, var(--stage) 62%), var(--stage); position: relative; overflow: hidden; min-height: 52vh; }
@@ -113,7 +84,7 @@
     font-size: 0.82em;
   }
   .c-sep { width: 22%; border-top: 2px solid var(--card-rule); margin: 0.75em 0; }
-  .c-meal { font-family: var(--meal-font, 'Lora', Georgia, serif); font-style: italic; font-weight: 500; font-size: var(--meal-size, 52px); line-height: 1.62; color: var(--card-ink, #234B32); opacity: 0.92; width: 100%; text-wrap: balance; }
+  .c-meal { font-family: var(--meal-font, 'Lora', Georgia, serif); font-style: var(--meal-style, italic); font-weight: 500; font-size: var(--meal-size, 52px); line-height: 1.62; color: var(--card-ink, #234B32); opacity: 0.92; width: 100%; text-wrap: balance; }
   .card[data-besmele="0"] .c-besmele { display: none; }
   .c-chip { position: absolute; right: 64px; bottom: 58px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 32px; color: var(--source-ink, #8A6E1A); opacity: 0.75; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; }
   .card[data-frame="ornate"] .c-chip { right: 132px; bottom: 128px; }
@@ -149,8 +120,8 @@
   button.dice:hover { background: var(--gold-lit); border-color: var(--gold-lit); }
   button.nav { width: 38px; padding: 10px 0; font-size: 15px; flex: 0 0 auto; }
 
-  input.num { font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); color: var(--ink); width: 78px; font-size: 14px; text-align: center; font-variant-numeric: tabular-nums; }
-  input.num:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  input.num, select.num { font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); color: var(--ink); width: 78px; font-size: 14px; text-align: center; font-variant-numeric: tabular-nums; }
+  input.num:focus-visible, select.num:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
 
   /* combobox */
   .combo-wrap { position: relative; flex: 1; min-width: 0; }
@@ -223,7 +194,19 @@
   .nav-ctl .dice-ctl:hover { background: var(--gold-lit); border-color: var(--gold-lit); }
   .nav-ctl .nav-btn { width: 34px; padding: 7px 0; font-size: 14px; }
   .nav-ctl .combo-wrap { max-width: 240px; }
-  .nav-ctl input.num { width: 64px; font-size: 13px; padding: 7px 8px; }
+  .nav-ctl input.num, .nav-ctl select.num { width: 74px; font-size: 13px; padding: 7px 6px; cursor: pointer; }
+  .nav-ctl .edit-ctl { white-space: nowrap; padding: 7px 12px; font-size: 13px; }
+  @media (max-width: 700px) {
+    .nav-ctl { gap: 6px; padding: 8px 10px; }
+    .nav-ctl input.num, .nav-ctl select.num { min-height: 42px; font-size: 16px; width: 80px; }
+    .nav-ctl .nav-btn { min-height: 42px; } .nav-ctl .dice-ctl, .nav-ctl .edit-ctl { min-height: 42px; }
+    input.combo { font-size: 16px; min-height: 42px; }
+    .nav-ctl .dice-ctl, .nav-ctl .edit-ctl { flex: 1 1 40%; justify-content: center; }
+    .sure-row, .ayah-row { display: flex; align-items: center; gap: 6px; flex: 1 1 100%; }
+    .sure-row .combo-wrap { flex: 1; min-width: 0; max-width: none; }
+    .ayah-row { gap: 8px; } .ayah-row select.num { flex: 1; width: auto; }
+  }
+  @media (min-width: 701px) { .sure-row, .ayah-row { display: contents; } }
   .nav-ctl .ayah-label-ctl { font-size: 11px; color: var(--ink-dim); flex: 0 0 auto; }
   .nav-ctl .dash-ctl { color: var(--ink-dim); }
   .top-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
@@ -240,6 +223,21 @@
   .brand-ctl h1 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 17px; letter-spacing: 0.01em; }
   .brand-ctl .rule { height: 2px; width: 80px; border-top: 1.5px solid var(--gold); border-bottom: 1px solid var(--gold); }
   .brand-ctl p { margin: 1px 0 0; font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-dim); }
+  /* ---- yazı tipi ızgarası, sayısal boyut, meâl düzenleme ---- */
+  .fontgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .fontgrid button { appearance: none; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 8px; padding: 9px 4px; font-size: 14px; cursor: pointer; min-height: 40px; }
+  .fontgrid button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #FBF7EC; font-weight: 700; }
+  .szin { font: inherit; width: 64px; padding: 4px 6px; text-align: right; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font-variant-numeric: tabular-nums; font-size: 14px; }
+  .szin:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .slider-head .val { display: inline-flex; align-items: center; gap: 4px; }
+  .mini { padding: 4px 10px; font-size: 12px; }
+  .medit-v { margin-top: 14px; }
+  .medit-v .top { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--ink-dim); margin-bottom: 4px; }
+  .medit-v textarea { width: 100%; font: inherit; font-size: 16px; line-height: 1.5; padding: 10px; min-height: 96px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); resize: vertical; }
+  .medit-v.edited textarea { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+  .medit-v.edited .top .tag { color: var(--gold); font-weight: 700; }
+  .sheet.wide { max-width: 560px; }
+  .rand-info { font-size: 12.5px; color: var(--ink-dim); line-height: 1.5; margin: 8px 0 0; }
 </style>
 
 <div class="app">
@@ -260,30 +258,24 @@
 
   <div class="nav-ctl">
     <button class="act dice-ctl" id="diceBtn" type="button">&#127922; Rastgele ayet</button>
-    <button class="act nav-btn" id="prevBtn" type="button" aria-label="Önceki ayet">&#8249;</button>
-    <div class="combo-wrap">
-      <input class="combo" id="sureInput" placeholder="Sûre adı veya no" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="sureList" aria-label="Sûre">
-      <ul class="combo-list" id="sureList" role="listbox"></ul>
+    <button class="act edit-ctl" id="editBtn" type="button" title="Meâli düzenle">&#9998; Meâli düzenle</button>
+    <div class="sure-row">
+      <button class="act nav-btn" id="prevBtn" type="button" aria-label="Önceki ayet">&#8249;</button>
+      <div class="combo-wrap">
+        <input class="combo" id="sureInput" placeholder="Sûre adı veya no" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="sureList" aria-label="Sûre">
+        <ul class="combo-list" id="sureList" role="listbox"></ul>
+      </div>
+      <button class="act nav-btn" id="nextBtn" type="button" aria-label="Sonraki ayet">&#8250;</button>
     </div>
-    <button class="act nav-btn" id="nextBtn" type="button" aria-label="Sonraki ayet">&#8250;</button>
-    <span class="ayah-label-ctl">Ayet</span>
-    <input class="num" id="ayahStart" type="number" min="1" inputmode="numeric" placeholder="1" aria-label="Başlangıç ayeti">
-    <span class="dash-ctl">&ndash;</span>
-    <input class="num" id="ayahEnd" type="number" min="1" inputmode="numeric" placeholder="1" aria-label="Bitiş ayeti">
+    <div class="ayah-row">
+      <span class="ayah-label-ctl">Ayet</span>
+      <select class="num" id="ayahStart" aria-label="Başlangıç ayeti"></select>
+      <span class="dash-ctl">&ndash;</span>
+      <select class="num" id="ayahEnd" aria-label="Bitiş ayeti"></select>
+    </div>
   </div>
 
   <div class="workspace">
-    <section class="news" id="newsPanel">
-      <button class="news-head" id="newsToggle" type="button" aria-expanded="true">
-        <h2>Gündem</h2>
-        <span class="news-date" id="newsDate"></span>
-        <span class="news-chevron">&#9662;</span>
-      </button>
-      <div class="news-body">
-        <div class="news-list" id="newsList"></div>
-        <p class="news-foot" id="newsFoot"></p>
-      </div>
-    </section>
 
     <section class="stage" id="stage">
       <div class="cards-row" id="cardsRow"></div>
@@ -302,12 +294,8 @@
     <div class="group">
       <p class="glabel"><span>Meâl seçimi</span></p>
       <select id="mealSelect" style="width:100%;font:inherit;font-size:13px;padding:9px 10px;border:1px solid var(--line);border-radius:var(--radius);background:var(--bg);color:var(--ink);cursor:pointer">
-        <option value="diyanet">Diyanet İşleri Meali</option>
-        <option value="elmalili">Elmalılı Hamdi Yazır Meali</option>
-        <option value="feyzul">Feyzü'l-Furkân Meali</option>
-        <option value="ali_bulac">Ali Bulaç Meali</option>
       </select>
-      <p class="swatch-note">Meâl kaynağını değiştirince kart otomatik güncellenir.</p>
+      <p class="swatch-note" id="mealCount">Meâl kaynağını değiştirince kart otomatik güncellenir.</p>
     </div>
 
     <div class="group">
@@ -337,38 +325,42 @@
       <p class="glabel"><span>Yazı boyutu</span><span class="selpill" id="sizeSel">kart 1</span></p>
       <label class="toggle"><input type="checkbox" id="autoFit" checked><span class="track"></span><span>Otomatik sığdır</span></label>
       <div style="margin-top:12px">
-        <div class="slider-head"><span>Arapça</span><span class="val" id="arVal">92 px</span></div>
+        <div class="slider-head"><span>Arapça</span><span class="val"><input class="szin" id="arNum" type="number" inputmode="numeric" min="8" max="400" step="1" aria-label="Arapça boyutu (px)"> px</span><span hidden id="arVal">92 px</span></div>
         <input type="range" id="arRange" min="30" max="150" step="1" value="92">
       </div>
       <div>
-        <div class="slider-head"><span>Türkçe meâl</span><span class="val" id="trVal">52 px</span></div>
+        <div class="slider-head"><span>Türkçe meâl</span><span class="val"><input class="szin" id="trNum" type="number" inputmode="numeric" min="8" max="300" step="1" aria-label="Türkçe meâl boyutu (px)"> px</span><span hidden id="trVal">52 px</span></div>
         <input type="range" id="trRange" min="22" max="100" step="1" value="52">
       </div>
       <div>
-        <div class="slider-head"><span>Başlık</span><span class="val" id="srcVal">50 px</span></div>
+        <div class="slider-head"><span>Başlık</span><span class="val"><input class="szin" id="srcNum" type="number" inputmode="numeric" min="8" max="300" step="1" aria-label="Başlık boyutu (px)"> px</span><span hidden id="srcVal">50 px</span></div>
         <input type="range" id="srcRange" min="26" max="86" step="1" value="50">
       </div>
       <div>
-        <div class="slider-head"><span>Meâl sahibi</span><span class="val" id="authorVal">24 px</span></div>
+        <div class="slider-head"><span>Besmele <button type="button" class="act mini" id="besAuto">Otomatik</button></span><span class="val"><input class="szin" id="besNum" type="number" inputmode="numeric" min="8" max="300" step="1" aria-label="Besmele boyutu (px)"> px</span></div>
+        <input type="range" id="besRange" min="20" max="140" step="1" value="46">
+      </div>
+      <div>
+        <div class="slider-head"><span>Meâl sahibi</span><span class="val"><input class="szin" id="authorNum" type="number" inputmode="numeric" min="6" max="150" step="1" aria-label="Meâl sahibi boyutu (px)"> px</span><span hidden id="authorVal">24 px</span></div>
         <input type="range" id="authorRange" min="12" max="48" step="1" value="24">
       </div>
       <div>
-        <div class="slider-head"><span>Sayfa no</span><span class="val" id="pageVal">26 px</span></div>
+        <div class="slider-head"><span>Sayfa no</span><span class="val"><input class="szin" id="pageNum" type="number" inputmode="numeric" min="6" max="150" step="1" aria-label="Sayfa no boyutu (px)"> px</span><span hidden id="pageVal">26 px</span></div>
         <input type="range" id="pageRange" min="12" max="48" step="1" value="26">
       </div>
       <p class="swatch-note">Boyutlar tüm kartları etkiler.</p>
       <div style="margin-top:10px">
         <p class="sublabel">Meâl yazı tipi</p>
-        <div class="seg" id="mealFontSeg" role="group" aria-label="Meâl fontu">
-          <button type="button" data-font="Lora" aria-pressed="true" style="font-family:Lora,serif;font-style:italic">Lora</button>
-          <button type="button" data-font="Inter" aria-pressed="false" style="font-family:Inter,sans-serif">Inter</button>
-          <button type="button" data-font="DM Sans" aria-pressed="false" style="font-family:'DM Sans',sans-serif">DM Sans</button>
-          <button type="button" data-font="Plus Jakarta Sans" aria-pressed="false" style="font-family:'Plus Jakarta Sans',sans-serif">Jakarta</button>
-          <button type="button" data-font="Outfit" aria-pressed="false" style="font-family:Outfit,sans-serif">Outfit</button>
-          <button type="button" data-font="Sora" aria-pressed="false" style="font-family:Sora,sans-serif">Sora</button>
-          <button type="button" data-font="Figtree" aria-pressed="false" style="font-family:Figtree,sans-serif">Figtree</button>
-        </div>
+        <div class="fontgrid" id="mealFontSeg" role="group" aria-label="Meâl fontu"></div>
+        <label class="toggle" style="margin-top:8px"><input type="checkbox" id="mealItalic"><span class="track"></span><span>Meâl italik (eğik)</span></label>
       </div>
+    </div>
+
+    <div class="group">
+      <p class="glabel"><span>Rastgele ayet</span></p>
+      <div class="slider-head"><span>Aynı ayet kaç gün tekrar önerilmesin?</span><span class="val"><input class="szin" id="randDays" type="number" inputmode="numeric" min="0" max="365" step="1"> gün</span></div>
+      <p class="rand-info" id="randInfo"></p>
+      <div style="margin-top:8px"><button type="button" class="act mini" id="randClear">Geçmişi temizle</button></div>
     </div>
 
     <div class="group">
@@ -385,7 +377,7 @@
     <div class="group">
       <p class="glabel"><span>Düzenle</span></p>
       <details class="editor" id="editor">
-        <summary>Seçili kartın metnini düzenle</summary>
+        <summary>Gelişmiş: seçili kartın metnini serbestçe düzenle</summary>
         <div class="field"><label for="fSource">Kaynak satırı</label><input id="fSource" type="text" spellcheck="false"></div>
         <div class="field"><label for="fArabic">Arapça metin</label><textarea id="fArabic" class="ar" spellcheck="false"></textarea></div>
         <div class="field"><label for="fMeal">Türkçe meâl</label><textarea id="fMeal" class="tr" spellcheck="false"></textarea></div>
@@ -417,16 +409,28 @@
   </div>
 </div>
 
+<div class="modal" id="mealModal" role="dialog" aria-modal="true" aria-labelledby="mealModalTitle">
+  <div class="sheet wide">
+    <button class="closex" id="mealModalClose" type="button" aria-label="Kapat">&times;</button>
+    <h2 id="mealModalTitle">Meâli düzenle</h2>
+    <p class="sub" id="mealModalSub"></p>
+    <div id="mealEdits"></div>
+    <div class="share-grid" style="margin-top:16px">
+      <button class="act" id="mealRevertAll" type="button">Hepsini orijinaline döndür</button>
+      <button class="act" id="mealDone" type="button" style="background:var(--gold);border-color:var(--gold);color:#FBF7EC;font-weight:700">Tamam</button>
+    </div>
+    <p class="hint">Değişiklik karta anında yansır. Düzenlenen metin yalnız bu oturumda ve seçili meâl için geçerlidir.</p>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script id="qdata" type="application/json">@@QDATA_JSON@@</script>
-<script id="news" type="application/json">@@NEWS_JSON@@</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.js"></script>
 <script>
 (function () {
   "use strict";
   var Q = JSON.parse(document.getElementById("qdata").textContent);
-  try { Q.news = JSON.parse(document.getElementById("news").textContent); } catch (e) { Q.news = null; }
 
   var BG_SWATCHES = [
     { n: "Krem", v: "#F4ECE0" }, { n: "Fildişi", v: "#FBF7EF" }, { n: "Kâğıt beyazı", v: "#FCFCFA" },
@@ -451,6 +455,8 @@
   var fSource = $("fSource"), fArabic = $("fArabic"), fMeal = $("fMeal");
   var arRange = $("arRange"), trRange = $("trRange"), srcRange = $("srcRange"), authorRange = $("authorRange"), pageRange = $("pageRange");
   var arVal = $("arVal"), trVal = $("trVal"), srcVal = $("srcVal"), authorVal = $("authorVal"), pageVal = $("pageVal");
+  var arNum = $("arNum"), trNum = $("trNum"), srcNum = $("srcNum"), authorNum = $("authorNum"), pageNum = $("pageNum"), besNum = $("besNum"), besRange = $("besRange");
+  function setNum(el, v) { if (document.activeElement !== el) el.value = Math.round(v); }
   var autoFitTgl = $("autoFit"), besmeleTgl = $("besmeleTgl");
   var toastEl = $("toast");
 
@@ -459,7 +465,8 @@
     sure: 2, a1: 255, a2: 255,
     frame: "ornate", bg: "#F4ECE0",
     auto: true, besmele: true, splitMode: "auto",
-    mealKey: "diyanet", mealFont: "Lora", authorSize: 24, pageNumSize: 26,
+    mealKey: "diyanet", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null,
+    authorSize: 24, pageNumSize: 26,
     pages: [], sel: 0
   };
   var DEF = { ink: "#234B32", srcInk: "#8A6E1A", mealFont: "Lora", authorSize: 24, pageNumSize: 26 };
@@ -471,6 +478,10 @@
       if (s.srcInk) DEF.srcInk = s.srcInk;
       if (s.mealKey) state.mealKey = s.mealKey;
       if (s.mealFont) state.mealFont = s.mealFont;
+      if (s.mealItalic !== undefined) state.mealItalic = !!s.mealItalic;
+      if (s.besmeleSize) state.besmeleSize = +s.besmeleSize;
+      if (s.randDays !== undefined && s.randDays !== null) state.randDays = +s.randDays;
+      if (s.last && s.last.length === 3) state.last = s.last;
       if (s.authorSize) DEF.authorSize = s.authorSize;
       if (s.pageNumSize) DEF.pageNumSize = s.pageNumSize;
       if (s.theme) document.documentElement.setAttribute("data-theme", s.theme);
@@ -481,7 +492,8 @@
       var pg = state.pages[state.sel] || {};
       localStorage.setItem(LS, JSON.stringify({
         frame: state.frame, bg: state.bg, auto: state.auto, besmele: state.besmele, splitMode: state.splitMode,
-        mealKey: state.mealKey, mealFont: state.mealFont, authorSize: state.authorSize, pageNumSize: state.pageNumSize,
+        mealKey: state.mealKey, mealFont: state.mealFont, mealItalic: state.mealItalic, besmeleSize: state.besmeleSize, randDays: state.randDays,
+        last: [state.sure, state.a1, state.a2], authorSize: state.authorSize, pageNumSize: state.pageNumSize,
         ink: pg.ink || DEF.ink, srcInk: pg.srcInk || DEF.srcInk,
         theme: document.documentElement.getAttribute("data-theme") || ""
       }));
@@ -491,6 +503,7 @@
   var AR_DIGITS = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
   function toArabicNum(n) { return String(n).split("").map(function (d) { return AR_DIGITS[+d]; }).join(""); }
   function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+  function besSz(trSz) { return state.besmeleSize || clamp(trSz * 0.98, 30, 58); }
   function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
   function norm(s) {
     return (s || "").toLocaleLowerCase("tr")
@@ -507,10 +520,44 @@
 
   function ayahAr(s, v) { return (Q.ar[s - 1][v - 1] || "").trim(); }
   function getMealKey() { return state.mealKey || Q.defaultMeal || "diyanet"; }
-  function getMeal() { return Q.meals[getMealKey()] || Q.meals[Object.keys(Q.meals)[0]]; }
-  function ayahTr(s, v) { var m = getMeal(); return (m.tr[s - 1][v - 1] || "").trim().replace(/\s*$/, ""); }
+  function getMeal() { return Q.meals[getMealKey()] || Q.meals[Q.defaultMeal]; }
+  var EDITS = {};   /* "meâl|sûre|ayet" -> elle düzenlenmiş metin (yalnız bu oturum) */
+  function editKey(s, v) { return getMealKey() + "|" + s + "|" + v; }
+  function ayahTrOrig(s, v) {
+    var t = (((getMeal().tr[s - 1] || [])[v - 1]) || "").trim();
+    if (!t) { t = (((Q.meals[Q.defaultMeal].tr[s - 1] || [])[v - 1]) || "").trim(); state._fallback = true; }
+    return t.replace(/\s*$/, "");
+  }
+  function ayahTr(s, v) {
+    var k = editKey(s, v);
+    return Object.prototype.hasOwnProperty.call(EDITS, k) ? EDITS[k] : ayahTrOrig(s, v);
+  }
   function mealName() { return getMeal().name || ""; }
-  function mealAuthor() { return getMeal().name || ""; }
+  function mealAuthor() { return (getMeal().name || "") + (state._fallback ? " (eksik ayetlerde Diyanet)" : ""); }
+
+  /* meâller meals/<anahtar>.json olarak ayrı tutulur; seçilince yüklenir */
+  function loadMeal(key) {
+    if (Q.meals[key]) return Promise.resolve(Q.meals[key]);
+    return fetch("meals/" + key + ".json").then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function (j) { Q.meals[key] = j; return j; });
+  }
+  function fillMealSelect() {
+    var sel = $("mealSelect"), cat = Q.catalog || [];
+    sel.innerHTML = "";
+    cat.forEach(function (c) {
+      var o = document.createElement("option"); o.value = c.key; o.textContent = c.name; sel.appendChild(o);
+    });
+    if (!cat.some(function (c) { return c.key === getMealKey(); })) state.mealKey = Q.defaultMeal;
+    sel.value = getMealKey();
+    $("mealCount").textContent = cat.length + " meâl. Meâl kaynağını değiştirince kart otomatik güncellenir.";
+  }
+  function refreshCatalog() {
+    return fetch("meals/index.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (c) {
+      if (c && c.length) { Q.catalog = c; fillMealSelect(); }
+    }).catch(function () {});
+  }
   function mealSentence(v, txt) { return v + ". " + txt + (/[.!?…”"]$/.test(txt) ? "" : "."); }
 
   function composeRange(s, a1, a2) {
@@ -586,6 +633,13 @@
     };
   }
 
+  var MEAL_FONTS = [
+    { n: "Lora", serif: true, italic: true }, { n: "Playfair Display", serif: true }, { n: "Merriweather", serif: true },
+    { n: "Inter" }, { n: "DM Sans" }, { n: "Plus Jakarta Sans", label: "Jakarta" }, { n: "Outfit" }, { n: "Sora" }, { n: "Figtree" },
+    { n: "Poppins" }, { n: "Montserrat" }, { n: "Roboto" }, { n: "Open Sans" }, { n: "Lato" }, { n: "Nunito" },
+    { n: "Raleway" }, { n: "Work Sans" }, { n: "Mulish" }, { n: "Source Sans 3", label: "Source Sans" }
+  ];
+  var FONT_INFO = {}; MEAL_FONTS.forEach(function (f) { FONT_INFO[f.n] = f; });
   var measureCard = null;
   function ensureMeasure() {
     if (measureCard) return measureCard;
@@ -621,8 +675,10 @@
     el.style.setProperty("--arabic-size", pg.arSize + "px");
     el.style.setProperty("--meal-size", pg.trSize + "px");
     el.style.setProperty("--source-size", pg.srcSize + "px");
-    el.style.setProperty("--besmele-size", clamp(pg.trSize * 0.98, 30, 58) + "px");
-    el.style.setProperty("--meal-font", state.mealFont || DEF.mealFont);
+    el.style.setProperty("--besmele-size", besSz(pg.trSize) + "px");
+    var mf = state.mealFont || DEF.mealFont, mfi = FONT_INFO[mf] || {};
+    el.style.setProperty("--meal-font", "'" + mf + "', " + (mfi.serif ? "Georgia, serif" : "system-ui, sans-serif"));
+    el.style.setProperty("--meal-style", state.mealItalic ? "italic" : "normal");
     el.style.setProperty("--author-size", (state.authorSize || DEF.authorSize) + "px");
     el.style.setProperty("--page-size", (state.pageNumSize || DEF.pageNumSize) + "px");
     el.querySelector(".c-source").textContent = pg.src;
@@ -661,7 +717,7 @@
       el.style.setProperty("--arabic-size", mid + "px");
       el.style.setProperty("--meal-size", mealPx + "px");
       el.style.setProperty("--source-size", clamp(mealPx * 0.94, 30, 60) + "px");
-      el.style.setProperty("--besmele-size", clamp(mealPx * 0.98, 30, 58) + "px");
+      el.style.setProperty("--besmele-size", besSz(mealPx) + "px");
       var fits = stack.scrollHeight <= availH * 0.94 && arEl.scrollWidth <= availW + 1 && meEl.scrollWidth <= availW + 1;
       if (fits) { best = mid; lo = mid; } else { hi = mid; }
     }
@@ -680,6 +736,7 @@
   }
 
   function buildPages() {
+    state._fallback = false;
     var base = composeRange(state.sure, state.a1, state.a2);
 
     var pages;
@@ -746,7 +803,7 @@
         el.style.setProperty("--arabic-size", pg.arSize + "px");
         el.style.setProperty("--meal-size", pg.trSize + "px");
         el.style.setProperty("--source-size", pg.srcSize + "px");
-        el.style.setProperty("--besmele-size", clamp(pg.trSize * 0.98, 30, 58) + "px");
+        el.style.setProperty("--besmele-size", besSz(pg.trSize) + "px");
       }
       el.addEventListener("click", function () { selectPage(i); });
       cardsRow.appendChild(el);
@@ -774,9 +831,13 @@
     $("colorSel").textContent = lbl; $("sizeSel").textContent = lbl;
     fSource.value = pg.src; fArabic.value = pg.arabic; fMeal.value = pg.meal;
     arRange.value = Math.round(pg.arSize); trRange.value = Math.round(pg.trSize); srcRange.value = Math.round(pg.srcSize);
-    arVal.textContent = Math.round(pg.arSize) + " px"; trVal.textContent = Math.round(pg.trSize) + " px"; srcVal.textContent = Math.round(pg.srcSize) + " px";
-    authorRange.value = state.authorSize || DEF.authorSize; authorVal.textContent = (state.authorSize || DEF.authorSize) + " px";
-    pageRange.value = state.pageNumSize || DEF.pageNumSize; pageVal.textContent = (state.pageNumSize || DEF.pageNumSize) + " px";
+    setNum(arNum, pg.arSize); setNum(trNum, pg.trSize); setNum(srcNum, pg.srcSize);
+    var aSz = state.authorSize || DEF.authorSize, pSz = state.pageNumSize || DEF.pageNumSize;
+    authorRange.value = aSz; setNum(authorNum, aSz);
+    pageRange.value = pSz; setNum(pageNum, pSz);
+    var bSz = besSz(pg.trSize);
+    besRange.value = Math.round(bSz); setNum(besNum, bSz);
+    $("besAuto").disabled = !state.besmeleSize;
     var dis = state.auto && !pg.manual;
     arRange.disabled = dis; trRange.disabled = dis; srcRange.disabled = dis;
     $("bgSwatches")._refresh && $("bgSwatches")._refresh();
@@ -799,12 +860,23 @@
     var cnt = sureCount(state.sure);
     state.a1 = clamp(a1, 1, cnt);
     state.a2 = clamp(a2 || a1, state.a1, cnt);
-    ayahStart.max = cnt; ayahEnd.max = cnt;
-    ayahStart.value = state.a1; ayahEnd.value = state.a2;
+    fillAyahSelects();
     if (document.activeElement !== sureInput) sureInput.value = sureLabel(state.sure);
     state.sel = 0;
     buildPages();
     render();
+    save();
+    if (state._fallback) toast(mealName() + " bu ayet için veride yok; Diyanet meâli kullanıldı.");
+  }
+  function fillAyahSelects() {
+    var cnt = sureCount(state.sure);
+    function fill(sel, from, cur) {
+      var h = "";
+      for (var i = from; i <= cnt; i++) h += "<option value=\"" + i + "\">" + i + "</option>";
+      sel.innerHTML = h; sel.value = String(cur);
+    }
+    fill(ayahStart, 1, state.a1);
+    fill(ayahEnd, state.a1, state.a2);
   }
   function stepAyah(d) {
     var s = state.sure, a = state.a1 + d;
@@ -812,7 +884,41 @@
     else if (a > sureCount(s)) { s = s < 114 ? s + 1 : 1; a = 1; }
     loadRef(s, a, a);
   }
-  function randomPick() { var p = Q.picks[Math.floor(Math.random() * Q.picks.length)]; loadRef(p[0], p[1], p[2]); }
+  /* Rastgele ayet: tüm Kur'an'dan; son N gün içinde önerilen ayetler tekrar önerilmez.
+     Geçmiş yalnız bu tarayıcıda (localStorage) tutulur. */
+  var RH_KEY = "gunun-ayeti-atolyesi.rastgele.v1";
+  function rhLoad() { try { return JSON.parse(localStorage.getItem(RH_KEY) || "{}") || {}; } catch (e) { return {}; } }
+  function rhSave(h) { try { localStorage.setItem(RH_KEY, JSON.stringify(h)); } catch (e) {} }
+  function rhPrune(h) {
+    var lim = (state.randDays || 0) * 86400000, now = Date.now();
+    Object.keys(h).forEach(function (k) { if (now - h[k] > lim) delete h[k]; });
+    return h;
+  }
+  function baseLetters(t) { return (t.match(/[\u0621-\u064A]/g) || []).length; }
+  function updateRandInfo() {
+    var h = rhPrune(rhLoad()), n = Object.keys(h).length;
+    $("randInfo").textContent = n + " ayet son " + (state.randDays || 0) + " gün içinde önerildi; rastgele seçimde tekrar çıkmaz. Geçmiş yalnız bu cihazın tarayıcısında saklanır.";
+  }
+  function randomPick() {
+    var h = rhPrune(rhLoad()), total = 0, pick = null;
+    Q.counts.forEach(function (c) { total += c; });
+    for (var t = 0; t < 600 && !pick; t++) {
+      var r = Math.floor(Math.random() * total), si = 0;
+      while (r >= Q.counts[si]) { r -= Q.counts[si]; si++; }
+      var sure = si + 1, v = r + 1;
+      if (h[sure + ":" + v]) continue;
+      if (baseLetters(ayahAr(sure, v)) <= 5) continue; /* "Elif-Lâm-Mîm" gibi harf ayetleri kart için uygun değil */
+      pick = [sure, v];
+    }
+    if (!pick) { /* geçmiş neredeyse tüm Kur'an'ı kapsıyorsa en eskiyi serbest bırak */
+      var oldest = Object.keys(h).sort(function (a, b) { return h[a] - h[b]; })[0];
+      var parts = (oldest || "1:1").split(":"); pick = [+parts[0], +parts[1]];
+    }
+    h[pick[0] + ":" + pick[1]] = Date.now();
+    rhSave(h);
+    loadRef(pick[0], pick[1], pick[1]);
+    updateRandInfo();
+  }
 
   /* ---- combobox ---- */
   var comboItems = [], comboIdx = -1;
@@ -976,31 +1082,6 @@
   }
 
   /* ---- UI build ---- */
-  function buildNews() {
-    var N = Q.news; if (!N) { $("newsPanel").style.display = "none"; return; }
-    $("newsDate").textContent = N.date || "";
-    $("newsFoot").textContent = "Bu başlıklar sayfa güncellendiğinde (" + (N.date || "") + ") dünya ve İslam dünyası gündeminden derlendi; suç, cinsel içerik ve İslami değerlere aykırı viral içerik alınmadı.";
-    var list = $("newsList");
-    N.items.forEach(function (it) {
-      var r = it.ref;
-      var rl = r[0] + "-" + sureName(r[0]) + " Sûresi: " + (r[1] === r[2] ? r[1] : r[1] + "-" + r[2]);
-      var wrap = document.createElement("div"); wrap.className = "news-card";
-      var btn = document.createElement("button"); btn.className = "nc-main"; btn.type = "button";
-      btn.innerHTML = '<span class="nc-cat">' + esc(it.cat) + '</span><span class="nc-title">' + esc(it.title) + '</span><span class="nc-note">' + esc(it.note) + '</span><span class="nc-ref"><b>' + esc(rl) + '</b>' + (it.refTxt ? ' · ' + esc(it.refTxt) : '') + '</span>';
-      btn.addEventListener("click", function () {
-        loadRef(r[0], r[1], r[2]);
-        if (matchMedia("(max-width: 1179px)").matches) { $("newsPanel").classList.add("collapsed"); $("newsToggle").setAttribute("aria-expanded", "false"); stage.scrollIntoView({ behavior: "smooth", block: "center" }); }
-      });
-      wrap.appendChild(btn);
-      if (it.src && it.src.length) {
-        var sd = document.createElement("div"); sd.className = "nc-src";
-        sd.appendChild(document.createTextNode("Kaynak: "));
-        it.src.forEach(function (s) { var a = document.createElement("a"); a.href = s.u; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = s.t; sd.appendChild(a); });
-        wrap.appendChild(sd);
-      }
-      list.appendChild(wrap);
-    });
-  }
   function rgbToHex(s) {
     var m = s.match(/\d+/g); if (!m) return s.toLowerCase();
     return "#" + m.slice(0, 3).map(function (n) { return ("0" + (+n).toString(16)).slice(-2); }).join("");
@@ -1047,17 +1128,11 @@
   $("prevBtn").addEventListener("click", function () { stepAyah(-1); });
   $("nextBtn").addEventListener("click", function () { stepAyah(1); });
 
-  var ayahDeb;
-  function ayahLive() {
-    clearTimeout(ayahDeb);
-    ayahDeb = setTimeout(function () {
-      var a1 = clamp(parseInt(ayahStart.value, 10) || 1, 1, sureCount(state.sure));
-      var er = parseInt(ayahEnd.value, 10);
-      var a2 = clamp(isNaN(er) ? a1 : er, a1, sureCount(state.sure));
-      loadRef(state.sure, a1, a2);
-    }, 320);
-  }
-  ["input", "change"].forEach(function (ev) { ayahStart.addEventListener(ev, ayahLive); ayahEnd.addEventListener(ev, ayahLive); });
+  ayahStart.addEventListener("change", function () {
+    var a1 = +ayahStart.value, a2 = Math.max(a1, state.a2);
+    loadRef(state.sure, a1, a2);
+  });
+  ayahEnd.addEventListener("change", function () { loadRef(state.sure, state.a1, +ayahEnd.value); });
 
   fSource.addEventListener("input", function () { var p = state.pages[state.sel]; if (p) { p.src = fSource.value; repaintSel(); } });
   fArabic.addEventListener("input", function () { var p = state.pages[state.sel]; if (p) { p.arabic = fArabic.value; repaintSel(); if (state.auto && !p.manual) autofitSel(); } });
@@ -1068,12 +1143,31 @@
     state.frame = b.dataset.frame; syncFrameSeg();
     buildPages(); render(); save();
   });
+  function buildFontGrid() {
+    var host = $("mealFontSeg"); host.innerHTML = "";
+    MEAL_FONTS.forEach(function (f) {
+      var b = document.createElement("button");
+      b.type = "button"; b.dataset.font = f.n; b.textContent = f.label || f.n;
+      b.style.fontFamily = "'" + f.n + "', " + (f.serif ? "serif" : "sans-serif");
+      b.setAttribute("aria-pressed", "false");
+      host.appendChild(b);
+    });
+  }
+  function refit() {
+    if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { if (!p.manual) { paintCard(mc, p); autoFitPage(mc, p); } }); }
+    render();
+  }
   $("mealFontSeg").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
     state.mealFont = b.dataset.font; DEF.mealFont = state.mealFont;
+    state.mealItalic = !!(FONT_INFO[state.mealFont] || {}).italic;
+    $("mealItalic").checked = state.mealItalic;
     syncMealFontSeg();
-    render(); save();
+    repaintAll(); save();
+    var fam = "16px '" + state.mealFont + "'";
+    (document.fonts && document.fonts.load ? document.fonts.load(fam, "ĞÜŞİÖÇğüşıöç abc") : Promise.resolve()).catch(function () {}).then(refit);
   });
+  $("mealItalic").addEventListener("change", function () { state.mealItalic = $("mealItalic").checked; refit(); save(); });
   $("splitSeg").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
     state.splitMode = b.dataset.split; syncSplitSeg();
@@ -1099,16 +1193,35 @@
     Array.prototype.forEach.call(cardsRow.children, function (el, i) {
       var pg = state.pages[i]; if (pg && el) paintCard(el, pg);
     });
-    authorVal.textContent = state.authorSize + " px"; save();
+    setNum(authorNum, state.authorSize); save();
   });
   pageRange.addEventListener("input", function () {
     state.pageNumSize = +pageRange.value; DEF.pageNumSize = state.pageNumSize;
     Array.prototype.forEach.call(cardsRow.children, function (el, i) {
       var pg = state.pages[i]; if (pg && el) paintCard(el, pg);
     });
-    pageVal.textContent = state.pageNumSize + " px"; save();
+    setNum(pageNum, state.pageNumSize); save();
   });
 
+  function numIn(el, fn) {
+    el.addEventListener("input", function () { var v = parseFloat(el.value); if (isFinite(v) && v >= +el.min) fn(Math.min(v, +el.max)); });
+  }
+  numIn(arNum, function (v) { manualSet("ar", v); });
+  numIn(trNum, function (v) { manualSet("tr", v); });
+  numIn(srcNum, function (v) { manualSet("src", v); });
+  numIn(authorNum, function (v) { state.authorSize = v; DEF.authorSize = v; repaintAll(); authorRange.value = v; save(); });
+  numIn(pageNum, function (v) { state.pageNumSize = v; DEF.pageNumSize = v; repaintAll(); pageRange.value = v; save(); });
+  function repaintAll() { Array.prototype.forEach.call(cardsRow.children, function (el, i) { var pg = state.pages[i]; if (pg && el) paintCard(el, pg); }); }
+  /* besmele boyutu: tüm kartlar */
+  function setBesmele(v) {
+    state.besmeleSize = v;
+    if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { if (!p.manual) { paintCard(mc, p); autoFitPage(mc, p); } }); render(); }
+    else { repaintAll(); syncControls(); }
+    save();
+  }
+  besRange.addEventListener("input", function () { setBesmele(+besRange.value); });
+  numIn(besNum, function (v) { setBesmele(v); });
+  $("besAuto").addEventListener("click", function () { setBesmele(null); });
   besmeleTgl.addEventListener("change", function () { state.besmele = besmeleTgl.checked; buildPages(); render(); save(); });
 
   document.querySelectorAll("[data-share]").forEach(function (b) { b.addEventListener("click", function () { share(b.dataset.share); }); });
@@ -1127,13 +1240,6 @@
 
   new ResizeObserver(fitPreview).observe(stage);
   window.addEventListener("resize", fitPreview);
-  $("newsToggle").addEventListener("click", function () {
-    if (matchMedia("(min-width: 1180px)").matches) return;
-    var c = $("newsPanel").classList.toggle("collapsed");
-    $("newsToggle").setAttribute("aria-expanded", String(!c));
-    fitPreview();
-  });
-
   Array.prototype.forEach.call(document.querySelectorAll('input[type="range"], input.num'), function (el) {
     el.addEventListener("wheel", function (e) {
       e.preventDefault();
@@ -1142,26 +1248,81 @@
     }, { passive: false });
   });
 
+  /* ---- meâl düzenleme (ayet başına) ---- */
+  var editDeb;
+  function rebuildKeep() {
+    var old = state.pages.slice();
+    buildPages();
+    if (old.length === state.pages.length) state.pages.forEach(function (p, i) {
+      var o = old[i]; p.ink = o.ink; p.srcInk = o.srcInk;
+      if (o.manual) { p.manual = true; p.arSize = o.arSize; p.trSize = o.trSize; p.srcSize = o.srcSize; }
+    });
+    render();
+  }
+  function openMealEdit() {
+    var box = $("mealEdits"); box.innerHTML = "";
+    $("mealModalSub").textContent = refLabel(state.sure, state.a1, state.a2) + " · " + mealName();
+    for (var v = state.a1; v <= state.a2; v++) (function (v) {
+      var key = editKey(state.sure, v), orig = ayahTrOrig(state.sure, v);
+      var d = document.createElement("div"); d.className = "medit-v";
+      d.innerHTML = '<div class="top"><span>' + v + '. ayet <span class="tag"></span></span><button type="button" class="act mini">Orijinaline dön</button></div><textarea spellcheck="false"></textarea>';
+      var ta = d.querySelector("textarea"), tag = d.querySelector(".tag");
+      function mark() { var e = Object.prototype.hasOwnProperty.call(EDITS, key); d.classList.toggle("edited", e); tag.textContent = e ? "· düzenlendi" : ""; }
+      ta.value = ayahTr(state.sure, v); mark();
+      ta.addEventListener("input", function () {
+        var t = ta.value.trim();
+        if (!t || t === orig) delete EDITS[key]; else EDITS[key] = t;
+        mark(); clearTimeout(editDeb); editDeb = setTimeout(rebuildKeep, 450);
+      });
+      d.querySelector("button").addEventListener("click", function () { delete EDITS[key]; ta.value = orig; mark(); rebuildKeep(); });
+      box.appendChild(d);
+    })(v);
+    $("mealModal").classList.add("open");
+  }
+  $("editBtn").addEventListener("click", openMealEdit);
+  $("mealModalClose").addEventListener("click", function () { $("mealModal").classList.remove("open"); });
+  $("mealDone").addEventListener("click", function () { $("mealModal").classList.remove("open"); });
+  $("mealModal").addEventListener("click", function (e) { if (e.target === $("mealModal")) $("mealModal").classList.remove("open"); });
+  $("mealRevertAll").addEventListener("click", function () {
+    for (var v = state.a1; v <= state.a2; v++) delete EDITS[editKey(state.sure, v)];
+    openMealEdit(); rebuildKeep();
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") $("mealModal").classList.remove("open"); });
+
   /* ---- init ---- */
   try {
   load();
   $("mealNote").textContent = "Meâl: " + mealName() + ". Paylaşmadan önce metni bir mushaf ile karşılaştırın.";
-  buildNews();
   buildSwatches("bgSwatches", BG_SWATCHES, function () { return state.bg; }, function (v) { state.bg = v; state.pages.forEach(function(p,i){ paintCard(cardsRow.children[i], p); }); $("bgSwatches")._refresh(); save(); });
   buildSwatches("inkSwatches", INK_SWATCHES, function () { var p = state.pages[state.sel]; return p ? p.ink : DEF.ink; }, function (v) { var p = state.pages[state.sel]; if (p) { p.ink = v; DEF.ink = v; repaintSel(); $("inkSwatches")._refresh(); save(); } });
   buildSwatches("srcInkSwatches", SRC_SWATCHES, function () { var p = state.pages[state.sel]; return p ? p.srcInk : DEF.srcInk; }, function (v) { var p = state.pages[state.sel]; if (p) { p.srcInk = v; DEF.srcInk = v; repaintSel(); $("srcInkSwatches")._refresh(); save(); } });
+  buildFontGrid(); $("mealItalic").checked = state.mealItalic;
+  fillMealSelect(); refreshCatalog();
   syncFrameSeg(); syncSplitSeg(); syncMealFontSeg(); syncTheme();
-  $("mealSelect").value = state.mealKey || "diyanet";
   $("mealSelect").addEventListener("change", function () {
-    state.mealKey = this.value;
-    $("mealNote").textContent = "Meâl: " + mealName() + ". Paylaşmadan önce metni bir mushaf ile karşılaştırın.";
-    buildPages(); render(); save();
+    var sel = this, key = sel.value;
+    toast("Meâl yükleniyor…");
+    loadMeal(key).then(function () {
+      state.mealKey = key;
+      $("mealNote").textContent = "Meâl: " + mealName() + ". Paylaşmadan önce metni bir mushaf ile karşılaştırın.";
+      buildPages(); render(); save();
+      if (state._fallback) toast(mealName() + " bu ayet için veride yok; Diyanet meâli kullanıldı.");
+      else toast(mealName());
+    }).catch(function () { sel.value = getMealKey(); toast("Meâl yüklenemedi — bağlantıyı kontrol edin."); });
   });
   autoFitTgl.checked = state.auto; besmeleTgl.checked = state.besmele;
-  if (matchMedia("(max-width: 1179px)").matches) { $("newsPanel").classList.add("collapsed"); $("newsToggle").setAttribute("aria-expanded", "false"); }
-  var p0 = Q.picks[Math.floor(Math.random() * Q.picks.length)];
-  loadRef(p0[0], p0[1], p0[2]);
+  $("randDays").value = state.randDays; updateRandInfo();
+  $("randDays").addEventListener("input", function () {
+    var v = parseInt($("randDays").value, 10); if (!isFinite(v) || v < 0) return;
+    state.randDays = Math.min(v, 365); updateRandInfo(); save();
+  });
+  $("randClear").addEventListener("click", function () { rhSave({}); updateRandInfo(); toast("Rastgele geçmişi temizlendi."); });
+  if (state.last && state.last.length === 3) loadRef(state.last[0], state.last[1], state.last[2]); else randomPick();
   fitPreview();
+  if (state.mealKey !== Q.defaultMeal && !Q.meals[state.mealKey]) {
+    loadMeal(state.mealKey).then(function () { buildPages(); render(); })
+      .catch(function () { state.mealKey = Q.defaultMeal; $("mealSelect").value = Q.defaultMeal; toast("Kayıtlı meâl yüklenemedi; Diyanet meâline dönüldü."); });
+  }
   document.fonts.ready.then(function () { if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { paintCard(mc, p); autoFitPage(mc, p); }); } render(); });
   } catch(e) { toast("Başlatma hatası: " + (e.message || e)); console.error(e); }
 

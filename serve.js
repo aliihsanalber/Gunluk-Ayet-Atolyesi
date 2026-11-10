@@ -12,7 +12,7 @@ http.createServer((req, res) => {
   if (p === '/') p = '/gunun-ayeti-atolyesi.html';
   const f = path.join(root, p);
   if (!f.startsWith(root) || !fs.existsSync(f)) { res.writeHead(404); return res.end('bulunamadı'); }
-  const ct = { '.html': 'text/html; charset=utf-8', '.png': 'image/png', '.otf': 'font/otf', '.json': 'application/json' }[path.extname(f)] || 'application/octet-stream';
+  const ct = { '.html': 'text/html; charset=utf-8', '.png': 'image/png', '.otf': 'font/otf', '.json': 'application/json', '.js': 'text/javascript; charset=utf-8', '.webmanifest': 'application/manifest+json' }[path.extname(f)] || 'application/octet-stream';
   res.writeHead(200, { 'content-type': ct });
   fs.createReadStream(f).pipe(res);
 }).listen(PORT, () => console.log('http://localhost:' + PORT + '/'));

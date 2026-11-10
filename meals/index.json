@@ -1,0 +1,27 @@
+[
+ {
+  "key": "diyanet",
+  "name": "Diyanet İşleri Meali",
+  "author": "Diyanet İşleri Başkanlığı"
+ },
+ {
+  "key": "elmalili",
+  "name": "Elmalılı Hamdi Yazır Meali",
+  "author": "Elmalılı Hamdi Yazır"
+ },
+ {
+  "key": "feyzul",
+  "name": "Feyzü'l-Furkân Meali",
+  "author": "Prof. Dr. Hasan Tahsin Feyizli"
+ },
+ {
+  "key": "ali_bulac",
+  "name": "Ali Bulaç Meali",
+  "author": "Ali Bulaç"
+ },
+ {
+  "key": "yasar",
+  "name": "Yaşar Nuri Öztürk Meali",
+  "author": "Yaşar Nuri Öztürk"
+ }
+]

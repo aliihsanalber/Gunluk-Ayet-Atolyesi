@@ -4,10 +4,10 @@ Ayet + meâl kartı hazırlama web aracı. Tek bir HTML dosyası olarak derlenir
 **Claude Artifact** olarak yayımlanır. Sol tarafta her gün otomatik güncellenen
 bir **Gündem** paneli vardır.
 
-- **Yayınlanan sayfa:** https://claude.ai/code/artifact/1a48275a-dd46-463b-b9c4-8d6dc0871148
-- **Gündem routine'i:** https://claude.ai/code/routines/trig_01CxgPvBxjPxMuS9P7EW6J3P
-  (her gün 04:00 TR — gündemi tarar, ayetlerle eşleştirir, sayfayı aynı adrese
-  yeniden yayımlar; **yalnız `<script id="news">` bloğunu** değiştirir)
+- **Yayınlanan sayfa (telefonda kullanılan):** https://aliihsanalber.github.io/Gunluk-Ayet-Atolyesi/
+  (GitHub Pages — repo kökündeki `index.html`, `meals/`, `sw.js`, `manifest.json`)
+- Sol taraftaki **Gündem paneli kaldırıldı**; eski Gündem routine'i artık gereksizdir
+  (https://claude.ai/code/routines/trig_01CxgPvBxjPxMuS9P7EW6J3P — durdurabilirsiniz).
 
 ---
 
@@ -52,9 +52,13 @@ node build.js      # src -> dist/gunun-ayeti-atolyesi.html
 node serve.js      # http://localhost:8791/
 ```
 
-`build.js` çalışırken:
-`@@FONT_B64@@`, `@@FRAME_B64@@`, `@@QDATA_JSON@@`, `@@NEWS_JSON@@`
-yer tutucuları `assets/` ve `data/` içindekilerle doldurulur.
+`build.js` çalışırken `@@FONT_B64@@`, `@@FRAME_B64@@`, `@@QDATA_JSON@@`
+yer tutucuları `assets/` ve `data/` içindekilerle doldurulur; `meals/*.json`
+dosyaları `dist/meals/` içine kopyalanır.
+
+**GitHub Pages'e yayın:** `node build.js` sonrası `dist/gunun-ayeti-atolyesi.html`
+dosyasını repo kökündeki `index.html` olarak kopyalayın (`sw.js`, `manifest.json`
+ve `meals/` zaten kökte durur) ve commit/push edin.
 
 ### Yayına alma (aynı Artifact adresine)
 
@@ -79,11 +83,10 @@ gündemi kaybetmemek için Claude'a şunu yaptır:
 
 | İstek | Ne olur |
 |---|---|
-| Kur'an metnini yeniden üret | `node mkdata.js` → `data/qdata.json` |
 | Başka bir süslü çerçeve dene | `assets/cerceve2.png`'i değiştir → `node make-frame.js` → `node build.js` |
-| Gündem başlıklarını elle değiştir | `data/news.json`'ı düzenle → `node build.js` → yayınla |
+| Yeni meâl ekle | `meals/<anahtar>.json` dosyası koy (`{name, author, tr:[[...114 sûre]]}`) + `meals/index.json`'a satır ekle |
 | Routine'i durdur / ayarla | https://claude.ai/code/routines veya Claude Code'da `/schedule` |
-| Meâli değiştir | `data/tr_diyanet.json` yerine başka bir çeviri koy, `mkdata.js`'i güncelle |
+| Meâl listesini yeniden üret | `node mkdata.js` → `data/qdata.json` + `meals/*.json` |
 
 ---
 
@@ -104,7 +107,6 @@ atolye/
   data/
     qdata.json      tüm Kur'an: Arapça (QPC Uthmani Hafs) + meâl (Diyanet İşleri)
                     + sûre adları + "öne çıkan" ayet listesi (picks)
-    news.json       sol Gündem paneli (routine bunun canlı sürümünü günceller)
     ar_uthmani.json / tr_diyanet.json   mkdata.js kaynakları (fawazahmed0/quran-api)
   dist/             ← build çıktısı (git'e girmez)
 ```
@@ -142,6 +144,17 @@ cargo test --release
 Web aracıyla aynı mantık: otomatik punto sığdırma, sığmayan ayetlerin ayrı
 kartlara bölünmesi (ardışık ayetler → ayet başına kart; tek uzun ayet → durak
 işaretinden ikiye), `1 / 2` numarası, çerçeve (yok/sade/süslü), renkler, 4 meâl.
+
+## Yenilikler (v5)
+
+- **Ayet seçimi açılır menü:** sûre seçince başlangıç/bitiş ayeti menüden seçilir (telefonda numara yazmak gerekmez)
+- **Rastgele ayet:** tüm Kur'an'dan seçer (eskiden yalnız ~50 öne çıkan ayet); önerilen ayetler
+  **30 gün** tekrar önerilmez (gün sayısı Ayarlar'dan değişir, geçmiş tarayıcıda saklanır, temizlenebilir)
+- **Meâl düzenleme:** üst çubuktaki "✎ Meâli düzenle" ile ayet başına metin düzeltilir ("Orijinaline dön" var)
+- **5 meâl** (Yaşar Nuri Öztürk eklendi); meâller `meals/` içinde ayrı dosya, seçilince yüklenir (sayfa 6,9 → 2,5 MB)
+- **19 meâl yazı tipi** (Poppins, Montserrat, Roboto, Open Sans, Lato, Nunito, Raleway, Work Sans, Mulish, Source Sans, Inter, DM Sans… + serifler) ve italik açma/kapama
+- **Besmele boyutu** ayarı; Arapça / meâl / başlık / besmele / meâl sahibi / sayfa no boyutları **rakamla** girilebilir
+- Service worker artık sayfayı önce ağdan alır: yeni sürüm telefonda hemen görünür
 
 ## Özellikler (v4)
 

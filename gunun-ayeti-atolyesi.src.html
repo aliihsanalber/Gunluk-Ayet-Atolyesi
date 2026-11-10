@@ -89,6 +89,10 @@
   .c-meal { font-family: var(--meal-font, 'Lora', Georgia, serif); font-style: var(--meal-style, italic); font-weight: 500; font-size: var(--meal-size, 52px); line-height: 1.62; color: var(--card-ink, #234B32); opacity: 0.92; width: 100%; text-wrap: balance; }
   /* İki yana yasla (Word'deki gibi); son satır ortalı kalır, balance kapatılır ki satırlar tam genişliği kullansın. */
   .card[data-justify="1"] .c-meal { text-align: justify; text-align-last: center; text-wrap: wrap; hyphens: auto; }
+  /* Arapçayı iki yana yasla: ayetler tek paragraf gibi akar, son satır ortalı. */
+  .card[data-arjustify="1"] .c-arabic { text-align: justify; text-align-last: center; text-justify: inter-word; }
+  .card[data-arjustify="1"] .c-arabic .ayah { display: inline; }
+  .card[data-arjustify="1"] .c-arabic .ayah + .ayah::before { content: " "; }
   .card[data-besmele="0"] .c-besmele { display: none; }
   .c-chip { position: absolute; right: 64px; bottom: 58px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 32px; color: var(--source-ink, #8A6E1A); opacity: 0.75; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; }
   .card[data-frame="ornate"] .c-chip { right: 132px; bottom: 128px; }
@@ -357,6 +361,7 @@
       <div style="margin-top:10px">
         <p class="sublabel">Arapça yazı tipi</p>
         <div class="fontgrid" id="arFontSeg" role="group" aria-label="Arapça font"></div>
+        <label class="toggle" style="margin-top:8px"><input type="checkbox" id="arJustify"><span class="track"></span><span>Arapçayı iki yana yasla</span></label>
         <div class="row" style="margin-top:8px"><button type="button" class="act mini" id="arFontUpload">＋ Font dosyası yükle</button><input type="file" id="arFontFile" accept=".ttf,.otf,.woff,.woff2" multiple hidden></div>
         <p class="hint">Yüklediğin font yalnızca bu cihazın tarayıcısında saklanır, hiçbir yere gönderilmez. Kendi fontlarını (ör. lisanslı mushaf fontları) böyle kullanabilirsin.</p>
         <p class="hint">Kur'an programlarında yaygın yazı tipleri. Mushaf yazısı için "Medine Mushafı (Hafs)" önerilir.</p>
@@ -470,14 +475,14 @@
   var arVal = $("arVal"), trVal = $("trVal"), srcVal = $("srcVal"), authorVal = $("authorVal"), pageVal = $("pageVal");
   var arNum = $("arNum"), trNum = $("trNum"), srcNum = $("srcNum"), authorNum = $("authorNum"), pageNum = $("pageNum"), besNum = $("besNum"), besRange = $("besRange");
   function setNum(el, v) { if (document.activeElement !== el) el.value = Math.round(v); }
-  var autoFitTgl = $("autoFit"), besmeleTgl = $("besmeleTgl"), spreadTgl = $("spreadTgl"), justifyTgl = $("mealJustify");
+  var autoFitTgl = $("autoFit"), besmeleTgl = $("besmeleTgl"), spreadTgl = $("spreadTgl"), justifyTgl = $("mealJustify"), arJustifyTgl = $("arJustify");
   var toastEl = $("toast");
 
   var LS = "gunun-ayeti-atolyesi.v4";
   var state = {
     sure: 2, a1: 255, a2: 255,
     frame: "ornate", bg: "#F4ECE0",
-    auto: true, spread: true, justify: false, besmele: true, splitMode: "auto",
+    auto: true, spread: true, justify: false, arJustify: false, besmele: true, splitMode: "auto",
     mealKey: "diyanet", arFont: "UthmanicHafs", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null,
     authorSize: 24, pageNumSize: 26,
     pages: [], sel: 0
@@ -486,7 +491,7 @@
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(LS) || "{}");
-      ["frame", "bg", "auto", "spread", "justify", "besmele", "splitMode"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
+      ["frame", "bg", "auto", "spread", "justify", "arJustify", "besmele", "splitMode"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
       if (s.ink) DEF.ink = s.ink;
       if (s.srcInk) DEF.srcInk = s.srcInk;
       if (s.mealKey) state.mealKey = s.mealKey;
@@ -505,7 +510,7 @@
     try {
       var pg = state.pages[state.sel] || {};
       localStorage.setItem(LS, JSON.stringify({
-        frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, justify: state.justify, besmele: state.besmele, splitMode: state.splitMode,
+        frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, justify: state.justify, arJustify: state.arJustify, besmele: state.besmele, splitMode: state.splitMode,
         mealKey: state.mealKey, arFont: state.arFont, mealFont: state.mealFont, mealItalic: state.mealItalic, besmeleSize: state.besmeleSize, randDays: state.randDays,
         last: [state.sure, state.a1, state.a2], authorSize: state.authorSize, pageNumSize: state.pageNumSize,
         ink: pg.ink || DEF.ink, srcInk: pg.srcInk || DEF.srcInk,
@@ -704,6 +709,7 @@
     el.dataset.besmele = pg.showBesmele ? "1" : "0";
     el.dataset.spread = state.spread ? "1" : "0";
     el.dataset.justify = state.justify ? "1" : "0";
+    el.dataset.arjustify = state.arJustify ? "1" : "0";
     el.dataset.chip = pg.chip || "";
     el.style.setProperty("--card-bg", state.bg);
     el.style.setProperty("--card-ink", pg.ink);
@@ -1343,6 +1349,7 @@
   $("besAuto").addEventListener("click", function () { setBesmele(null); });
   spreadTgl.addEventListener("change", function () { state.spread = spreadTgl.checked; render(); save(); });
   justifyTgl.addEventListener("change", function () { state.justify = justifyTgl.checked; if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { if (!p.manual) { paintCard(mc, p); autoFitPage(mc, p); } }); } render(); save(); });
+  arJustifyTgl.addEventListener("change", function () { state.arJustify = arJustifyTgl.checked; refit(); save(); });
   besmeleTgl.addEventListener("change", function () { state.besmele = besmeleTgl.checked; buildPages(); render(); save(); });
 
   document.querySelectorAll("[data-share]").forEach(function (b) { b.addEventListener("click", function () { share(b.dataset.share); }); });
@@ -1437,7 +1444,7 @@
       else toast(mealName());
     }).catch(function () { sel.value = getMealKey(); toast("Meâl yüklenemedi — bağlantıyı kontrol edin."); });
   });
-  autoFitTgl.checked = state.auto; spreadTgl.checked = state.spread; justifyTgl.checked = state.justify; besmeleTgl.checked = state.besmele;
+  autoFitTgl.checked = state.auto; spreadTgl.checked = state.spread; justifyTgl.checked = state.justify; arJustifyTgl.checked = state.arJustify; besmeleTgl.checked = state.besmele;
   $("randDays").value = state.randDays; updateRandInfo();
   $("randDays").addEventListener("input", function () {
     var v = parseInt($("randDays").value, 10); if (!isFinite(v) || v < 0) return;

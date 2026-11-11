@@ -99,6 +99,8 @@
   .c-meal .m-line { display: block; }
   .c-meal .m-line + .m-line { margin-top: 0.3em; }
   .card[data-justify="1"] .c-meal .m-line:not(:only-child) { text-align-last: left; }
+  /* ölçüm modu (mealJustifyGuard): yaslamadan, aynı satır kırılımıyla doğal satır genişliklerini ölç */
+  .card[data-justify="1"][data-mjoff="1"] .c-meal, .card[data-justify="1"][data-mjoff="1"] .c-meal .m-line { text-align: left; text-align-last: left; }
   .card[data-besmele="0"] .c-besmele { display: none; }
   .c-chip { position: absolute; right: 64px; bottom: 58px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 32px; color: var(--source-ink, #8A6E1A); opacity: 0.75; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; }
   .card[data-frame="ornate"] .c-chip { right: 132px; bottom: 128px; }
@@ -377,6 +379,7 @@
         <div class="fontgrid" id="mealFontSeg" role="group" aria-label="Meâl fontu"></div>
         <label class="toggle" style="margin-top:8px"><input type="checkbox" id="mealItalic"><span class="track"></span><span>Meâl italik (eğik)</span></label>
         <label class="toggle" style="margin-top:8px"><input type="checkbox" id="mealJustify"><span class="track"></span><span>Meâli iki yana yasla</span></label>
+        <label class="toggle" style="margin-top:8px"><input type="checkbox" id="mealJustFit" checked><span class="track"></span><span>Yaslarken geniş boşlukları yazıyı hafifçe küçülterek gider</span></label>
       </div>
     </div>
 
@@ -481,14 +484,14 @@
   var arVal = $("arVal"), trVal = $("trVal"), srcVal = $("srcVal"), authorVal = $("authorVal"), pageVal = $("pageVal");
   var arNum = $("arNum"), trNum = $("trNum"), srcNum = $("srcNum"), authorNum = $("authorNum"), pageNum = $("pageNum"), besNum = $("besNum"), besRange = $("besRange");
   function setNum(el, v) { if (document.activeElement !== el) el.value = Math.round(v); }
-  var autoFitTgl = $("autoFit"), besmeleTgl = $("besmeleTgl"), spreadTgl = $("spreadTgl"), justifyTgl = $("mealJustify"), arJustifyTgl = $("arJustify");
+  var autoFitTgl = $("autoFit"), besmeleTgl = $("besmeleTgl"), spreadTgl = $("spreadTgl"), justifyTgl = $("mealJustify"), justFitTgl = $("mealJustFit"), arJustifyTgl = $("arJustify");
   var toastEl = $("toast");
 
   var LS = "gunun-ayeti-atolyesi.v4";
   var state = {
     sure: 2, a1: 255, a2: 255,
     frame: "ornate", bg: "#F4ECE0",
-    auto: true, spread: true, justify: false, arJustify: false, besmele: true, splitMode: "auto",
+    auto: true, spread: true, justify: false, justFit: true, arJustify: false, besmele: true, splitMode: "auto",
     mealKey: "diyanet", arFont: "UthmanicHafs", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null, shared: null,
     authorSize: 24, pageNumSize: 26,
     pages: [], sel: 0
@@ -497,7 +500,7 @@
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(LS) || "{}");
-      ["frame", "bg", "auto", "spread", "justify", "arJustify", "besmele", "splitMode"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
+      ["frame", "bg", "auto", "spread", "justify", "justFit", "arJustify", "besmele", "splitMode"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
       if (s.ink) DEF.ink = s.ink;
       if (s.srcInk) DEF.srcInk = s.srcInk;
       if (s.mealKey) state.mealKey = s.mealKey;
@@ -517,7 +520,7 @@
     try {
       var pg = state.pages[state.sel] || {};
       localStorage.setItem(LS, JSON.stringify({
-        frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, justify: state.justify, arJustify: state.arJustify, besmele: state.besmele, splitMode: state.splitMode,
+        frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, justify: state.justify, justFit: state.justFit, arJustify: state.arJustify, besmele: state.besmele, splitMode: state.splitMode,
         mealKey: state.mealKey, arFont: state.arFont, mealFont: state.mealFont, mealItalic: state.mealItalic, besmeleSize: state.besmeleSize, randDays: state.randDays,
         last: [state.sure, state.a1, state.a2], shared: state.shared, authorSize: state.authorSize, pageNumSize: state.pageNumSize,
         ink: pg.ink || DEF.ink, srcInk: pg.srcInk || DEF.srcInk,
@@ -751,10 +754,53 @@
     var pgEl = el.querySelector(".c-page");
     if (pgEl) { pgEl.textContent = pg.pageLabel || ""; el.dataset.page = pg.pageLabel || ""; }
     arJustifyGuard(el);
+    mealJustifyGuard(el, pg);
   }
   /* Arapçayı yaslama koruması: yaslanmamış hâlde (son satır hariç) herhangi bir satır kutunun %78'inden azını
      dolduruyorsa (kısa ayet / kelime az), yaslamak kelime aralarını aşırı açar -> o kartta yaslama kapatılır. */
   var AR_JUSTIFY_MIN_FILL = 0.78;
+  /* Meâl yaslama ince ayarı: yaslanmamış hâlde bir satırın (ayetin son satırı hariç) boşluğu genişliğin %MAX'ından
+     fazlaysa (sonraki kelime sığmadığı için aralar çok açılır), yazıyı en çok %8 küçülterek (0,5'lik adımlarla)
+     o kelimenin yukarı çekilmesini dener. Yalnızca istisna durumda devreye girer; elle boyutlanmış sayfaya dokunmaz. */
+  var MJ_MAX_SLACK = 0.10, MJ_MAX_SHRINK = 0.08, MJ_STEP = 0.005;
+  function mealWorstSlack(el) {
+    var worst = 0, me = el.querySelector(".c-meal");
+    var fs = parseFloat(getComputedStyle(me).fontSize) || 40, tol = fs * 0.45;
+    Array.prototype.forEach.call(me.querySelectorAll(".m-line"), function (ln) {
+      var W = ln.getBoundingClientRect().width; if (W <= 0) return;
+      var rg = document.createRange(); rg.selectNodeContents(ln);
+      var rows = [];
+      Array.prototype.slice.call(rg.getClientRects()).filter(function (q) { return q.width >= 1; })
+        .sort(function (a, b) { return (a.top + a.bottom) - (b.top + b.bottom); })
+        .forEach(function (q) {
+          var cy = (q.top + q.bottom) / 2, row = rows[rows.length - 1];
+          if (row && Math.abs(cy - row.cy) < tol * (W / (ln.offsetWidth || W))) { row.l = Math.min(row.l, q.left); row.r = Math.max(row.r, q.right); }
+          else rows.push({ cy: cy, l: q.left, r: q.right });
+        });
+      for (var i = 0; i < rows.length - 1; i++) worst = Math.max(worst, (W - (rows[i].r - rows[i].l)) / W);
+    });
+    return worst;
+  }
+  function mealJustifyGuard(el, pg) {
+    if (el.classList.contains("measure") || !state.justify || !state.justFit || pg.manual) return;
+    var me = el.querySelector(".c-meal"), base = pg.trSize;
+    if (!me || me.getBoundingClientRect().width <= 0) return;
+    el.dataset.mjoff = "1";
+    try {
+      var w0 = mealWorstSlack(el);
+      if (w0 <= MJ_MAX_SLACK) return;
+      var bestK = 0, bestW = w0;
+      for (var k = 1; k * MJ_STEP <= MJ_MAX_SHRINK + 1e-9; k++) {
+        el.style.setProperty("--meal-size", (base * (1 - k * MJ_STEP)).toFixed(2) + "px");
+        var w = mealWorstSlack(el);
+        if (w < bestW - 1e-6) { bestW = w; bestK = k; }
+        if (w <= MJ_MAX_SLACK) break;
+      }
+      /* yeterli iyileşme yoksa orijinal boyutta kal */
+      if (bestK && (bestW <= MJ_MAX_SLACK || bestW <= w0 * 0.6)) el.style.setProperty("--meal-size", (base * (1 - bestK * MJ_STEP)).toFixed(2) + "px");
+      else el.style.setProperty("--meal-size", base + "px");
+    } finally { delete el.dataset.mjoff; }
+  }
   function arJustifyGuard(el) {
     delete el.dataset.arjoff;
     if (!state.arJustify) return;
@@ -898,6 +944,7 @@
       el.addEventListener("click", function () { selectPage(i); });
       cardsRow.appendChild(el);
       arJustifyGuard(el);   /* ölçüm için kart DOM'da olmalı */
+      mealJustifyGuard(el, pg);
     });
     fitPreview();
     syncControls();
@@ -1419,6 +1466,7 @@
   spreadTgl.addEventListener("change", function () { state.spread = spreadTgl.checked; render(); save(); });
   justifyTgl.addEventListener("change", function () { state.justify = justifyTgl.checked; if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { if (!p.manual) { paintCard(mc, p); autoFitPage(mc, p); } }); } render(); save(); });
   arJustifyTgl.addEventListener("change", function () { state.arJustify = arJustifyTgl.checked; refit(); save(); });
+  justFitTgl.addEventListener("change", function () { state.justFit = justFitTgl.checked; repaintAll(); save(); });
   besmeleTgl.addEventListener("change", function () { state.besmele = besmeleTgl.checked; buildPages(); render(); save(); });
 
   document.querySelectorAll("[data-share]").forEach(function (b) { b.addEventListener("click", function () { share(b.dataset.share); }); });
@@ -1513,7 +1561,7 @@
       else toast(mealName());
     }).catch(function () { sel.value = getMealKey(); toast("Meâl yüklenemedi — bağlantıyı kontrol edin."); });
   });
-  autoFitTgl.checked = state.auto; spreadTgl.checked = state.spread; justifyTgl.checked = state.justify; arJustifyTgl.checked = state.arJustify; besmeleTgl.checked = state.besmele;
+  autoFitTgl.checked = state.auto; spreadTgl.checked = state.spread; justifyTgl.checked = state.justify; justFitTgl.checked = state.justFit; arJustifyTgl.checked = state.arJustify; besmeleTgl.checked = state.besmele;
   $("randDays").value = state.randDays; updateRandInfo();
   $("randDays").addEventListener("input", function () {
     var v = parseInt($("randDays").value, 10); if (!isFinite(v) || v < 0) return;

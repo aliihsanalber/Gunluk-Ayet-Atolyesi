@@ -489,7 +489,7 @@
     sure: 2, a1: 255, a2: 255,
     frame: "ornate", bg: "#F4ECE0",
     auto: true, spread: true, justify: false, arJustify: false, besmele: true, splitMode: "auto",
-    mealKey: "diyanet", arFont: "UthmanicHafs", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null,
+    mealKey: "diyanet", arFont: "UthmanicHafs", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null, shared: null,
     authorSize: 24, pageNumSize: 26,
     pages: [], sel: 0
   };
@@ -507,6 +507,7 @@
       if (s.besmeleSize) state.besmeleSize = +s.besmeleSize;
       if (s.randDays !== undefined && s.randDays !== null) state.randDays = +s.randDays;
       if (s.last && s.last.length === 3) state.last = s.last;
+      if (s.shared && s.shared.length === 3) state.shared = s.shared;
       if (s.authorSize) DEF.authorSize = s.authorSize;
       if (s.pageNumSize) DEF.pageNumSize = s.pageNumSize;
       if (s.theme) document.documentElement.setAttribute("data-theme", s.theme);
@@ -518,7 +519,7 @@
       localStorage.setItem(LS, JSON.stringify({
         frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, justify: state.justify, arJustify: state.arJustify, besmele: state.besmele, splitMode: state.splitMode,
         mealKey: state.mealKey, arFont: state.arFont, mealFont: state.mealFont, mealItalic: state.mealItalic, besmeleSize: state.besmeleSize, randDays: state.randDays,
-        last: [state.sure, state.a1, state.a2], authorSize: state.authorSize, pageNumSize: state.pageNumSize,
+        last: [state.sure, state.a1, state.a2], shared: state.shared, authorSize: state.authorSize, pageNumSize: state.pageNumSize,
         ink: pg.ink || DEF.ink, srcInk: pg.srcInk || DEF.srcInk,
         theme: document.documentElement.getAttribute("data-theme") || ""
       }));
@@ -974,9 +975,10 @@
     else if (a > sureCount(s)) { s = s < 114 ? s + 1 : 1; a = 1; }
     loadRef(s, a, a);
   }
-  /* Rastgele ayet: tüm Kur'an'dan; son N gün içinde önerilen ayetler tekrar önerilmez.
-     Geçmiş yalnız bu tarayıcıda (localStorage) tutulur. */
-  var RH_KEY = "gunun-ayeti-atolyesi.rastgele.v1";
+  /* Rastgele ayet: tüm Kur'an'dan. Yalnızca PAYLAŞILAN ayetler son N gün (varsayılan 30) tekrar önerilmez;
+     paylaşılmamış ayetler tekrar çıkabilir. Geçmiş yalnız bu cihazda (localStorage) tutulur. */
+  var RH_KEY = "gunun-ayeti-atolyesi.paylasilan.v1";
+  try { localStorage.removeItem("gunun-ayeti-atolyesi.rastgele.v1"); } catch (e) {}   /* eski sürüm: seçilenleri kaydediyordu */
   function rhLoad() { try { return JSON.parse(localStorage.getItem(RH_KEY) || "{}") || {}; } catch (e) { return {}; } }
   function rhSave(h) { try { localStorage.setItem(RH_KEY, JSON.stringify(h)); } catch (e) {} }
   function rhPrune(h) {
@@ -984,28 +986,34 @@
     Object.keys(h).forEach(function (k) { if (now - h[k] > lim) delete h[k]; });
     return h;
   }
+  /* Paylaşım/indirme/kopyalama başarılı olunca: ayet(ler)i "paylaşıldı" say, bir sonraki açılışta bu ayet gösterilsin. */
+  function markShared() {
+    var h = rhPrune(rhLoad()), now = Date.now();
+    for (var v = state.a1; v <= state.a2; v++) h[state.sure + ":" + v] = now;
+    rhSave(h);
+    state.shared = [state.sure, state.a1, state.a2];
+    save(); updateRandInfo();
+  }
   function baseLetters(t) { return (t.match(/[\u0621-\u064A]/g) || []).length; }
   function updateRandInfo() {
     var h = rhPrune(rhLoad()), n = Object.keys(h).length;
-    $("randInfo").textContent = n + " ayet son " + (state.randDays || 0) + " gün içinde önerildi; rastgele seçimde tekrar çıkmaz. Geçmiş yalnız bu cihazın tarayıcısında saklanır.";
+    $("randInfo").textContent = n + " ayet son " + (state.randDays || 0) + " gün içinde paylaşıldı; rastgele seçimde bir daha çıkmaz. Paylaşılmayan ayetler tekrar çıkabilir. Geçmiş yalnız bu cihazda saklanır.";
   }
   function randomPick() {
-    var h = rhPrune(rhLoad()), total = 0, pick = null;
-    Q.counts.forEach(function (c) { total += c; });
-    for (var t = 0; t < 600 && !pick; t++) {
-      var r = Math.floor(Math.random() * total), si = 0;
-      while (r >= Q.counts[si]) { r -= Q.counts[si]; si++; }
-      var sure = si + 1, v = r + 1;
-      if (h[sure + ":" + v]) continue;
-      if (baseLetters(ayahAr(sure, v)) <= 5) continue; /* "Elif-Lâm-Mîm" gibi harf ayetleri kart için uygun değil */
-      pick = [sure, v];
-    }
-    if (!pick) { /* geçmiş neredeyse tüm Kur'an'ı kapsıyorsa en eskiyi serbest bırak */
+    var h = rhPrune(rhLoad()), cand = [], pick = null;
+    /* adaylar: paylaşılmamış (ya da süresi dolmuş) tüm ayetler; harf ayetleri ("Elif-Lâm-Mîm") kart için uygun değil */
+    Q.counts.forEach(function (c, si) {
+      for (var v = 1; v <= c; v++) {
+        if (h[(si + 1) + ":" + v]) continue;
+        if (baseLetters(ayahAr(si + 1, v)) <= 5) continue;
+        cand.push([si + 1, v]);
+      }
+    });
+    if (cand.length) pick = cand[Math.floor(Math.random() * cand.length)];
+    if (!pick) { /* paylaşılanlar neredeyse tüm Kur'an'ı kapsıyorsa en eskiyi serbest bırak */
       var oldest = Object.keys(h).sort(function (a, b) { return h[a] - h[b]; })[0];
       var parts = (oldest || "1:1").split(":"); pick = [+parts[0], +parts[1]];
     }
-    h[pick[0] + ":" + pick[1]] = Date.now();
-    rhSave(h);
     loadRef(pick[0], pick[1], pick[1]);
     updateRandInfo();
   }
@@ -1137,7 +1145,7 @@
       var r = await P.Filesystem.writeFile({ path: lastFiles[i].name, data: await blobToB64(lastFiles[i]), directory: "CACHE" });
       uris.push(r.uri);
     }
-    try { await P.Share.share({ title: refLabel(state.sure, state.a1, state.a2), files: uris, dialogTitle: "Kartı paylaş / kaydet" }); }
+    try { await P.Share.share({ title: refLabel(state.sure, state.a1, state.a2), files: uris, dialogTitle: "Kartı paylaş / kaydet" }); markShared(); }
     catch (e) { if (!(e && /cancel/i.test(String(e.message || e)))) toast("Paylaşılamadı: " + (e && e.message || e)); }
   }
   async function share(platform) {
@@ -1149,27 +1157,28 @@
         $("modal").classList.remove("open");
         await downloadFiles();
         try { window.open("https://web.whatsapp.com/", "_blank"); } catch (e) {}
-        toast("Kartlar indirildi. WhatsApp sohbetine sürükleyin.");
+        toast("Kartlar indirildi. WhatsApp sohbetine sürükleyin."); markShared();
       } else {
         try { await navigator.clipboard.write([new window.ClipboardItem({ "image/png": lastFiles[0] })]); } catch (e) {}
         try { window.open("https://web.whatsapp.com/", "_blank"); } catch (e) {}
-        toast("WhatsApp açıldı. Ctrl+V yapıştırın.");
+        toast("WhatsApp açıldı. Ctrl+V yapıştırın."); markShared();
       }
       return;
     }
     var canFiles = navigator.canShare && navigator.canShare({ files: lastFiles });
     if (platform === "more" || (canFiles && matchMedia("(pointer: coarse)").matches)) {
-      if (canFiles) { try { await navigator.share({ files: lastFiles, title: refLabel(state.sure, state.a1, state.a2) }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+      if (canFiles) { try { await navigator.share({ files: lastFiles, title: refLabel(state.sure, state.a1, state.a2) }); markShared(); return; } catch (e) { if (e && e.name === "AbortError") return; } }
       if (platform === "more") { toast("Bu cihaz doğrudan paylaşımı desteklemiyor — İndir'i kullanın."); return; }
     }
     var copied = false;
     try { await navigator.clipboard.write([new window.ClipboardItem({ "image/png": lastFiles[0] })]); copied = true; } catch (e) {}
     try { window.open(SHARE_URLS[platform] || "about:blank", "_blank", "noopener"); } catch (e) {}
     toast(copied ? SHARE_LABEL[platform] + " açıldı — görsel panoda, yeni gönderiye yapıştırın." : SHARE_LABEL[platform] + " açıldı — İndir ile kaydedin.");
+    markShared();
   }
   async function copyImage() {
     if (!(await ensureFiles())) return;
-    try { await navigator.clipboard.write([new window.ClipboardItem({ "image/png": lastFiles[0] })]); toast("Panoya kopyalandı."); }
+    try { await navigator.clipboard.write([new window.ClipboardItem({ "image/png": lastFiles[0] })]); toast("Panoya kopyalandı."); markShared(); }
     catch (e) { toast("Kopyalanamadı — “İndir” kullanın."); }
   }
   async function downloadFiles() {
@@ -1183,6 +1192,7 @@
       document.body.appendChild(a); a.click(); a.remove();
       await new Promise(function (r) { setTimeout(r, 250); });
     }
+    markShared();
   }
 
   /* ---- UI build ---- */
@@ -1510,7 +1520,9 @@
     state.randDays = Math.min(v, 365); updateRandInfo(); save();
   });
   $("randClear").addEventListener("click", function () { rhSave({}); updateRandInfo(); toast("Rastgele geçmişi temizlendi."); });
-  if (state.last && state.last.length === 3) loadRef(state.last[0], state.last[1], state.last[2]); else randomPick();
+  /* Açılışta: en son PAYLAŞILAN ayet; hiç paylaşım yoksa son bakılan ayet; o da yoksa rastgele. */
+  var startRef = (state.shared && state.shared.length === 3) ? state.shared : (state.last && state.last.length === 3 ? state.last : null);
+  if (startRef) loadRef(startRef[0], startRef[1], startRef[2]); else randomPick();
   fitPreview();
   if (state.mealKey !== Q.defaultMeal && !Q.meals[state.mealKey]) {
     loadMeal(state.mealKey).then(function () { buildPages(); render(); })

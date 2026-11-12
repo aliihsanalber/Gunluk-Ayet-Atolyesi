@@ -81,6 +81,10 @@
   /* Boşluğu sayfaya yay: yığın tüm kart içi yüksekliğini kaplar, öğeler arası ve alt/üst boşluk eşitlenir. Ölçüm kartı (.measure) doğal yükseklikte kalır. */
   /* Kısa ayette kartı kısalt: boşluk yayılmaz, öğeler sabit aralıkla birbirine yaklaşır; kart yüksekliği içeriğe göre (1350–1920 px) ayarlanır. */
   .card[data-compact="1"] .c-stack { gap: 34px; }
+  /* Sıkı dolgu: kısaltılan (otomatik/elle) kartlarda üst-alt boşluk azalır; böylece kart içeriğe kadar daraltılabilir. */
+  .card[data-tight="1"] .card-inner { padding: 100px 132px 170px; }
+  .card[data-tight="1"][data-frame="simple"] .card-inner { padding: 120px 148px 215px; }
+  .card[data-tight="1"][data-frame="ornate"] .card-inner { padding: 170px 150px 250px; }
   /* Kart yüksekliği tutamaçları (üst/alt kenar): sürükleyerek kartı kısalt/uzat; içerik otomatik yeniden dağılır. PNG'ye girmez. */
   .card .rz { position: absolute; left: 50%; transform: translateX(-50%); width: 420px; height: 130px; z-index: 5; touch-action: none; cursor: ns-resize; display: flex; align-items: center; justify-content: center; }
   .card .rz-t { top: 0; } .card .rz-b { bottom: 0; }
@@ -411,7 +415,7 @@
       <label class="toggle"><input type="checkbox" id="autoFit" checked><span class="track"></span><span>Otomatik sığdır</span></label>
       <label class="toggle"><input type="checkbox" id="spreadTgl" checked><span class="track"></span><span>Boşluğu sayfaya yay</span></label>
       <label class="toggle"><input type="checkbox" id="compactTgl"><span class="track"></span><span>Kısa ayette kartı kısalt (başlık, ayet ve meâl birbirine yaklaşsın)</span></label>
-      <p class="hint">Açıkken kısa ayetlerde kart 1080×1920 yerine içeriğe göre 1080×1350–1920 olur; "Boşluğu sayfaya yay" bu kartlarda uygulanmaz.</p>
+      <p class="hint">Açıkken kısa ayetlerde kart 1080×1920 yerine içeriğe göre 1080×1080–1920 olur; "Boşluğu sayfaya yay" bu kartlarda uygulanmaz.</p>
       <p class="hint"><b>Elle:</b> kartın üst veya alt kenarındaki tutamacı (küçük çubuk) sürükleyerek yüksekliği ayarlayabilirsin; başlık, besmele, ayet ve meâl otomatik yeniden dağılır. Çift dokunma otomatiğe döndürür.</p>
       <div style="margin-top:12px">
         <div class="slider-head"><span>Arapça</span><span class="val"><input class="szin" id="arNum" type="number" inputmode="numeric" min="8" max="400" step="1" aria-label="Arapça boyutu (px)"> px</span><span hidden id="arVal">92 px</span></div>
@@ -797,6 +801,7 @@
     el.dataset.frame = state.frame;
     el.dataset.besmele = pg.showBesmele ? "1" : "0";
     el.dataset.compact = state.compact ? "1" : "0";
+    el.dataset.tight = (state.compact || pg.fixedH) ? "1" : "0";
     el.dataset.spread = (state.spread && !state.compact) ? "1" : "0";
     el.dataset.justify = state.justify ? "1" : "0";
     el.dataset.arjustify = state.arJustify ? "1" : "0";
@@ -907,16 +912,16 @@
     delete el.dataset.arjoff;
   }
   /* Kısa ayet: ölçüm kartında doğal içerik yüksekliği + dolgular; 1350–1920 px arasına sıkıştırılır. */
-  var CARD_H_MIN = 1350, CARD_H_MAX = 1920;
+  var CARD_H_MIN = 1080, CARD_H_MAX = 1920;
   function computeCardH(pg) {
-    var mc = ensureMeasure(); paintCard(mc, pg);
+    var mc = ensureMeasure(); paintCard(mc, pg); mc.dataset.tight = "1";
     var inner = mc.querySelector(".card-inner"), stack = mc.querySelector(".c-stack"), cs = getComputedStyle(inner);
     var h = stack.scrollHeight + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
     return clamp(Math.round(h / 2) * 2, CARD_H_MIN, CARD_H_MAX);
   }
   /* Elle kısaltmanın alt sınırı: içeriğin doğal yüksekliği + dolgular (içerik taşmasın). */
   function naturalCardH(pg) {
-    var mc = ensureMeasure(); paintCard(mc, pg);
+    var mc = ensureMeasure(); paintCard(mc, pg); mc.dataset.tight = "1";
     var inner = mc.querySelector(".card-inner"), stack = mc.querySelector(".c-stack"), cs = getComputedStyle(inner);
     return Math.min(CARD_H_MAX, Math.ceil((stack.scrollHeight + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)) / 2) * 2);
   }
@@ -935,7 +940,7 @@
         var i = Array.prototype.indexOf.call(cardsRow.children, el), pg = state.pages[i]; if (!pg) return;
         e.preventDefault(); e.stopPropagation();
         selectPage(i);
-        var minH = Math.min(CARD_H_MAX, Math.max(700, naturalCardH(pg) + 90));   /* +90: en sıkı hâlde bile nefes payı */
+        var minH = Math.min(CARD_H_MAX, Math.max(700, naturalCardH(pg) + 24));   /* içerik iç içe geçmeyecek en sıkı yükseklik */
         if (!pg.fixedH) { pg.fixedH = pg.cardH || 1920; paintCard(el, pg); }
         drag = { y: e.clientY, h: pg.cardH || 1920, min: minH, scale: parseFloat(getComputedStyle(cardsRow).getPropertyValue("--preview-scale")) || 0.3, pg: pg };
         h.classList.add("drag"); try { h.setPointerCapture(e.pointerId); } catch (x) {}

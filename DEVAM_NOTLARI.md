@@ -3,7 +3,7 @@
 Bu dosya, bir oturumda yapılanları ve bekleyen işleri yeni oturuma aktarmak için yazıldı.
 Yeni oturumda önce bunu okuyun.
 
-- **Dal:** `claude/daily-verse-workshop-rust-7ci8iy`. Altı PR (#1–#6) `main`'e **birleştirildi**; tüm özellikler canlı sitede. Yeni işe başlarken dalı `main`'in son hâlinden yeniden başlat (`git fetch origin main && git checkout -B claude/daily-verse-workshop-rust-7ci8iy origin/main`).
+- **Dal:** `claude/daily-verse-workshop-rust-7ci8iy`. On üç PR (#1–#13) `main`'e **birleştirildi**; tüm özellikler canlı sitede ve APK'da. Yeni işe başlarken dalı `main`'in son hâlinden yeniden başlat (`git fetch origin main && git checkout -B claude/daily-verse-workshop-rust-7ci8iy origin/main`).
 - **Canlı site:** https://aliihsanalber.github.io/Gunluk-Ayet-Atolyesi/ (GitHub Pages, `main`'den yayınlanır). Depo **herkese açık (public)**; kullanıcı bunu bilerek kabul etti ("telif sorunu olmaz", meâller depoda).
 - **Kullanıcı:** Türkçe konuşuyor. Her akşam telefondan (Chrome) ayet seçip düzenleyip WhatsApp'ta paylaşıyor. **Asıl kullandığı araç web sürümü**; Rust sürümü yedek/ek.
 
@@ -67,10 +67,19 @@ README güncellendi (Rust bölümü, v5 notları, yayın akışı).
 - **Arapça yazı tipi:** Medine Mushafı/Hafs (varsayılan), Amiri Quran, Scheherazade New, Noto Naskh, Lateef (`AR_FONTS`). **Kendi font dosyanı yükle** (.ttf/.otf/.woff/.woff2): IndexedDB (`ayet-fontlar`) + blob `@font-face`; cihazdan çıkmaz, repoya girmez, PNG dışa aktarmada çalışır (telefonda doğrulandı).
 - **Arapçayı iki yana yasla** (`data-arjustify`): ayetler inline akar. **Koruma** `arJustifyGuard`: yaslanmamış hâlde (son satır hariç) herhangi bir satır kutunun %78'inden azsa o kartta yaslama kapanır (`AR_JUSTIFY_MIN_FILL`, `data-arjoff`). Ölçüm için kart DOM'da olmalı (`render` içinde `appendChild` sonrası çağrılır).
 - **Paylaşım hafızası (web + APK):** Ayarlar `localStorage`'da (`gunun-ayeti-atolyesi.v4`) hatırlanır. Rastgele geçmişi artık yalnız **paylaşılan** ayetleri tutar (`gunun-ayeti-atolyesi.paylasilan.v1`, `markShared()`; paylaş/indir/kopyala başarılıysa işaretlenir, Android paylaşım iptalinde işaretlenmez). Paylaşılan ayet `randDays` (30) gün rastgelede çıkmaz; paylaşılmayanlar tekrar çıkabilir. Açılışta en son **paylaşılan** ayet gösterilir (yoksa son bakılan, o da yoksa rastgele). Eski `rastgele.v1` anahtarı silinir.
-- **Yaslama ince ayarı (`mealJustifyGuard`):** Meâl yaslıyken (ayetin son satırı hariç) bir satırda boşluk genişliğin %10'undan fazlaysa (`MJ_MAX_SLACK`) yazı en çok %8 (`MJ_MAX_SHRINK`, 0,5'lik adımlarla) küçülerek sonraki kelimenin yukarı çekilmesi denenir; yeterli iyileşme yoksa boyut korunur. Elle boyutlanmış sayfaya dokunmaz; Ayarlar'da "Yaslarken geniş boşlukları yazıyı hafifçe küçülterek gider" anahtarı (`justFit`, varsayılan açık).
+- **Yaslama ince ayarı (`mealJustifyGuard`):** Meâl yaslıyken (ayetin son satırı hariç) bir satırda boşluk genişliğin %15'inden fazlaysa (`MJ_MAX_SLACK`) yazı en çok %8 (`MJ_MAX_SHRINK`, 0,5'lik adımlarla) küçülerek sonraki kelimenin yukarı çekilmesi denenir; yeterli iyileşme yoksa boyut korunur. Elle boyutlanmış sayfaya dokunmaz; Ayarlar'da "Yaslarken geniş boşlukları yazıyı hafifçe küçülterek gider" anahtarı (`justFit`, varsayılan açık).
 - **Yaslama geri düşüşü:** `mealJustifyGuard` yazıyı küçültünce de boşluk eşiğin altına inmezse o kartta yaslama bırakılır, meâl ortalanır (`data-justify="0"`, boyut orijinal). Eşik %15: 40 örnek ayette Lora/Poppins ile ~%70 yaslı kalır, ~%30 ortalanır.
 - **Ayarlar menüsü açılır gruplar:** `details.sgroup` — Meâl (açık), Arapça, Görünüm, Yazı boyutu ve yerleşim, Rastgele ayet ve kart bölme, Gelişmiş düzenleme. Açık/kapalı durum `gunun-ayeti-atolyesi.ayarGruplari` anahtarında hatırlanır. Tüm kontrol kimlikleri (id) korundu.
+- **Meâl sahibi satırı:** Satır sabit konumlu (`.c-author`) olduğundan metin bloğunun alt dolgusu artırıldı (`.card-inner` padding-bottom: çerçevesiz 210, basit 260, süslü 300 px) ki yayma düzeni onunla yapışmasın.
 - Telefonda doğrulananlar: PNG çıktısı (yeni yazı tipleriyle), 13:40-43 tek kartta sığıyor.
+
+### 1.5 Android uygulaması (APK)
+- **Yapı:** `android-app/` = Capacitor 6 sarmalayıcı (`appId com.aliihsanalber.ayetatolyesi`). `prepare-www.js` repo kökündeki `index.html`, `manifest.json`, `meals/` ve simgeleri `www/`'e kopyalar; `android/` Capacitor'ın ürettiği Gradle projesi (simgeler `assets/icon-512.png`'den). Eklentiler: `@capacitor/share`, `@capacitor/filesystem`.
+- **Derleme:** `.github/workflows/android-apk.yml` (GitHub Actions, ubuntu + JDK17). `main`'e `index.html`, `meals/`, `android-app/**` değişikliği gelince (ya da elle `workflow_dispatch`) debug imzalı APK derler ve `apk-latest` sürümüne yükler. Her birleşmede APK kendiliğinden yenilenir (~5 dk).
+- **İndirme:** https://github.com/aliihsanalber/Gunluk-Ayet-Atolyesi/releases/download/apk-latest/ayet-atolyesi.apk (debug imzalı: "bilinmeyen kaynaklar" izniyle kurulur; Play Store için ayrı imza gerekir).
+- **Önemli hatalar ve dersler:** (1) `index.html`'de `<meta charset="utf-8">` yoktu; GitHub Pages karakter kodunu HTTP başlığında gönderdiği için web'de sorun yoktu ama WebView'da Türkçe bozuldu, Arapça içeren düzenli ifade betiği durdurdu, ekran boş kaldı. Düzeltildi; **APK'yı telefonda ya da charset başlığı göndermeyen yerel sunucuyla (`/tmp/.../nocs.js` benzeri) test etmeden teslim etme**. (2) WebView'da `navigator.share` yok: `isNative()` ise `nativeShare()` Filesystem(CACHE)+Share ile yerel paylaşım ekranını açar; paylaşım iptal edilirse "paylaşıldı" sayılmaz.
+- **Sınırlar:** Arapça fontlar (Google Fonts) ve PNG aracı (html-to-image, cdnjs) internetten yüklenir; uygulama çevrimiçi çalışır. APK'nın telefonda tam doğrulanan kısmı: açılış, ayet/meâl, PNG paylaşımı (kullanıcı denedi). Servis çalışanı (`sw.js`) APK'ya kopyalanmıyor.
+- **Hatırlatma:** Kullanıcı için kurulan tek seferlik "APK hatırlatması" çalıştı (trig_017NTQPQgUEwiJVFdjWisgER), tekrar gerekmez.
 
 ---
 
@@ -99,7 +108,7 @@ README güncellendi (Rust bölümü, v5 notları, yayın akışı).
 ## 3. Ortam ve ağ (önemli)
 
 - "Default" ortamda `kuranmeali.com`, `tevhidmeali.com` erişilemezdi (`403`). Bu repo için kişisel ortam kullanılınca erişim çalıştı.
-- Bu repo için **kişisel ortam oluşturuldu: `gunluk-ayet-atolyesi`** (`env_01PQ5vSXkn8aYppdUMtX3GFH`). İzinli adresler: `www.kuranmeali.com`, `kuranmeali.com`, `tevhidmeali.com`, `www.tevhidmeali.com`, `fonts.googleapis.com`, `fonts.gstatic.com`, `generativelanguage.googleapis.com`, `www.kurankelimemeali.com`, `kurankelimemeali.com`, `kuran.diyanet.gov.tr` (son üçü font sayfalarını incelemek için eklendi). Paket yöneticileri izinli.
+- Bu repo için **kişisel ortam oluşturuldu: `gunluk-ayet-atolyesi`** (`env_01PQ5vSXkn8aYppdUMtX3GFH`). İzinli adresler: `www.kuranmeali.com`, `kuranmeali.com`, `tevhidmeali.com`, `www.tevhidmeali.com`, `fonts.googleapis.com`, `fonts.gstatic.com`, `generativelanguage.googleapis.com`, `www.kurankelimemeali.com`, `kurankelimemeali.com`, `kuran.diyanet.gov.tr` (son üçü font sayfalarını incelemek için eklendi). Android derlemesi GitHub Actions üzerinde yapılır, bu ortamda Android SDK/Gradle yok. Paket yöneticileri izinli.
 - **Yeni oturumu bu ortamda başlatın** (ortam menüsünden "gunluk-ayet-atolyesi"). Aksi halde siteler yine engelli olur.
 - Claude in Chrome / Remote Control **bağlanmadı** (bulut oturumundan bilgisayara erişilemedi). Gerekmezse kullanmayın; ağ izni yeterli.
 - GitHub push: bu oturumun başında 403 vardı, kullanıcı erişimi düzeltince push çalıştı. Yeni oturumda tekrar sorun olursa https://claude.ai/connect-github adresinden bağlanması gerekir.
@@ -131,5 +140,8 @@ data/qdata.json                 ← gömülü veri (Arapça + Diyanet + katalog 
 data/tr_*.json, ar_uthmani.json ← mkdata.js kaynakları
 assets/, fonts/                 ← Hafs fontu, çerçeve, ikonlar
 ayet-rs/                        ← Rust sürümü
+android-app/                    ← Android (Capacitor) projesi; android/ üretilmiş Gradle projesi, www/ derleme sırasında oluşur
+.github/workflows/android-apk.yml ← APK derleme + apk-latest sürümü
+data/scrape_kuranmeali.py       ← kuranmeali.com meâl kazıyıcı
 DEVAM_NOTLARI.md                ← bu dosya
 ```

@@ -80,7 +80,7 @@
   .c-stack { display: flex; flex-direction: column; align-items: center; width: 100%; }
   /* Boşluğu sayfaya yay: yığın tüm kart içi yüksekliğini kaplar, öğeler arası ve alt/üst boşluk eşitlenir. Ölçüm kartı (.measure) doğal yükseklikte kalır. */
   /* Kısa ayette kartı kısalt: boşluk yayılmaz, öğeler sabit aralıkla birbirine yaklaşır; kart yüksekliği içeriğe göre (1350–1920 px) ayarlanır. */
-  .card[data-compact="1"] .c-stack { gap: 34px; }
+  .card[data-compact="1"] .c-stack { gap: var(--c-gap, 34px); }
   /* Sıkı dolgu: kısaltılan (otomatik/elle) kartlarda üst-alt boşluk azalır; böylece kart içeriğe kadar daraltılabilir. */
   .card[data-tight="1"] .card-inner { padding: 100px 132px 170px; }
   .card[data-tight="1"][data-frame="simple"] .card-inner { padding: 120px 148px 215px; }
@@ -92,8 +92,8 @@
   .card .rz:hover::after, .card .rz.drag::after { opacity: 0.6; }
   .card .rz.drag::after { background: var(--gold); opacity: 0.9; }
   .card[data-spread="1"]:not(.measure) .c-stack { height: 100%; justify-content: space-evenly; }
-  .c-source { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: var(--source-size, 50px); color: var(--source-ink, #8A6E1A); letter-spacing: 0.01em; margin-bottom: 0.55em; }
-  .c-besmele { font-family: var(--ar-font, 'UthmanicHafs'), 'Noto Naskh Arabic', serif; direction: rtl; font-size: var(--besmele-size, 46px); line-height: 1.5; color: var(--card-ink, #234B32); opacity: 0.85; margin-bottom: 0.9em; }
+  .c-source { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: var(--source-size, 50px); color: var(--source-ink, #8A6E1A); letter-spacing: 0.01em; margin-bottom: var(--mb-src, 0.55em); }
+  .c-besmele { font-family: var(--ar-font, 'UthmanicHafs'), 'Noto Naskh Arabic', serif; direction: rtl; font-size: var(--besmele-size, 46px); line-height: var(--bes-lh, 1.5); color: var(--card-ink, #234B32); opacity: 0.85; margin-bottom: var(--mb-bes, 0.9em); }
   .c-arabic { font-family: var(--ar-font, 'UthmanicHafs'), 'Noto Naskh Arabic', serif; direction: rtl; font-size: var(--arabic-size, 92px); line-height: var(--ar-lh, 1.9); color: var(--card-ink, #234B32); width: 100%; unicode-bidi: plaintext; }
   .c-arabic .ayah { display: block; }
   .c-arabic .badge {
@@ -102,8 +102,8 @@
     font-feature-settings: "calt" 0, "liga" 0, "dlig" 0, "rlig" 0;
     font-size: 0.82em;
   }
-  .c-sep { width: 22%; border-top: 2px solid var(--card-rule); margin: 0.75em 0; }
-  .c-meal { font-family: var(--meal-font, 'Lora', Georgia, serif); font-style: var(--meal-style, italic); font-weight: 500; font-size: var(--meal-size, 52px); line-height: 1.62; color: var(--card-ink, #234B32); opacity: 0.92; width: 100%; text-wrap: balance; }
+  .c-sep { width: 22%; border-top: 2px solid var(--card-rule); margin: var(--sep-m, 0.75em) 0; }
+  .c-meal { font-family: var(--meal-font, 'Lora', Georgia, serif); font-style: var(--meal-style, italic); font-weight: 500; font-size: var(--meal-size, 52px); line-height: var(--meal-lh, 1.62); color: var(--card-ink, #234B32); opacity: 0.92; width: 100%; text-wrap: balance; }
   /* İki yana yasla (Word'deki gibi); son satır ortalı kalır, balance kapatılır ki satırlar tam genişliği kullansın. */
   .card[data-justify="1"] .c-meal { text-align: justify; text-align-last: center; text-wrap: wrap; hyphens: auto; }
   /* Arapçayı iki yana yasla: ayetler tek paragraf gibi akar, son satır ortalı. */
@@ -421,7 +421,10 @@
       <label class="toggle"><input type="checkbox" id="autoFit" checked><span class="track"></span><span>Otomatik sığdır</span></label>
       <label class="toggle"><input type="checkbox" id="spreadTgl" checked><span class="track"></span><span>Boşluğu sayfaya yay</span></label>
       <label class="toggle"><input type="checkbox" id="compactTgl"><span class="track"></span><span>Kısa ayette kartı kısalt (başlık, ayet ve meâl birbirine yaklaşsın)</span></label>
-      <p class="hint">Açıkken kısa ayetlerde kart 1080×1920 yerine içeriğe göre 1080×1080–1920 olur; "Boşluğu sayfaya yay" bu kartlarda uygulanmaz.</p>
+      <p class="hint">Açıkken kısa ayetlerde kart 1080×1920 yerine içeriğe göre 1080×720–1920 olur; "Boşluğu sayfaya yay" bu kartlarda uygulanmaz.</p>
+      <div class="slider-head" style="margin-top:12px"><span>Öğeler arası sıkılık</span><span class="val"><input class="szin" id="tightNum" type="number" inputmode="numeric" min="0" max="100" step="5" aria-label="Sıkılık yüzdesi"> %</span></div>
+      <input type="range" id="tightRange" min="0" max="100" step="5" value="0">
+      <p class="hint">Başlık, besmele, ayet ve meâl arasındaki boşlukları ve satır aralıklarını azaltır; yazılar iç içe geçmez. Kısa ayetlerde kartı kısaltmak içindir (0'dan büyük yapınca "Kısa ayette kartı kısalt" otomatik açılır).</p>
       <p class="hint"><b>Elle:</b> kartın üst veya alt kenarındaki tutamacı (küçük çubuk) sürükleyerek yüksekliği ayarlayabilirsin; başlık, besmele, ayet ve meâl otomatik yeniden dağılır. Çift dokunma otomatiğe döndürür.</p>
       <div style="margin-top:12px">
         <div class="slider-head"><span>Arapça</span><span class="val"><input class="szin" id="arNum" type="number" inputmode="numeric" min="8" max="400" step="1" aria-label="Arapça boyutu (px)"> px</span><span hidden id="arVal">92 px</span></div>
@@ -570,7 +573,7 @@
   var state = {
     sure: 2, a1: 255, a2: 255,
     frame: "ornate", bg: "#F4ECE0",
-    auto: true, spread: true, compact: false, justify: false, justFit: true, arJustify: false, besmele: true, splitMode: "auto",
+    auto: true, spread: true, compact: false, tight: 0, justify: false, justFit: true, arJustify: false, besmele: true, splitMode: "auto",
     mealKey: "diyanet", arText: "simple", arFont: "UthmanicHafs", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null, shared: null,
     authorSize: 24, pageNumSize: 26,
     pages: [], sel: 0
@@ -579,7 +582,7 @@
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(LS) || "{}");
-      ["frame", "bg", "auto", "spread", "compact", "justify", "justFit", "arJustify", "besmele", "splitMode"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
+      ["frame", "bg", "auto", "spread", "compact", "tight", "justify", "justFit", "arJustify", "besmele", "splitMode"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
       if (s.ink) DEF.ink = s.ink;
       if (s.srcInk) DEF.srcInk = s.srcInk;
       if (s.mealKey) state.mealKey = s.mealKey;
@@ -600,7 +603,7 @@
     try {
       var pg = state.pages[state.sel] || {};
       localStorage.setItem(LS, JSON.stringify({
-        frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, compact: state.compact, justify: state.justify, justFit: state.justFit, arJustify: state.arJustify, besmele: state.besmele, splitMode: state.splitMode,
+        frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, compact: state.compact, tight: state.tight, justify: state.justify, justFit: state.justFit, arJustify: state.arJustify, besmele: state.besmele, splitMode: state.splitMode,
         mealKey: state.mealKey, arText: state.arText, arFont: state.arFont, mealFont: state.mealFont, mealItalic: state.mealItalic, besmeleSize: state.besmeleSize, randDays: state.randDays,
         last: [state.sure, state.a1, state.a2], shared: state.shared, authorSize: state.authorSize, pageNumSize: state.pageNumSize,
         ink: pg.ink || DEF.ink, srcInk: pg.srcInk || DEF.srcInk,
@@ -840,7 +843,15 @@
     }
     var af = AR_INFO[state.arFont] || AR_INFO.UthmanicHafs;
     el.style.setProperty("--ar-font", "'" + af.n + "'");
-    el.style.setProperty("--ar-lh", af.lh);
+    var tg = clamp((+state.tight || 0) / 100, 0, 1), lerp = function (a, b) { return a + (b - a) * tg; };
+    /* Sıkılık: öğeler arası boşluklar ve satır aralıkları azalır; alt sınırlar harekelerin birbirine girmeyeceği değerlerdir. */
+    el.style.setProperty("--ar-lh", lerp(af.lh, Math.min(af.lh, 1.5)).toFixed(3));
+    el.style.setProperty("--bes-lh", lerp(1.5, 1.25).toFixed(3));
+    el.style.setProperty("--meal-lh", lerp(1.62, 1.42).toFixed(3));
+    el.style.setProperty("--mb-src", lerp(0.55, 0.12).toFixed(3) + "em");
+    el.style.setProperty("--mb-bes", lerp(0.9, 0.08).toFixed(3) + "em");
+    el.style.setProperty("--sep-m", lerp(0.75, 0.25).toFixed(3) + "em");
+    el.style.setProperty("--c-gap", lerp(34, 0).toFixed(1) + "px");
     var mf = state.mealFont || DEF.mealFont, mfi = FONT_INFO[mf] || {};
     el.style.setProperty("--meal-font", "'" + mf + "', " + (mfi.serif ? "Georgia, serif" : "system-ui, sans-serif"));
     el.style.setProperty("--meal-style", state.mealItalic ? "italic" : "normal");
@@ -932,7 +943,7 @@
     delete el.dataset.arjoff;
   }
   /* Kısa ayet: ölçüm kartında doğal içerik yüksekliği + dolgular; 1350–1920 px arasına sıkıştırılır. */
-  var CARD_H_MIN = 1080, CARD_H_MAX = 1920;
+  var CARD_H_MIN = 720, CARD_H_MAX = 1920;
   function computeCardH(pg) {
     var mc = ensureMeasure(); paintCard(mc, pg); mc.dataset.tight = "1";
     var inner = mc.querySelector(".card-inner"), stack = mc.querySelector(".c-stack"), cs = getComputedStyle(inner);
@@ -1624,6 +1635,14 @@
   besRange.addEventListener("input", function () { setBesmele(+besRange.value); });
   numIn(besNum, function (v) { setBesmele(v); });
   $("besAuto").addEventListener("click", function () { setBesmele(null); });
+  function setTight(v) {
+    v = clamp(Math.round(+v || 0), 0, 100); state.tight = v;
+    $("tightRange").value = v; if (document.activeElement !== $("tightNum")) $("tightNum").value = v;
+    if (v > 0 && !state.compact) { state.compact = true; compactTgl.checked = true; toast("Kısa ayette kartı kısalt açıldı."); }
+    repaintAll(); fitPreview(); save();
+  }
+  $("tightRange").addEventListener("input", function () { setTight($("tightRange").value); });
+  $("tightNum").addEventListener("input", function () { if ($("tightNum").value !== "") setTight($("tightNum").value); });
   compactTgl.addEventListener("change", function () { state.compact = compactTgl.checked; repaintAll(); fitPreview(); save(); });
   spreadTgl.addEventListener("change", function () { state.spread = spreadTgl.checked; render(); save(); });
   justifyTgl.addEventListener("change", function () { state.justify = justifyTgl.checked; if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { if (!p.manual) { paintCard(mc, p); autoFitPage(mc, p); } }); } render(); save(); });
@@ -1723,7 +1742,7 @@
       else toast(mealName());
     }).catch(function () { sel.value = getMealKey(); toast("Meâl yüklenemedi — bağlantıyı kontrol edin."); });
   });
-  autoFitTgl.checked = state.auto; spreadTgl.checked = state.spread; compactTgl.checked = state.compact; justifyTgl.checked = state.justify; justFitTgl.checked = state.justFit; arJustifyTgl.checked = state.arJustify; besmeleTgl.checked = state.besmele;
+  autoFitTgl.checked = state.auto; spreadTgl.checked = state.spread; compactTgl.checked = state.compact; $("tightRange").value = state.tight || 0; $("tightNum").value = state.tight || 0; justifyTgl.checked = state.justify; justFitTgl.checked = state.justFit; arJustifyTgl.checked = state.arJustify; besmeleTgl.checked = state.besmele;
   (function () {   /* açılır ayar grupları: hangileri açık, cihazda hatırlanır */
     var K = "gunun-ayeti-atolyesi.ayarGruplari", sgs = document.querySelectorAll("details.sgroup"), saved = null;
     try { saved = JSON.parse(localStorage.getItem(K) || "null"); } catch (e) {}

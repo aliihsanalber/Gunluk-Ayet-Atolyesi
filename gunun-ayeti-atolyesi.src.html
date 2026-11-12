@@ -63,9 +63,12 @@
   @media (min-width: 1180px) { .stage { min-height: 0; } }
   .cards-row { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(var(--preview-scale, 0.3)); transform-origin: center; display: flex; gap: 56px; align-items: center; }
 
-  .card { width: 1080px; height: 1920px; position: relative; overflow: hidden; background: var(--card-bg); font-family: 'Lora', Georgia, serif; flex: 0 0 auto; filter: drop-shadow(0 18px 40px var(--shadow)); transition: outline-color 0.12s; outline: 6px solid transparent; outline-offset: 10px; cursor: pointer; }
+  .card { width: 1080px; height: var(--card-h, 1920px); position: relative; overflow: hidden; background: var(--card-bg); font-family: 'Lora', Georgia, serif; flex: 0 0 auto; filter: drop-shadow(0 18px 40px var(--shadow)); transition: outline-color 0.12s; outline: 6px solid transparent; outline-offset: 10px; cursor: pointer; }
   .cards-row.multi .card.sel { outline-color: var(--gold); }
-  .card .ornate { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; pointer-events: none; }
+  /* Süslü çerçeve: üst ve alt yarı ayrı katman (köşe süsleri yalnız uçlarda), kart kısalınca (kısa ayet seçeneği) kırpılmaz. */
+  .card .ornate { position: absolute; left: 0; width: 100%; height: 50%; display: none; pointer-events: none; background-repeat: no-repeat; background-size: 1080px 1920px; }
+  .card .ornate.o-top { top: 0; background-position: left top; }
+  .card .ornate.o-bot { bottom: 0; background-position: left bottom; }
   .card[data-frame="ornate"] .ornate { display: block; }
   .card .rule-frame { position: absolute; inset: 46px; border: 2.5px solid var(--card-rule); display: none; pointer-events: none; }
   .card .rule-frame::after { content: ""; position: absolute; inset: 13px; border: 1px solid var(--card-rule); }
@@ -76,6 +79,8 @@
   .card[data-frame="ornate"] .card-inner { padding: 292px 150px 300px; }
   .c-stack { display: flex; flex-direction: column; align-items: center; width: 100%; }
   /* Boşluğu sayfaya yay: yığın tüm kart içi yüksekliğini kaplar, öğeler arası ve alt/üst boşluk eşitlenir. Ölçüm kartı (.measure) doğal yükseklikte kalır. */
+  /* Kısa ayette kartı kısalt: boşluk yayılmaz, öğeler sabit aralıkla birbirine yaklaşır; kart yüksekliği içeriğe göre (1350–1920 px) ayarlanır. */
+  .card[data-compact="1"] .c-stack { gap: 34px; }
   .card[data-spread="1"]:not(.measure) .c-stack { height: 100%; justify-content: space-evenly; }
   .c-source { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: var(--source-size, 50px); color: var(--source-ink, #8A6E1A); letter-spacing: 0.01em; margin-bottom: 0.55em; }
   .c-besmele { font-family: var(--ar-font, 'UthmanicHafs'), 'Noto Naskh Arabic', serif; direction: rtl; font-size: var(--besmele-size, 46px); line-height: 1.5; color: var(--card-ink, #234B32); opacity: 0.85; margin-bottom: 0.9em; }
@@ -399,6 +404,8 @@
       <p class="glabel"><span>Yazı boyutu</span><span class="selpill" id="sizeSel">kart 1</span></p>
       <label class="toggle"><input type="checkbox" id="autoFit" checked><span class="track"></span><span>Otomatik sığdır</span></label>
       <label class="toggle"><input type="checkbox" id="spreadTgl" checked><span class="track"></span><span>Boşluğu sayfaya yay</span></label>
+      <label class="toggle"><input type="checkbox" id="compactTgl"><span class="track"></span><span>Kısa ayette kartı kısalt (başlık, ayet ve meâl birbirine yaklaşsın)</span></label>
+      <p class="hint">Açıkken kısa ayetlerde kart 1080×1920 yerine içeriğe göre 1080×1350–1920 olur; "Boşluğu sayfaya yay" bu kartlarda uygulanmaz.</p>
       <div style="margin-top:12px">
         <div class="slider-head"><span>Arapça</span><span class="val"><input class="szin" id="arNum" type="number" inputmode="numeric" min="8" max="400" step="1" aria-label="Arapça boyutu (px)"> px</span><span hidden id="arVal">92 px</span></div>
         <input type="range" id="arRange" min="30" max="150" step="1" value="92">
@@ -539,14 +546,14 @@
   var arVal = $("arVal"), trVal = $("trVal"), srcVal = $("srcVal"), authorVal = $("authorVal"), pageVal = $("pageVal");
   var arNum = $("arNum"), trNum = $("trNum"), srcNum = $("srcNum"), authorNum = $("authorNum"), pageNum = $("pageNum"), besNum = $("besNum"), besRange = $("besRange");
   function setNum(el, v) { if (document.activeElement !== el) el.value = Math.round(v); }
-  var autoFitTgl = $("autoFit"), besmeleTgl = $("besmeleTgl"), spreadTgl = $("spreadTgl"), justifyTgl = $("mealJustify"), justFitTgl = $("mealJustFit"), arJustifyTgl = $("arJustify");
+  var autoFitTgl = $("autoFit"), besmeleTgl = $("besmeleTgl"), spreadTgl = $("spreadTgl"), compactTgl = $("compactTgl"), justifyTgl = $("mealJustify"), justFitTgl = $("mealJustFit"), arJustifyTgl = $("arJustify");
   var toastEl = $("toast");
 
   var LS = "gunun-ayeti-atolyesi.v4";
   var state = {
     sure: 2, a1: 255, a2: 255,
     frame: "ornate", bg: "#F4ECE0",
-    auto: true, spread: true, justify: false, justFit: true, arJustify: false, besmele: true, splitMode: "auto",
+    auto: true, spread: true, compact: false, justify: false, justFit: true, arJustify: false, besmele: true, splitMode: "auto",
     mealKey: "diyanet", arFont: "UthmanicHafs", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null, shared: null,
     authorSize: 24, pageNumSize: 26,
     pages: [], sel: 0
@@ -555,7 +562,7 @@
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(LS) || "{}");
-      ["frame", "bg", "auto", "spread", "justify", "justFit", "arJustify", "besmele", "splitMode"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
+      ["frame", "bg", "auto", "spread", "compact", "justify", "justFit", "arJustify", "besmele", "splitMode"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
       if (s.ink) DEF.ink = s.ink;
       if (s.srcInk) DEF.srcInk = s.srcInk;
       if (s.mealKey) state.mealKey = s.mealKey;
@@ -575,7 +582,7 @@
     try {
       var pg = state.pages[state.sel] || {};
       localStorage.setItem(LS, JSON.stringify({
-        frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, justify: state.justify, justFit: state.justFit, arJustify: state.arJustify, besmele: state.besmele, splitMode: state.splitMode,
+        frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, compact: state.compact, justify: state.justify, justFit: state.justFit, arJustify: state.arJustify, besmele: state.besmele, splitMode: state.splitMode,
         mealKey: state.mealKey, arFont: state.arFont, mealFont: state.mealFont, mealItalic: state.mealItalic, besmeleSize: state.besmeleSize, randDays: state.randDays,
         last: [state.sure, state.a1, state.a2], shared: state.shared, authorSize: state.authorSize, pageNumSize: state.pageNumSize,
         ink: pg.ink || DEF.ink, srcInk: pg.srcInk || DEF.srcInk,
@@ -765,7 +772,7 @@
     return c;
   }
   function cardHTML() {
-    return '<img class="ornate" alt="" src="' + ORNATE_SRC + '">' +
+    return '<div class="ornate o-top"></div><div class="ornate o-bot"></div>' +
       '<div class="rule-frame"></div>' +
       '<div class="card-inner"><div class="c-stack">' +
       '<div class="c-source"></div>' +
@@ -777,11 +784,13 @@
       '</div></div><div class="c-chip"></div><div class="c-page"></div>';
   }
   var ORNATE_SRC = "data:image/png;base64,@@FRAME_B64@@";
+  (function () { var st = document.createElement("style"); st.textContent = ".card .ornate{background-image:url(" + ORNATE_SRC + ")}"; document.head.appendChild(st); })();
 
   function paintCard(el, pg) {
     el.dataset.frame = state.frame;
     el.dataset.besmele = pg.showBesmele ? "1" : "0";
-    el.dataset.spread = state.spread ? "1" : "0";
+    el.dataset.compact = state.compact ? "1" : "0";
+    el.dataset.spread = (state.spread && !state.compact) ? "1" : "0";
     el.dataset.justify = state.justify ? "1" : "0";
     el.dataset.arjustify = state.arJustify ? "1" : "0";
     el.dataset.chip = pg.chip || "";
@@ -792,6 +801,10 @@
     el.style.setProperty("--meal-size", pg.trSize + "px");
     el.style.setProperty("--source-size", pg.srcSize + "px");
     el.style.setProperty("--besmele-size", besSz(pg.trSize) + "px");
+    if (!el.classList.contains("measure")) {   /* kart yüksekliği: kısa ayet seçeneği açıksa içeriğe göre */
+      var H = (state.compact && !pg.manual) ? computeCardH(pg) : 1920;
+      pg.cardH = H; el.style.setProperty("--card-h", H + "px");
+    }
     var af = AR_INFO[state.arFont] || AR_INFO.UthmanicHafs;
     el.style.setProperty("--ar-font", "'" + af.n + "'");
     el.style.setProperty("--ar-lh", af.lh);
@@ -883,6 +896,14 @@
       if (minFill < AR_JUSTIFY_MIN_FILL) return;   /* yaslama kapalı kalır */
     }
     delete el.dataset.arjoff;
+  }
+  /* Kısa ayet: ölçüm kartında doğal içerik yüksekliği + dolgular; 1350–1920 px arasına sıkıştırılır. */
+  var CARD_H_MIN = 1350, CARD_H_MAX = 1920;
+  function computeCardH(pg) {
+    var mc = ensureMeasure(); paintCard(mc, pg);
+    var inner = mc.querySelector(".card-inner"), stack = mc.querySelector(".c-stack"), cs = getComputedStyle(inner);
+    var h = stack.scrollHeight + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    return clamp(Math.round(h / 2) * 2, CARD_H_MIN, CARD_H_MAX);
   }
   function overflowOf(el) {
     var inner = el.querySelector(".card-inner"), stack = el.querySelector(".c-stack");
@@ -1018,7 +1039,7 @@
     var n = state.pages.length || 1;
     var rowW = n * 1080 + (n - 1) * 56;
     var w = Math.max(120, stage.clientWidth - 44), h = Math.max(180, stage.clientHeight - 44);
-    cardsRow.style.setProperty("--preview-scale", clamp(Math.min(w / rowW, h / 1920), 0.06, 0.92).toFixed(4));
+    cardsRow.style.setProperty("--preview-scale", clamp(Math.min(w / rowW, h / Math.max.apply(null, state.pages.map(function (p) { return p.cardH || 1920; }).concat([CARD_H_MIN]))), 0.06, 0.92).toFixed(4));
   }
 
   /* ---- controls <-> selected page ---- */
@@ -1202,7 +1223,7 @@
     try { await document.fonts.ready; } catch (e) {}
     await new Promise(function (r) { setTimeout(r, 60); });
     var opts = {
-      width: 1080, height: 1920, pixelRatio: 2, backgroundColor: state.bg,
+      width: 1080, height: el.offsetHeight || 1920, pixelRatio: 2, backgroundColor: state.bg,
       style: { transform: "none", margin: "0", filter: "none", outline: "0", "outline-offset": "0" }
     };
     if (!renderOnePng._primed) { try { await window.htmlToImage.toBlob(el, opts); } catch (e) {} renderOnePng._primed = true; }
@@ -1522,6 +1543,7 @@
   besRange.addEventListener("input", function () { setBesmele(+besRange.value); });
   numIn(besNum, function (v) { setBesmele(v); });
   $("besAuto").addEventListener("click", function () { setBesmele(null); });
+  compactTgl.addEventListener("change", function () { state.compact = compactTgl.checked; repaintAll(); fitPreview(); save(); });
   spreadTgl.addEventListener("change", function () { state.spread = spreadTgl.checked; render(); save(); });
   justifyTgl.addEventListener("change", function () { state.justify = justifyTgl.checked; if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { if (!p.manual) { paintCard(mc, p); autoFitPage(mc, p); } }); } render(); save(); });
   arJustifyTgl.addEventListener("change", function () { state.arJustify = arJustifyTgl.checked; refit(); save(); });
@@ -1620,7 +1642,7 @@
       else toast(mealName());
     }).catch(function () { sel.value = getMealKey(); toast("Meâl yüklenemedi — bağlantıyı kontrol edin."); });
   });
-  autoFitTgl.checked = state.auto; spreadTgl.checked = state.spread; justifyTgl.checked = state.justify; justFitTgl.checked = state.justFit; arJustifyTgl.checked = state.arJustify; besmeleTgl.checked = state.besmele;
+  autoFitTgl.checked = state.auto; spreadTgl.checked = state.spread; compactTgl.checked = state.compact; justifyTgl.checked = state.justify; justFitTgl.checked = state.justFit; arJustifyTgl.checked = state.arJustify; besmeleTgl.checked = state.besmele;
   (function () {   /* açılır ayar grupları: hangileri açık, cihazda hatırlanır */
     var K = "gunun-ayeti-atolyesi.ayarGruplari", sgs = document.querySelectorAll("details.sgroup"), saved = null;
     try { saved = JSON.parse(localStorage.getItem(K) || "null"); } catch (e) {}

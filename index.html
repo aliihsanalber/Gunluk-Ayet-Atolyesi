@@ -864,7 +864,7 @@
     return worst;
   }
   function mealJustifyGuard(el, pg) {
-    if (el.classList.contains("measure") || !state.justify || !state.justFit || pg.manual) return;
+    if (el.classList.contains("measure") || !state.justify || !state.justFit) return;
     var me = el.querySelector(".c-meal"), base = pg.trSize;
     if (!me || me.getBoundingClientRect().width <= 0) return;
     el.dataset.mjoff = "1";
@@ -872,7 +872,8 @@
       var w0 = mealWorstSlack(el);
       if (w0 <= MJ_MAX_SLACK) return;
       var bestK = 0, bestW = w0;
-      for (var k = 1; k * MJ_STEP <= MJ_MAX_SHRINK + 1e-9; k++) {
+      /* elle boyutlandırılmış sayfada yazı boyutuna dokunulmaz; yalnız aşağıdaki "ortala" geri düşüşü uygulanır */
+      for (var k = 1; !pg.manual && k * MJ_STEP <= MJ_MAX_SHRINK + 1e-9; k++) {
         el.style.setProperty("--meal-size", (base * (1 - k * MJ_STEP)).toFixed(2) + "px");
         var w = mealWorstSlack(el);
         if (w < bestW - 1e-6) { bestW = w; bestK = k; }

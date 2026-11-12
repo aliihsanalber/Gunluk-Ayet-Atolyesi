@@ -370,7 +370,13 @@
     <div class="group">
       <p class="glabel"><span>Arapça yazısı</span></p>
       <div>
-        <p class="sublabel">Yazı tipi</p>
+        <p class="sublabel">Yazım</p>
+        <div class="seg" id="arTextSeg" role="group" aria-label="Arapça yazım">
+          <button type="button" data-artext="simple" aria-pressed="true">Türkiye (sade)</button>
+          <button type="button" data-artext="uthmani" aria-pressed="false">Medine (Uthmani)</button>
+        </div>
+        <p class="hint">"Türkiye (sade)": düz elif, tam uzun ünlüler ve yuvarlak cezm ile Diyanet / Hasenat tarzı okunaklı yazım. Metin: <a href="http://tanzil.net" target="_blank" rel="noopener">Tanzil.net</a> (CC BY 3.0, değiştirilmeden). "Medine": Suudi mushaf yazımı.</p>
+        <p class="sublabel" style="margin-top:12px">Yazı tipi</p>
         <div class="fontgrid" id="arFontSeg" role="group" aria-label="Arapça font"></div>
         <label class="toggle" style="margin-top:8px"><input type="checkbox" id="arJustify"><span class="track"></span><span>Arapçayı iki yana yasla</span></label>
         <div class="row" style="margin-top:8px"><button type="button" class="act mini" id="arFontUpload">＋ Font dosyası yükle</button><input type="file" id="arFontFile" accept=".ttf,.otf,.woff,.woff2" multiple hidden></div>
@@ -565,7 +571,7 @@
     sure: 2, a1: 255, a2: 255,
     frame: "ornate", bg: "#F4ECE0",
     auto: true, spread: true, compact: false, justify: false, justFit: true, arJustify: false, besmele: true, splitMode: "auto",
-    mealKey: "diyanet", arFont: "UthmanicHafs", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null, shared: null,
+    mealKey: "diyanet", arText: "simple", arFont: "UthmanicHafs", mealFont: "Lora", mealItalic: true, besmeleSize: null, randDays: 30, last: null, shared: null,
     authorSize: 24, pageNumSize: 26,
     pages: [], sel: 0
   };
@@ -579,6 +585,7 @@
       if (s.mealKey) state.mealKey = s.mealKey;
       if (s.mealFont) state.mealFont = s.mealFont;
       if (s.arFont) state.arFont = s.arFont;
+      if (s.arText) state.arText = s.arText;
       if (s.mealItalic !== undefined) state.mealItalic = !!s.mealItalic;
       if (s.besmeleSize) state.besmeleSize = +s.besmeleSize;
       if (s.randDays !== undefined && s.randDays !== null) state.randDays = +s.randDays;
@@ -594,7 +601,7 @@
       var pg = state.pages[state.sel] || {};
       localStorage.setItem(LS, JSON.stringify({
         frame: state.frame, bg: state.bg, auto: state.auto, spread: state.spread, compact: state.compact, justify: state.justify, justFit: state.justFit, arJustify: state.arJustify, besmele: state.besmele, splitMode: state.splitMode,
-        mealKey: state.mealKey, arFont: state.arFont, mealFont: state.mealFont, mealItalic: state.mealItalic, besmeleSize: state.besmeleSize, randDays: state.randDays,
+        mealKey: state.mealKey, arText: state.arText, arFont: state.arFont, mealFont: state.mealFont, mealItalic: state.mealItalic, besmeleSize: state.besmeleSize, randDays: state.randDays,
         last: [state.sure, state.a1, state.a2], shared: state.shared, authorSize: state.authorSize, pageNumSize: state.pageNumSize,
         ink: pg.ink || DEF.ink, srcInk: pg.srcInk || DEF.srcInk,
         theme: document.documentElement.getAttribute("data-theme") || ""
@@ -620,7 +627,18 @@
   function sureLabel(s) { return s + ". " + sureName(s) + " Sûresi"; }
   function refLabel(s, a1, a2) { return s + "-" + sureName(s) + " Sûresi: " + (a1 === a2 ? a1 : a1 + "-" + a2); }
 
-  function ayahAr(s, v) { return (Q.ar[s - 1][v - 1] || "").trim(); }
+  /* Arapça metin: "simple" = Türkiye'de yaygın sade/imlâî harekeli yazım (Tanzil.net Simple, CC BY 3.0, değiştirilmeden; ar/simple.json, ilk kullanımda yüklenir),
+     "uthmani" = Medine mushafı yazımı (gömülü). */
+  var AR2 = null, BES_UTH = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ", BES_SIMPLE = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
+  function loadArSimple() {
+    if (AR2) return Promise.resolve(AR2);
+    return fetch("ar/simple.json").then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(function (j) { if (!j.ar || j.ar.length !== 114) throw new Error("veri"); AR2 = j.ar; return AR2; });
+  }
+  function ayahAr(s, v) {
+    var t = (state.arText === "simple" && AR2) ? AR2[s - 1][v - 1] : Q.ar[s - 1][v - 1];
+    return (t || "").trim();
+  }
   function getMealKey() { return state.mealKey || Q.defaultMeal || "diyanet"; }
   function getMeal() { return Q.meals[getMealKey()] || Q.meals[Q.defaultMeal]; }
   var EDITS = {};   /* "meâl|sûre|ayet" -> elle düzenlenmiş metin (yalnız bu oturum) */
@@ -787,7 +805,7 @@
       '<div class="rule-frame"></div>' +
       '<div class="card-inner"><div class="c-stack">' +
       '<div class="c-source"></div>' +
-      '<div class="c-besmele" dir="rtl">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>' +
+      '<div class="c-besmele" dir="rtl"></div>' +
       '<div class="c-arabic" dir="rtl"></div>' +
       '<div class="c-sep"></div>' +
       '<div class="c-meal"></div>' +
@@ -800,6 +818,7 @@
   function paintCard(el, pg) {
     el.dataset.frame = state.frame;
     el.dataset.besmele = pg.showBesmele ? "1" : "0";
+    el.querySelector(".c-besmele").textContent = (state.arText === "simple" && AR2) ? BES_SIMPLE : BES_UTH;
     el.dataset.compact = state.compact ? "1" : "0";
     el.dataset.tight = (state.compact || pg.fixedH) ? "1" : "0";
     el.dataset.spread = (state.spread && !state.compact) ? "1" : "0";
@@ -1498,6 +1517,14 @@
     if (state.auto) { var mc = ensureMeasure(); state.pages.forEach(function (p) { if (!p.manual) { paintCard(mc, p); autoFitPage(mc, p); } }); }
     render();
   }
+  function syncArTextSeg() { Array.prototype.forEach.call($("arTextSeg").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.artext === state.arText)); }); }
+  $("arTextSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var v = b.dataset.artext;
+    function apply() { state.arText = v; syncArTextSeg(); buildPages(); render(); save(); }
+    if (v === "simple" && !AR2) { toast("Metin yükleniyor…"); loadArSimple().then(apply).catch(function () { toast("Metin yüklenemedi — bağlantıyı kontrol edin."); }); }
+    else apply();
+  });
   $("arFontUpload").addEventListener("click", function () { $("arFontFile").click(); });
   $("arFontFile").addEventListener("change", function () {
     var files = Array.prototype.slice.call($("arFontFile").files || []), last = null;
@@ -1715,8 +1742,10 @@
   $("randClear").addEventListener("click", function () { rhSave({}); updateRandInfo(); toast("Rastgele geçmişi temizlendi."); });
   /* Açılışta: en son PAYLAŞILAN ayet; hiç paylaşım yoksa son bakılan ayet; o da yoksa rastgele. */
   var startRef = (state.shared && state.shared.length === 3) ? state.shared : (state.last && state.last.length === 3 ? state.last : null);
-  if (startRef) loadRef(startRef[0], startRef[1], startRef[2]); else randomPick();
-  fitPreview();
+  syncArTextSeg();
+  /* "Türkiye (sade)" metni ilk kartta hazır olsun (Medine metni bir an görünmesin); yüklenemezse Medine'ye dön. */
+  (state.arText === "simple" ? loadArSimple() : Promise.resolve()).catch(function () { state.arText = "uthmani"; syncArTextSeg(); toast("Sade Arapça metin yüklenemedi, Medine yazımı kullanılıyor."); })
+    .then(function () { if (startRef) loadRef(startRef[0], startRef[1], startRef[2]); else randomPick(); fitPreview(); });
   if (state.mealKey !== Q.defaultMeal && !Q.meals[state.mealKey]) {
     loadMeal(state.mealKey).then(function () { buildPages(); render(); })
       .catch(function () { state.mealKey = Q.defaultMeal; $("mealSelect").value = Q.defaultMeal; toast("Kayıtlı meâl yüklenemedi; Diyanet meâline dönüldü."); });

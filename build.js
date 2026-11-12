@@ -47,6 +47,10 @@ for (const f of ['icon-192.png', 'icon-512.png']) {
   console.log('  +', f);
 }
 
+/* Arapça sade metin (ar/*) */
+fs.mkdirSync(R('dist', 'ar'), { recursive: true });
+for (const f of fs.readdirSync(R('ar'))) fs.copyFileSync(R('ar', f), R('dist', 'ar', f));
+
 /* Meâl dosyaları (meals/*.json) — sayfa meâli seçilince buradan yükler */
 fs.mkdirSync(R('dist', 'meals'), { recursive: true });
 for (const f of fs.readdirSync(R('meals'))) {

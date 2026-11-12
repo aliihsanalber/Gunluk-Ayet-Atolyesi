@@ -179,3 +179,7 @@ git init
 git add .
 git commit -m "Günün Ayeti Atölyesi v4"
 ```
+
+## Arapça metin kaynakları
+- **Medine (Uthmani):** fawazahmed0/quran-api (gömülü).
+- **Türkiye (sade, imlâî harekeli):** [Tanzil.net](http://tanzil.net) Quran Text (Simple) v1.0.2, CC BY 3.0, değiştirilmeden kullanılır (`ar/simple.json`, telif bloğu `ar/TANZIL-LICENSE.txt`).

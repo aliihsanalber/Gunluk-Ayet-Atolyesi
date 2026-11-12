@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['android-app/**', 'index.html', 'meals/**', '.github/workflows/android-apk.yml']
+    paths: ['android-app/**', 'index.html', 'meals/**', 'ar/**', '.github/workflows/android-apk.yml']
 permissions:
   contents: write
 jobs:

@@ -231,6 +231,17 @@
   .settings-overlay-bg { position: absolute; inset: 0; cursor: pointer; }
   .settings-panel { position: relative; background: var(--surface); border-left: 1px solid var(--line); width: 440px; max-width: 92vw; max-height: 100vh; overflow-y: auto; padding: 0 0 60px; box-shadow: -8px 0 30px var(--shadow); }
   .settings-open .stage { margin-right: 440px; }
+  /* Telefon: ayarlar alttan açılan sayfa; kart önizlemesi üstte görünür kalır, her değişiklik anında yansır. */
+  @media (max-width: 700px) {
+    .settings-overlay { pointer-events: none; align-items: flex-end; justify-content: stretch; }
+    .settings-overlay-bg { display: none; }
+    .settings-panel { pointer-events: auto; width: 100%; max-width: 100%; height: 48dvh; max-height: 48dvh; border-left: 0; border-top: 1px solid var(--line); border-radius: 16px 16px 0 0; box-shadow: 0 -8px 30px var(--shadow); padding-bottom: 24px; overscroll-behavior: contain; }
+    .settings-head { padding: 10px 18px; border-radius: 16px 16px 0 0; }
+    body.settings-open .app { height: 52dvh; min-height: 0; overflow: hidden; }
+    body.settings-open .topbar, body.settings-open .nav-ctl { display: none; }
+    body.settings-open .workspace { height: 100%; }
+    body.settings-open .stage { margin-right: 0; min-height: 0; height: 100%; }
+  }
   .settings-head { display: flex; align-items: center; gap: 10px; padding: 16px 22px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); z-index: 1; }
   details.sgroup { border-bottom: 1px solid var(--line); }
   details.sgroup > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 15px 22px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 15px; color: var(--ink); user-select: none; }
@@ -1326,7 +1337,7 @@
   }
 
   /* ---- events ---- */
-  $("settingsBtn").addEventListener("click", function () { $("settingsOverlay").classList.add("open"); document.body.classList.add("settings-open"); setTimeout(fitPreview, 50); });
+  $("settingsBtn").addEventListener("click", function () { window.scrollTo(0, 0); $("settingsOverlay").classList.add("open"); document.body.classList.add("settings-open"); setTimeout(fitPreview, 50); });
   $("settingsClose").addEventListener("click", function () { $("settingsOverlay").classList.remove("open"); document.body.classList.remove("settings-open"); setTimeout(fitPreview, 50);  });
   $("settingsBg").addEventListener("click", function () { $("settingsOverlay").classList.remove("open"); document.body.classList.remove("settings-open"); setTimeout(fitPreview, 50); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") { $("settingsOverlay").classList.remove("open"); document.body.classList.remove("settings-open"); setTimeout(fitPreview, 50); } });

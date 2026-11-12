@@ -232,6 +232,15 @@
   .settings-panel { position: relative; background: var(--surface); border-left: 1px solid var(--line); width: 440px; max-width: 92vw; max-height: 100vh; overflow-y: auto; padding: 0 0 60px; box-shadow: -8px 0 30px var(--shadow); }
   .settings-open .stage { margin-right: 440px; }
   .settings-head { display: flex; align-items: center; gap: 10px; padding: 16px 22px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); z-index: 1; }
+  details.sgroup { border-bottom: 1px solid var(--line); }
+  details.sgroup > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 15px 22px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 15px; color: var(--ink); user-select: none; }
+  details.sgroup > summary::-webkit-details-marker { display: none; }
+  details.sgroup > summary > span:first-child { flex: 1; }
+  details.sgroup > summary::after { content: ""; width: 9px; height: 9px; border-right: 2px solid var(--gold); border-bottom: 2px solid var(--gold); transform: rotate(45deg); margin-right: 4px; transition: transform .15s; }
+  details.sgroup[open] > summary::after { transform: rotate(-135deg); }
+  details.sgroup[open] > summary { border-bottom: 1px dashed var(--line); background: var(--surface-2, transparent); }
+  details.sgroup .sbody .group { border-bottom: 0; padding-top: 14px; padding-bottom: 4px; }
+  details.sgroup .sbody { padding-bottom: 10px; }
   .settings-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 16px; flex: 1; }
   .settings-head .closex { border: 0; background: transparent; color: var(--ink-dim); font-size: 22px; cursor: pointer; padding: 0; line-height: 1; }
   .settings-head .closex:hover { color: var(--ink); }
@@ -307,13 +316,48 @@
       <button class="closex" id="settingsClose" type="button" aria-label="Kapat">&times;</button>
     </div>
 
+    <details class="sgroup" id="sg-meal" open>
+      <summary><span>Meâl</span><span class="sgnote"></span></summary>
+      <div class="sbody">
     <div class="group">
       <p class="glabel"><span>Meâl seçimi</span></p>
       <select id="mealSelect" style="width:100%;font:inherit;font-size:13px;padding:9px 10px;border:1px solid var(--line);border-radius:var(--radius);background:var(--bg);color:var(--ink);cursor:pointer">
       </select>
       <p class="swatch-note" id="mealCount">Meâl kaynağını değiştirince kart otomatik güncellenir.</p>
     </div>
+    <div class="group">
+      <p class="glabel"><span>Meâl yazısı</span></p>
+      <div>
+        <p class="sublabel">Yazı tipi</p>
+        <div class="fontgrid" id="mealFontSeg" role="group" aria-label="Meâl fontu"></div>
+        <label class="toggle" style="margin-top:8px"><input type="checkbox" id="mealItalic"><span class="track"></span><span>Meâl italik (eğik)</span></label>
+        <label class="toggle" style="margin-top:8px"><input type="checkbox" id="mealJustify"><span class="track"></span><span>Meâli iki yana yasla</span></label>
+        <label class="toggle" style="margin-top:8px"><input type="checkbox" id="mealJustFit" checked><span class="track"></span><span>Yaslarken geniş boşlukları yazıyı hafifçe küçülterek gider</span></label>
+      </div>
+    </div>
+      </div>
+    </details>
 
+    <details class="sgroup" id="sg-arabic">
+      <summary><span>Arapça</span><span class="sgnote"></span></summary>
+      <div class="sbody">
+    <div class="group">
+      <p class="glabel"><span>Arapça yazısı</span></p>
+      <div>
+        <p class="sublabel">Yazı tipi</p>
+        <div class="fontgrid" id="arFontSeg" role="group" aria-label="Arapça font"></div>
+        <label class="toggle" style="margin-top:8px"><input type="checkbox" id="arJustify"><span class="track"></span><span>Arapçayı iki yana yasla</span></label>
+        <div class="row" style="margin-top:8px"><button type="button" class="act mini" id="arFontUpload">＋ Font dosyası yükle</button><input type="file" id="arFontFile" accept=".ttf,.otf,.woff,.woff2" multiple hidden></div>
+        <p class="hint">Yüklediğin font yalnızca bu cihazın tarayıcısında saklanır, hiçbir yere gönderilmez. Kendi fontlarını (ör. lisanslı mushaf fontları) böyle kullanabilirsin.</p>
+        <p class="hint">Kur'an programlarında yaygın yazı tipleri. Mushaf yazısı için "Medine Mushafı (Hafs)" önerilir.</p>
+      </div>
+    </div>
+      </div>
+    </details>
+
+    <details class="sgroup" id="sg-view">
+      <summary><span>Görünüm (çerçeve, renkler)</span><span class="sgnote"></span></summary>
+      <div class="sbody">
     <div class="group">
       <p class="glabel"><span>Çerçeve</span></p>
       <div class="seg" id="frameSeg" role="group" aria-label="Çerçeve türü">
@@ -322,12 +366,10 @@
         <button type="button" data-frame="ornate" aria-pressed="true">Süslü</button>
       </div>
     </div>
-
     <div class="group">
       <p class="glabel"><span>Zemin rengi</span></p>
       <div class="swatches" id="bgSwatches"></div>
     </div>
-
     <div class="group">
       <p class="glabel"><span>Renkler</span><span class="selpill" id="colorSel">kart 1</span></p>
       <p class="sublabel">Ayet &amp; meâl rengi</p>
@@ -336,7 +378,12 @@
       <div class="swatches" id="srcInkSwatches"></div>
       <p class="swatch-note">Renkler yalnız seçili kartı etkiler.</p>
     </div>
+      </div>
+    </details>
 
+    <details class="sgroup" id="sg-size">
+      <summary><span>Yazı boyutu ve yerleşim</span><span class="sgnote"></span></summary>
+      <div class="sbody">
     <div class="group">
       <p class="glabel"><span>Yazı boyutu</span><span class="selpill" id="sizeSel">kart 1</span></p>
       <label class="toggle"><input type="checkbox" id="autoFit" checked><span class="track"></span><span>Otomatik sığdır</span></label>
@@ -366,30 +413,19 @@
         <input type="range" id="pageRange" min="12" max="48" step="1" value="26">
       </div>
       <p class="swatch-note">Boyutlar tüm kartları etkiler.</p>
-      <div style="margin-top:10px">
-        <p class="sublabel">Arapça yazı tipi</p>
-        <div class="fontgrid" id="arFontSeg" role="group" aria-label="Arapça font"></div>
-        <label class="toggle" style="margin-top:8px"><input type="checkbox" id="arJustify"><span class="track"></span><span>Arapçayı iki yana yasla</span></label>
-        <div class="row" style="margin-top:8px"><button type="button" class="act mini" id="arFontUpload">＋ Font dosyası yükle</button><input type="file" id="arFontFile" accept=".ttf,.otf,.woff,.woff2" multiple hidden></div>
-        <p class="hint">Yüklediğin font yalnızca bu cihazın tarayıcısında saklanır, hiçbir yere gönderilmez. Kendi fontlarını (ör. lisanslı mushaf fontları) böyle kullanabilirsin.</p>
-        <p class="hint">Kur'an programlarında yaygın yazı tipleri. Mushaf yazısı için "Medine Mushafı (Hafs)" önerilir.</p>
-      </div>
-      <div style="margin-top:14px">
-        <p class="sublabel">Meâl yazı tipi</p>
-        <div class="fontgrid" id="mealFontSeg" role="group" aria-label="Meâl fontu"></div>
-        <label class="toggle" style="margin-top:8px"><input type="checkbox" id="mealItalic"><span class="track"></span><span>Meâl italik (eğik)</span></label>
-        <label class="toggle" style="margin-top:8px"><input type="checkbox" id="mealJustify"><span class="track"></span><span>Meâli iki yana yasla</span></label>
-        <label class="toggle" style="margin-top:8px"><input type="checkbox" id="mealJustFit" checked><span class="track"></span><span>Yaslarken geniş boşlukları yazıyı hafifçe küçülterek gider</span></label>
-      </div>
     </div>
+      </div>
+    </details>
 
+    <details class="sgroup" id="sg-pick">
+      <summary><span>Rastgele ayet ve kart bölme</span><span class="sgnote"></span></summary>
+      <div class="sbody">
     <div class="group">
       <p class="glabel"><span>Rastgele ayet</span></p>
       <div class="slider-head"><span>Aynı ayet kaç gün tekrar önerilmesin?</span><span class="val"><input class="szin" id="randDays" type="number" inputmode="numeric" min="0" max="365" step="1"> gün</span></div>
       <p class="rand-info" id="randInfo"></p>
       <div style="margin-top:8px"><button type="button" class="act mini" id="randClear">Geçmişi temizle</button></div>
     </div>
-
     <div class="group">
       <p class="glabel"><span>Kart bölme</span></p>
       <div class="seg" id="splitSeg" role="group" aria-label="Kart bölme">
@@ -400,7 +436,12 @@
       <label class="toggle" style="margin-top:8px"><input type="checkbox" id="besmeleTgl" checked><span class="track"></span><span>Besmele göster (ilk kart)</span></label>
       <p class="swatch-note">Sığmayan ayet(ler) otomatik ayrı kartlara bölünür.</p>
     </div>
+      </div>
+    </details>
 
+    <details class="sgroup" id="sg-edit">
+      <summary><span>Gelişmiş düzenleme</span><span class="sgnote"></span></summary>
+      <div class="sbody">
     <div class="group">
       <p class="glabel"><span>Düzenle</span></p>
       <details class="editor" id="editor">
@@ -411,6 +452,9 @@
         <p class="hint" id="mealNote"></p>
       </details>
     </div>
+      </div>
+    </details>
+
   </div>
 </div>
 
@@ -761,8 +805,8 @@
   var AR_JUSTIFY_MIN_FILL = 0.78;
   /* Meâl yaslama ince ayarı: yaslanmamış hâlde bir satırın (ayetin son satırı hariç) boşluğu genişliğin %MAX'ından
      fazlaysa (sonraki kelime sığmadığı için aralar çok açılır), yazıyı en çok %8 küçülterek (0,5'lik adımlarla)
-     o kelimenin yukarı çekilmesini dener. Yalnızca istisna durumda devreye girer; elle boyutlanmış sayfaya dokunmaz. */
-  var MJ_MAX_SLACK = 0.10, MJ_MAX_SHRINK = 0.08, MJ_STEP = 0.005;
+     o kelimenin yukarı çekilmesini dener; olmazsa o kartta yaslamayı bırakıp meâli ortalar. Yalnızca istisna durumda devreye girer; elle boyutlanmış sayfaya dokunmaz. */
+  var MJ_MAX_SLACK = 0.15, MJ_MAX_SHRINK = 0.08, MJ_STEP = 0.005;
   function mealWorstSlack(el) {
     var worst = 0, me = el.querySelector(".c-meal");
     var fs = parseFloat(getComputedStyle(me).fontSize) || 40, tol = fs * 0.45;
@@ -796,9 +840,13 @@
         if (w < bestW - 1e-6) { bestW = w; bestK = k; }
         if (w <= MJ_MAX_SLACK) break;
       }
-      /* yeterli iyileşme yoksa orijinal boyutta kal */
-      if (bestK && (bestW <= MJ_MAX_SLACK || bestW <= w0 * 0.6)) el.style.setProperty("--meal-size", (base * (1 - bestK * MJ_STEP)).toFixed(2) + "px");
-      else el.style.setProperty("--meal-size", base + "px");
+      if (bestK && bestW <= MJ_MAX_SLACK) {
+        el.style.setProperty("--meal-size", (base * (1 - bestK * MJ_STEP)).toFixed(2) + "px");
+      } else {
+        /* küçültmek de işe yaramadı: yaslamayı bu kartta bırak, meâl ortalı görünsün (boyut orijinal) */
+        el.style.setProperty("--meal-size", base + "px");
+        el.dataset.justify = "0";
+      }
     } finally { delete el.dataset.mjoff; }
   }
   function arJustifyGuard(el) {
@@ -1562,6 +1610,16 @@
     }).catch(function () { sel.value = getMealKey(); toast("Meâl yüklenemedi — bağlantıyı kontrol edin."); });
   });
   autoFitTgl.checked = state.auto; spreadTgl.checked = state.spread; justifyTgl.checked = state.justify; justFitTgl.checked = state.justFit; arJustifyTgl.checked = state.arJustify; besmeleTgl.checked = state.besmele;
+  (function () {   /* açılır ayar grupları: hangileri açık, cihazda hatırlanır */
+    var K = "gunun-ayeti-atolyesi.ayarGruplari", sgs = document.querySelectorAll("details.sgroup"), saved = null;
+    try { saved = JSON.parse(localStorage.getItem(K) || "null"); } catch (e) {}
+    if (saved) Array.prototype.forEach.call(sgs, function (d) { d.open = saved.indexOf(d.id) >= 0; });
+    Array.prototype.forEach.call(sgs, function (d) {
+      d.addEventListener("toggle", function () {
+        try { localStorage.setItem(K, JSON.stringify(Array.prototype.filter.call(sgs, function (x) { return x.open; }).map(function (x) { return x.id; }))); } catch (e) {}
+      });
+    });
+  })();
   $("randDays").value = state.randDays; updateRandInfo();
   $("randDays").addEventListener("input", function () {
     var v = parseInt($("randDays").value, 10); if (!isFinite(v) || v < 0) return;

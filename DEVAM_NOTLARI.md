@@ -71,6 +71,7 @@ README güncellendi (Rust bölümü, v5 notları, yayın akışı).
 - **Yaslama geri düşüşü:** `mealJustifyGuard` yazıyı küçültünce de boşluk eşiğin altına inmezse o kartta yaslama bırakılır, meâl ortalanır (`data-justify="0"`, boyut orijinal). Eşik %15: 40 örnek ayette Lora/Poppins ile ~%70 yaslı kalır, ~%30 ortalanır.
 - **Ayarlar menüsü açılır gruplar:** `details.sgroup` — Meâl (açık), Arapça, Görünüm, Yazı boyutu ve yerleşim, Rastgele ayet ve kart bölme, Gelişmiş düzenleme. Açık/kapalı durum `gunun-ayeti-atolyesi.ayarGruplari` anahtarında hatırlanır. Tüm kontrol kimlikleri (id) korundu.
 - **Meâl sahibi satırı:** Satır sabit konumlu (`.c-author`) olduğundan metin bloğunun alt dolgusu artırıldı (`.card-inner` padding-bottom: çerçevesiz 210, basit 260, süslü 300 px) ki yayma düzeni onunla yapışmasın.
+- **Telefonda ayarlar alttan açılan sayfa (≤700 px):** Ayarlar ekranı kaplamaz; alttan %48 yükseklikte sayfa açılır, üstte kart önizlemesi (`body.settings-open`, üst çubuk ve ayet kontrolleri geçici gizlenir) görünür kalır, her ayar anında karta yansır. Masaüstünde eskisi gibi sağ panel.
 - Telefonda doğrulananlar: PNG çıktısı (yeni yazı tipleriyle), 13:40-43 tek kartta sığıyor.
 
 ### 1.5 Android uygulaması (APK)

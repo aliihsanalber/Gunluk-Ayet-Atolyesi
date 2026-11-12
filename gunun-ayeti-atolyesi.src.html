@@ -81,6 +81,12 @@
   /* Boşluğu sayfaya yay: yığın tüm kart içi yüksekliğini kaplar, öğeler arası ve alt/üst boşluk eşitlenir. Ölçüm kartı (.measure) doğal yükseklikte kalır. */
   /* Kısa ayette kartı kısalt: boşluk yayılmaz, öğeler sabit aralıkla birbirine yaklaşır; kart yüksekliği içeriğe göre (1350–1920 px) ayarlanır. */
   .card[data-compact="1"] .c-stack { gap: 34px; }
+  /* Kart yüksekliği tutamaçları (üst/alt kenar): sürükleyerek kartı kısalt/uzat; içerik otomatik yeniden dağılır. PNG'ye girmez. */
+  .card .rz { position: absolute; left: 50%; transform: translateX(-50%); width: 420px; height: 130px; z-index: 5; touch-action: none; cursor: ns-resize; display: flex; align-items: center; justify-content: center; }
+  .card .rz-t { top: 0; } .card .rz-b { bottom: 0; }
+  .card .rz::after { content: ""; width: 170px; height: 14px; border-radius: 8px; background: var(--card-ink, #234B32); opacity: 0.28; transition: opacity .15s; }
+  .card .rz:hover::after, .card .rz.drag::after { opacity: 0.6; }
+  .card .rz.drag::after { background: var(--gold); opacity: 0.9; }
   .card[data-spread="1"]:not(.measure) .c-stack { height: 100%; justify-content: space-evenly; }
   .c-source { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: var(--source-size, 50px); color: var(--source-ink, #8A6E1A); letter-spacing: 0.01em; margin-bottom: 0.55em; }
   .c-besmele { font-family: var(--ar-font, 'UthmanicHafs'), 'Noto Naskh Arabic', serif; direction: rtl; font-size: var(--besmele-size, 46px); line-height: 1.5; color: var(--card-ink, #234B32); opacity: 0.85; margin-bottom: 0.9em; }
@@ -406,6 +412,7 @@
       <label class="toggle"><input type="checkbox" id="spreadTgl" checked><span class="track"></span><span>Boşluğu sayfaya yay</span></label>
       <label class="toggle"><input type="checkbox" id="compactTgl"><span class="track"></span><span>Kısa ayette kartı kısalt (başlık, ayet ve meâl birbirine yaklaşsın)</span></label>
       <p class="hint">Açıkken kısa ayetlerde kart 1080×1920 yerine içeriğe göre 1080×1350–1920 olur; "Boşluğu sayfaya yay" bu kartlarda uygulanmaz.</p>
+      <p class="hint"><b>Elle:</b> kartın üst veya alt kenarındaki tutamacı (küçük çubuk) sürükleyerek yüksekliği ayarlayabilirsin; başlık, besmele, ayet ve meâl otomatik yeniden dağılır. Çift dokunma otomatiğe döndürür.</p>
       <div style="margin-top:12px">
         <div class="slider-head"><span>Arapça</span><span class="val"><input class="szin" id="arNum" type="number" inputmode="numeric" min="8" max="400" step="1" aria-label="Arapça boyutu (px)"> px</span><span hidden id="arVal">92 px</span></div>
         <input type="range" id="arRange" min="30" max="150" step="1" value="92">
@@ -802,8 +809,10 @@
     el.style.setProperty("--source-size", pg.srcSize + "px");
     el.style.setProperty("--besmele-size", besSz(pg.trSize) + "px");
     if (!el.classList.contains("measure")) {   /* kart yüksekliği: kısa ayet seçeneği açıksa içeriğe göre */
-      var H = (state.compact && !pg.manual) ? computeCardH(pg) : 1920;
+      if (pg.fixedH) pg.fixedH = Math.max(pg.fixedH, naturalCardH(pg));   /* içerik büyüdüyse (font/meâl değişti) taşmasın */
+      var H = pg.fixedH ? pg.fixedH : ((state.compact && !pg.manual) ? computeCardH(pg) : 1920);
       pg.cardH = H; el.style.setProperty("--card-h", H + "px");
+      if (pg.fixedH) { el.dataset.compact = "0"; el.dataset.spread = "1"; }   /* elle ayarlanan yükseklikte içerik kartın tamamına eşit dağılır */
     }
     var af = AR_INFO[state.arFont] || AR_INFO.UthmanicHafs;
     el.style.setProperty("--ar-font", "'" + af.n + "'");
@@ -904,6 +913,43 @@
     var inner = mc.querySelector(".card-inner"), stack = mc.querySelector(".c-stack"), cs = getComputedStyle(inner);
     var h = stack.scrollHeight + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
     return clamp(Math.round(h / 2) * 2, CARD_H_MIN, CARD_H_MAX);
+  }
+  /* Elle kısaltmanın alt sınırı: içeriğin doğal yüksekliği + dolgular (içerik taşmasın). */
+  function naturalCardH(pg) {
+    var mc = ensureMeasure(); paintCard(mc, pg);
+    var inner = mc.querySelector(".card-inner"), stack = mc.querySelector(".c-stack"), cs = getComputedStyle(inner);
+    return Math.min(CARD_H_MAX, Math.ceil((stack.scrollHeight + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)) / 2) * 2);
+  }
+  function wireHandles(el) {
+    ["t", "b"].forEach(function (k) {
+      var h = document.createElement("div");
+      h.className = "rz rz-" + k; h.title = "Sürükleyerek kartın yüksekliğini ayarla (çift dokunma: sıfırla)";
+      var drag = null;
+      h.addEventListener("click", function (e) { e.stopPropagation(); });
+      h.addEventListener("dblclick", function (e) {
+        e.stopPropagation();
+        var pg = state.pages[Array.prototype.indexOf.call(cardsRow.children, el)]; if (!pg) return;
+        delete pg.fixedH; paintCard(el, pg); fitPreview(); toast("Kart yüksekliği otomatiğe döndü.");
+      });
+      h.addEventListener("pointerdown", function (e) {
+        var i = Array.prototype.indexOf.call(cardsRow.children, el), pg = state.pages[i]; if (!pg) return;
+        e.preventDefault(); e.stopPropagation();
+        selectPage(i);
+        var minH = Math.min(CARD_H_MAX, Math.max(700, naturalCardH(pg) + 90));   /* +90: en sıkı hâlde bile nefes payı */
+        if (!pg.fixedH) { pg.fixedH = pg.cardH || 1920; paintCard(el, pg); }
+        drag = { y: e.clientY, h: pg.cardH || 1920, min: minH, scale: parseFloat(getComputedStyle(cardsRow).getPropertyValue("--preview-scale")) || 0.3, pg: pg };
+        h.classList.add("drag"); try { h.setPointerCapture(e.pointerId); } catch (x) {}
+      });
+      h.addEventListener("pointermove", function (e) {
+        if (!drag) return;
+        var dy = (e.clientY - drag.y) / drag.scale * (k === "b" ? 1 : -1) * 2;   /* kart ortalı: kenar parmağı izlesin */
+        var H = clamp(Math.round((drag.h + dy) / 2) * 2, drag.min, CARD_H_MAX);
+        drag.pg.fixedH = H; drag.pg.cardH = H; el.style.setProperty("--card-h", H + "px");
+      });
+      function end() { if (!drag) return; drag = null; h.classList.remove("drag"); fitPreview(); }
+      h.addEventListener("pointerup", end); h.addEventListener("pointercancel", end);
+      el.appendChild(h);
+    });
   }
   function overflowOf(el) {
     var inner = el.querySelector(".card-inner"), stack = el.querySelector(".c-stack");
@@ -1023,6 +1069,7 @@
       }
       el.addEventListener("click", function () { selectPage(i); });
       cardsRow.appendChild(el);
+      wireHandles(el);
       arJustifyGuard(el);   /* ölçüm için kart DOM'da olmalı */
       mealJustifyGuard(el, pg);
     });
@@ -1224,6 +1271,7 @@
     await new Promise(function (r) { setTimeout(r, 60); });
     var opts = {
       width: 1080, height: el.offsetHeight || 1920, pixelRatio: 2, backgroundColor: state.bg,
+      filter: function (n) { return !(n && n.classList && n.classList.contains("rz")); },
       style: { transform: "none", margin: "0", filter: "none", outline: "0", "outline-offset": "0" }
     };
     if (!renderOnePng._primed) { try { await window.htmlToImage.toBlob(el, opts); } catch (e) {} renderOnePng._primed = true; }

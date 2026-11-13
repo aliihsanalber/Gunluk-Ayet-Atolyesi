@@ -3,7 +3,7 @@
 Bu dosya, bir oturumda yapılanları ve bekleyen işleri yeni oturuma aktarmak için yazıldı.
 Yeni oturumda önce bunu okuyun.
 
-- **Dal:** `claude/daily-verse-workshop-rust-7ci8iy`. On üç PR (#1–#13) `main`'e **birleştirildi**; tüm özellikler canlı sitede ve APK'da. Yeni işe başlarken dalı `main`'in son hâlinden yeniden başlat (`git fetch origin main && git checkout -B claude/daily-verse-workshop-rust-7ci8iy origin/main`).
+- **Dal:** `claude/daily-verse-workshop-rust-7ci8iy`. Yirmi bir PR (#1–#21) `main`'e **birleştirildi**; tüm özellikler canlı sitede ve APK'da. Yeni işe başlarken dalı `main`'in son hâlinden yeniden başlat (`git fetch origin main && git checkout -B claude/daily-verse-workshop-rust-7ci8iy origin/main`).
 - **Canlı site:** https://aliihsanalber.github.io/Gunluk-Ayet-Atolyesi/ (GitHub Pages, `main`'den yayınlanır). Depo **herkese açık (public)**; kullanıcı bunu bilerek kabul etti ("telif sorunu olmaz", meâller depoda).
 - **Kullanıcı:** Türkçe konuşuyor. Her akşam telefondan (Chrome) ayet seçip düzenleyip WhatsApp'ta paylaşıyor. **Asıl kullandığı araç web sürümü**; Rust sürümü yedek/ek.
 
@@ -102,6 +102,11 @@ README güncellendi (Rust bölümü, v5 notları, yayın akışı).
 - Çözüm: kullanıcı fontu kendisi indirip uygulamadaki **"Font dosyası yükle"** ile kullanır. Yazılı izin alınırsa doğrudan repoya konabilir.
 - Rust sürümü `ayet-rs/src/card.rs` hâlâ yalnız Hafs'ı kullanıyor (Arapça font seçimi web'e özel).
 
+### 2.2b Arapça metin (Türkiye yazımı)
+- Varsayılan **Türkiye (sade)** = Tanzil Simple (bkz. 1.4). Kullanıcı Hasenat Temel/Hasenat Hatim ve Diyanet mushafı görünümünü hedefliyor; Hasenat'ın kendi metni/fontu kullanılamaz (lisans, uygulamaya erişim yok). **Resmî Diyanet metni** için Diyanet'in açık kaynak Kur'an API'si anahtar ister (`kuran.diyanet.gov.tr/api/v2/...` yetkisiz uçta 403; belgeler: `acikkaynakkuran-dev.diyanet.gov.tr/swagger/documentation`); kullanıcı başvurursa bağlanabilir.
+- Okunaklılık için "Noto Naskh" / "Scheherazade" yazı tipi önerildi; varsayılan font Hafs'ta bırakıldı. Rust sürümü yalnız Medine metnini kullanır.
+- Telefonda henüz doğrulanması beklenenler: sade metnin okunabilirliği, sıkılık ayarının uygun varsayılanı (şimdi 0), elle kart yüksekliği tutamaçlarının dokunma payı.
+
 ### 2.3 Diğer
 - **Eski Gündem routine'i** hâlâ çalışıyor olabilir: https://claude.ai/code/routines/trig_01CxgPvBxjPxMuS9P7EW6J3P — artık gereksiz; kullanıcı durdurmalı (oradan durdurulamadı).
 - Rust sürümü: kullanıcı Windows'ta Rust kurmayı denedi (Visual C++ ön koşulu); tamamlandığı doğrulanmadı. "Şimdilik web sürümü" dedi.
@@ -115,7 +120,7 @@ README güncellendi (Rust bölümü, v5 notları, yayın akışı).
 ## 3. Ortam ve ağ (önemli)
 
 - "Default" ortamda `kuranmeali.com`, `tevhidmeali.com` erişilemezdi (`403`). Bu repo için kişisel ortam kullanılınca erişim çalıştı.
-- Bu repo için **kişisel ortam oluşturuldu: `gunluk-ayet-atolyesi`** (`env_01PQ5vSXkn8aYppdUMtX3GFH`). İzinli adresler: `www.kuranmeali.com`, `kuranmeali.com`, `tevhidmeali.com`, `www.tevhidmeali.com`, `fonts.googleapis.com`, `fonts.gstatic.com`, `generativelanguage.googleapis.com`, `www.kurankelimemeali.com`, `kurankelimemeali.com`, `kuran.diyanet.gov.tr` (son üçü font sayfalarını incelemek için eklendi). Android derlemesi GitHub Actions üzerinde yapılır, bu ortamda Android SDK/Gradle yok. Paket yöneticileri izinli.
+- Bu repo için **kişisel ortam oluşturuldu: `gunluk-ayet-atolyesi`** (`env_01PQ5vSXkn8aYppdUMtX3GFH`). İzinli adresler: `www.kuranmeali.com`, `kuranmeali.com`, `tevhidmeali.com`, `www.tevhidmeali.com`, `fonts.googleapis.com`, `fonts.gstatic.com`, `generativelanguage.googleapis.com`, `www.kurankelimemeali.com`, `kurankelimemeali.com`, `kuran.diyanet.gov.tr` (son üçü font sayfalarını ve Diyanet sitesini incelemek için eklendi; Diyanet API anahtarsız çalışmaz). Android derlemesi GitHub Actions üzerinde yapılır, bu ortamda Android SDK/Gradle yok. Paket yöneticileri izinli.
 - **Yeni oturumu bu ortamda başlatın** (ortam menüsünden "gunluk-ayet-atolyesi"). Aksi halde siteler yine engelli olur.
 - Claude in Chrome / Remote Control **bağlanmadı** (bulut oturumundan bilgisayara erişilemedi). Gerekmezse kullanmayın; ağ izni yeterli.
 - GitHub push: bu oturumun başında 403 vardı, kullanıcı erişimi düzeltince push çalıştı. Yeni oturumda tekrar sorun olursa https://claude.ai/connect-github adresinden bağlanması gerekir.
@@ -150,5 +155,6 @@ ayet-rs/                        ← Rust sürümü
 android-app/                    ← Android (Capacitor) projesi; android/ üretilmiş Gradle projesi, www/ derleme sırasında oluşur
 .github/workflows/android-apk.yml ← APK derleme + apk-latest sürümü
 data/scrape_kuranmeali.py       ← kuranmeali.com meâl kazıyıcı
+ar/simple.json, ar/TANZIL-LICENSE.txt ← Türkiye (sade) Arapça metin (Tanzil Simple, CC BY 3.0); build.js ve APK (prepare-www.js, workflow) bunu da kopyalar
 DEVAM_NOTLARI.md                ← bu dosya
 ```
